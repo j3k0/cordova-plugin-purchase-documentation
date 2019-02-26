@@ -8,6 +8,11 @@
 * [About IAP Technology](introduction/generalities-about-iap-technology.md)
 * [About the Plugin](introduction/about-the-plugin.md)
 
+## Guides
+
+* [Consumable on Android](flat-guides/full-consumable-android.md)
+* [Consumable on iOS](flat-guides/full-consumable-ios.md)
+
 ## Android Setup
 
 * [1. Install Dependencies](android-setup/installing-dependencies.md)
@@ -20,7 +25,7 @@
 
 ## Android Guides
 
-* [Consumable on Android](android-guides/non-consumable-android.md)
+* [Consumable on Android](android-guides/consumable-android.md)
 * [Subscription on Android](android-guides/subscription-android.md)
 
 ## Setup for iOS
