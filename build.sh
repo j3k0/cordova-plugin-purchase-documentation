@@ -11,6 +11,8 @@ for platform in android ios; do
       echo
       echo '# Coding'
       echo
+      cat ./sections/$type-generic-initialization.md
+      echo
       cat ./sections/$type-$platform.md
     ) > guides/$type-$platform.md
   done

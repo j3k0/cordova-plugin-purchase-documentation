@@ -8,7 +8,7 @@ When you need Android support, you need to setup your `BILLING_KEY`.
 cordova plugin add cc.fovea.cordova.purchase  --variable BILLING_KEY="<BILLING_KEY>"
 ```
 
-You can find that piece of information on the Google Play Publisher Console, as [explained here](sections/setup-android-3-google-play.md#retrieve-the-billing-key).
+You can find that piece of information on the Google Play Publisher Console, as [explained here](#retrieve-the-billing-key).
 
 Now let's try to build.
 

@@ -126,6 +126,7 @@ The process is well explained by Apple, so I'll not enter into more details.
 
 # Coding
 
+
 ## Initialization
 
 Assuming you're starting from a blank project, we'll add the minimal amount of HTML for the purpose of this tutorial. Let's replace the `<body>` from the `www/index.html` file with the below.
@@ -243,6 +244,7 @@ function refreshProductUI(product) {
 If you want a bit more background information about this, please check the [Displaying Products ](../introduction/about-the-plugin.md#displaying-products)section and the [⇒ API Documentation](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/api.md#storeproduct-object) for full details about the fields found for a product.
 
 Let's build and test that!
+
 
 ## Testing
 

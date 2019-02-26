@@ -139,7 +139,7 @@ When you need Android support, you need to setup your `BILLING_KEY`.
 cordova plugin add cc.fovea.cordova.purchase  --variable BILLING_KEY="<BILLING_KEY>"
 ```
 
-You can find that piece of information on the Google Play Publisher Console, as [explained here](sections/setup-android-3-google-play.md#retrieve-the-billing-key).
+You can find that piece of information on the Google Play Publisher Console, as [explained here](#retrieve-the-billing-key).
 
 Now let's try to build.
 
@@ -250,6 +250,7 @@ There's might be some delay between creating a product on the Google Play Consol
 
 # Coding
 
+
 ## Initialization
 
 Assuming you're starting from a blank project, we'll add the minimal amount of HTML for the purpose of this tutorial. Let's replace the `<body>` from the `www/index.html` file with the below.
@@ -338,7 +339,7 @@ This part was easy,. Now for a bit more challenge, let's display the title, desc
 We'll add a little more at `initStore()` function, line 20.
 
 ```javascript
-store.when('my_consumable1 updated', refreshProductUI);
+store.when('my_consumable1').updated(refreshProductUI);
 ```
 
 Then define  the `refreshProduct()` function at the bottom of the file.
@@ -367,6 +368,7 @@ function refreshProductUI(product) {
 If you want a bit more background information about this, please check the [Displaying Products ](../introduction/about-the-plugin.md#displaying-products)section and the [⇒ API Documentation](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/api.md#storeproduct-object) for full details about the fields found for a product.
 
 Let's build and test that!
+
 
 ## Testing
 
