@@ -20,5 +20,3 @@ Once we have a Cordova application with IAP support enabled and everything is in
 3. Deliver our product
 4. Secure the transactions
 
-# Setup
-

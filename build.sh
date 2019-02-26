@@ -2,7 +2,17 @@
 
 for platform in android ios; do
   for type in consumable subscription non-consumable nr-subscription; do
-    cat sections/$type-$platform-intro.md sections/generic-$platform-intro.md ./sections/setup-$platform-*.md ./sections/$type-$platform.md > guides/$type-$platform.md
+    (
+      cat sections/$type-$platform-intro.md sections/generic-$platform-intro.md
+      echo 
+      echo '# Setup'
+      echo
+      cat ./sections/setup-$platform-*.md
+      echo
+      echo '# Coding'
+      echo
+      cat ./sections/$type-$platform.md
+    ) > guides/$type-$platform.md
   done
 done
 

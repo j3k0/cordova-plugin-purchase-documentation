@@ -19,6 +19,7 @@ Once we have a Cordova iOS application with IAP support enabled and everything i
 3. Deliver our product
 4. Secure the transactions
 
+
 # Setup
 
 ## 1. Install Dependencies
@@ -121,6 +122,9 @@ Even if that sounds stupid, you need to fill-in ALL metadata in order to use the
 {% endhint %}
 
 The process is well explained by Apple, so I'll not enter into more details.
+
+
+# Coding
 
 ## Initialization
 

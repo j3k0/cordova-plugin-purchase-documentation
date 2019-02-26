@@ -20,6 +20,7 @@ Once we have a Cordova application with IAP support enabled and everything is in
 3. Deliver our product
 4. Secure the transactions
 
+
 # Setup
 
 ## 1. Install Dependencies
@@ -241,4 +242,7 @@ And we're done!
 {% hint style="info" %}
 There's might be some delay between creating a product on the Google Play Console and seeing it in your app. If your product doesn't show up after 24h, then you should start to worry.
 {% endhint %}
+
+
+# Coding
 
