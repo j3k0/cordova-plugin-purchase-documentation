@@ -1,4 +1,4 @@
-# 2. Create Cordova Project
+## 2. Create Cordova Project
 
 Making sure we have a Cordova project that we can build for Android and/or iOS.
 

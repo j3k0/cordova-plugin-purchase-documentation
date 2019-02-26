@@ -1,4 +1,4 @@
-# 5. Create In-App Products
+## 5. Create In-App Products
 
 If you followed the [Setup AppStore Application](3.-create-app-store-application.md) page, you should have everything setup. Head again to the App's In-App Purchases page: select your application, then _Features_, then _In-App Purchases_.
 
@@ -9,11 +9,4 @@ Even if that sounds stupid, you need to fill-in ALL metadata in order to use the
 {% endhint %}
 
 The process is well explained by Apple, so I'll not enter into more details.
-
-Now that you've defined your product\(s\), let's get into some coding!
-
-* [Subscription on iOS](../ios-guides/subscription-ios.md)
-* [Consumable on iOS](../ios-guides/consumable-ios.md)
-
-
 

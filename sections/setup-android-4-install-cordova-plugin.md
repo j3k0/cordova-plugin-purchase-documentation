@@ -1,4 +1,4 @@
-# 4. Install Cordova Purchase Plugin
+## 4. Install Cordova Purchase Plugin
 
 To install the plugin, we will use the usual `cordova plugin add` command. There is little subtleties on Android.
 

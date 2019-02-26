@@ -1,4 +1,4 @@
-# 6. Upload to Google Play
+## 6. Upload to Google Play
 
 Once you have built your release APK, you need to upload it to Google Play in order to be able to test In-App Purchases. In-App Purchase is not enabled in "debug build". In order to test in-app purchase, your APK needs to be signed with your release signing key. In order for Google to know your release signing key for this application, you need to upload a release APK:
 

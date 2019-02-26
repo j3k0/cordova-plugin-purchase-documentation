@@ -1,4 +1,4 @@
-# 1. Install Dependencies
+## 1. Install Dependencies
 
 Needless to say, make sure you have the tools installed on your machine. Developing from a mac is generally recommended for doing iOS development, it's way easier. If you only plan on doing Android, then everything will work.
 

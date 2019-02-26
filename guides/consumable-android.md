@@ -24,7 +24,9 @@ Once we have a Cordova application with IAP support enabled and everything is in
 3. Deliver our product
 4. Secure the transactions
 
-# 1. Install Dependencies
+# Setup
+
+## 1. Install Dependencies
 
 Needless to say, make sure you have the tools installed on your machine. Developing from a mac is generally recommended for doing iOS development, it's way easier. If you only plan on doing Android, then everything will work.
 
@@ -36,7 +38,7 @@ During the writing of this guide, I've been using the following environment:
 
 I'm not saying it won't work with different version. If you start fresh, it might be a good idea to use an up-to-date environment.
 
-# 2. Create Cordova Project
+## 2. Create Cordova Project
 
 Making sure we have a Cordova project that we can build for Android and/or iOS.
 
@@ -97,7 +99,7 @@ Which outputs:
 
 Alright, seems like we have no problems with our Android build chain. If you do have problems, fixing it is out of scope from this guide but it's required!
 
-# 3. Create Google Play Application
+## 3. Create Google Play Application
 
 Make sure we have a Google Play application created and configured.
 
@@ -126,7 +128,7 @@ That is where you'll find this long Base64 string they call "**Your license key 
 The Billing Key will be required to install the plugin on Android and setup receipt validation.
 {% endhint %}
 
-# 4. Install Cordova Purchase Plugin
+## 4. Install Cordova Purchase Plugin
 
 To install the plugin, we will use the usual `cordova plugin add` command. There is little subtleties on Android.
 
@@ -155,7 +157,7 @@ All good! Seems like we can build an app with support for the Billing API.
 
 Let's now prepare a release APK.
 
-# 5. Android Release APK
+## 5. Android Release APK
 
 To generate a release build, I generally use the following script: [android-release.sh](https://gist.github.com/j3k0/28f60a7d5622508634d09f94c59d6dfc)
 
@@ -192,7 +194,7 @@ Build is ready:
 
 There you go, this is your first release APK.
 
-# 6. Upload to Google Play
+## 6. Upload to Google Play
 
 Once you have built your release APK, you need to upload it to Google Play in order to be able to test In-App Purchases. In-App Purchase is not enabled in "debug build". In order to test in-app purchase, your APK needs to be signed with your release signing key. In order for Google to know your release signing key for this application, you need to upload a release APK:
 
@@ -212,7 +214,7 @@ Once you went over those steps, you can test your app with in-app purchase enabl
 Note that it might up to 24 hours for your IAP to work after you uploaded the first release APK.
 {% endhint %}
 
-# 6. Create In-App Products
+## 6. Create In-App Products
 
 There is still a bit more preparatory work: we need to setup our in-app product.
 

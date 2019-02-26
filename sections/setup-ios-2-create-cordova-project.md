@@ -1,4 +1,4 @@
-# 2. Create Cordova Project
+## 2. Create Cordova Project
 
 ### Create the project
 

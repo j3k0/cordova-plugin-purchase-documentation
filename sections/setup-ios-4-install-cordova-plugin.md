@@ -1,6 +1,4 @@
-# 4. Install and Prepare with XCode
-
-## iOS
+## 4. Install and Prepare with XCode
 
 When you only require iOS support, no need for special command line arguments:
 

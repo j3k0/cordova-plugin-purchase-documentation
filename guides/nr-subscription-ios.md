@@ -17,7 +17,9 @@ Once we have a Cordova iOS application with IAP support enabled and everything i
 3. Deliver our product
 4. Secure the transactions
 
-# 1. Install Dependencies
+# Setup
+
+## 1. Install Dependencies
 
 Needless to say, make sure you have the tools installed on your machine. Developing from a mac is generally recommended for doing iOS development, it's way easier. If you only plan on doing Android, then everything will work.
 
@@ -29,7 +31,7 @@ During the writing of this guide, I've been using the following environment:
 
 I'm not saying it won't work with different version. If you start fresh, it might be a good idea to use an up-to-date environment.
 
-# 2. Create Cordova Project
+## 2. Create Cordova Project
 
 ### Create the project
 
@@ -60,7 +62,7 @@ $ cd CordovaProject
 $ cordova platform add ios
 ```
 
-# 3. Setup AppStore Application
+## 3. Setup AppStore Application
 
 First, I assume you have an Apple developer account. If not time to register, because it's mandatory.
 
@@ -76,9 +78,7 @@ Since you are here, let's retrieve the Shared Secret. You can use an App-Specifi
 
 
 
-# 4. Install and Prepare with XCode
-
-## iOS
+## 4. Install and Prepare with XCode
 
 When you only require iOS support, no need for special command line arguments:
 
@@ -108,7 +108,7 @@ Now try to **build the app from Xcode**. It might point you to a few stuff it mi
 
 Successful build? You're good to go!
 
-# 5. Create In-App Products
+## 5. Create In-App Products
 
 If you followed the [Setup AppStore Application](3.-create-app-store-application.md) page, you should have everything setup. Head again to the App's In-App Purchases page: select your application, then _Features_, then _In-App Purchases_.
 
@@ -119,11 +119,4 @@ Even if that sounds stupid, you need to fill-in ALL metadata in order to use the
 {% endhint %}
 
 The process is well explained by Apple, so I'll not enter into more details.
-
-Now that you've defined your product\(s\), let's get into some coding!
-
-* [Subscription on iOS](../ios-guides/subscription-ios.md)
-* [Consumable on iOS](../ios-guides/consumable-ios.md)
-
-
 

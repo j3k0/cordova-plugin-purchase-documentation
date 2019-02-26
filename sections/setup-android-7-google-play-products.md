@@ -1,4 +1,4 @@
-# 6. Create In-App Products
+## 6. Create In-App Products
 
 There is still a bit more preparatory work: we need to setup our in-app product.
 
