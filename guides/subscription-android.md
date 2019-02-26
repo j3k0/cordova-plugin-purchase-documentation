@@ -1,7 +1,11 @@
+# Subscription on Android
 
-We will proceed in steps: setup, initialization, presentation and purchase.'
+In this guide, we will build a small application with a subscription that works on Android with Google Play.
 
-Before moving on with this guide, you have to:
+
+We will proceed in steps: setup, initialization, presentation and purchase.
+
+First some setup. If you already have 
 
 1. Install NodeJS and Cordova
 2. Setup your Cordova project
@@ -11,13 +15,11 @@ Before moving on with this guide, you have to:
 6. Create a Product on Google Play
 7. Upload a Release APK to Google Play
 
-Once we have a Cordova application with IAP support enabled and everything is in place on Google Play. Let's get into some coding!
+Once we have a Cordova application with IAP support enabled and everything is in place on Google Play, we will get into some coding.
 
-We will then handle the  now:
-
-1. Initialize the IAP plugin
-2. Handle the IAP events
-3. Deliver our products
+1. Initialize the in-app purchase plugin
+2. Handle the purchase events
+3. Deliver our product
 4. Secure the transactions
 
 # 1. Install Dependencies
@@ -245,6 +247,4 @@ Once you went over those steps, you can test your app with in-app purchase enabl
 {% hint style="warning" %}
 Note that it might up to 24 hours for your IAP to work after you uploaded the first release APK.
 {% endhint %}
-
-# Subscription on Android
 

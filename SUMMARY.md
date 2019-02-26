@@ -8,14 +8,19 @@
 * [About IAP Technology](introduction/generalities-about-iap-technology.md)
 * [About the Plugin](introduction/about-the-plugin.md)
 
-## Full Guides
+## Guides
 
 * [Consumable on Android](guides/consumable-android.md)
 * [Consumable on iOS](guides/consumable-ios.md)
 * [Subscriptions on Android](guides/subscription-android.md)
 * [Subscriptions on iOS](guides/subscription-ios.md)
 
-## Android Setup (Sections)
+## Documentation
+
+* [API](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/api.md)
+* [Troubleshooting](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/troubleshooting.md)
+
+## Android
 
 * [1. Install Dependencies](sections/setup-android-1-install-dependencies.md)
 * [2. Create Cordova Project](sections/setup-android-2-create-cordova-project.md)
@@ -24,22 +29,22 @@
 * [5. Android Release APK](sections/setup-android-5-android-release-apk.md)
 * [6. Create In-App Products](sections/setup-android-6-google-play-products.md)
 * [7. Upload to Google Play](sections/setup-android-7-upload-to-google-play.md)
+* [Generic Intro](sections/generic-android-intro.md)
+* [Consumable (Intro)](sections/consumable-android-intro.md)
+* [Consumable](sections/consumable-android.md)
+* [Subscription (Intro)](sections/subscription-android-intro.md)
+* [Subscription](sections/subscription-android.md)
 
-## Android Guides (Sections)
-
-* [Consumable on Android](sections/consumable-android.md)
-* [Subscription on Android](sections/subscription-android.md)
-
-## iOS Setup (Sections)
+## iOS
 
 * [1. Install Dependencies](sections/setup-ios-1-install-dependencies.md)
 * [2. Create Cordova Project](sections/setup-ios-2-create-cordova-project.md)
 * [3. Setup AppStore Application](sections/setup-ios-3-create-app-store-application.md)
 * [4. Install and Prepare with XCode](sections/setup-ios-4-install-cordova-plugin.md)
 * [5. Create In-App Products](sections/setup-ios-5-create-in-app-products.md)
-
-## iOS Guides (Sections)
-
-* [Consumable on iOS](sections/consumable-ios.md)
-* [Subscription on iOS](sections/subscription-ios.md)
+* [Generic Intro](sections/generic-ios-intro.md)
+* [Consumable (Intro)](sections/consumable-ios-intro.md)
+* [Consumable](sections/consumable-ios.md)
+* [Subscription (Intro)](sections/subscription-ios-intro.md)
+* [Subscription](sections/subscription-ios.md)
 

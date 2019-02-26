@@ -1,3 +1,22 @@
+# Consumable on iOS
+
+We will proceed in 4 steps: setup, initialization, presentation and purchase.
+
+Here what we'll do.
+
+1. Install Dependencies
+2. Create Cordova Project
+3. Setup AppStore Application
+4. Install and Prepare with XCode
+5. Create In-App Products
+
+Once we have a Cordova application with IAP support enabled and everything is in place on AppStore Connect, we will get into some coding.
+
+1. Initialize the in-app purchase plugin
+2. Handle the purchase events
+3. Deliver our product
+4. Secure the transactions
+
 # 1. Install Dependencies
 
 Needless to say, make sure you have the tools installed on your machine. Developing from a mac is generally recommended for doing iOS development, it's way easier. If you only plan on doing Android, then everything will work.
@@ -107,25 +126,6 @@ Now that you've defined your product\(s\), let's get into some coding!
 * [Consumable on iOS](../ios-guides/consumable-ios.md)
 
 
-
----
-description: 'We will proceed in 4 steps: setup, initialization, presentation and purchase.'
----
-
-# Consumable on iOS
-
-## Setup
-
-Before moving on with this guide, please follow the steps for SETUP FOR IOS, [this starts here](../ios-setup/1.-install-dependencies.md).
-
-Good. Now we have a Cordova application with IAP support enabled and everything is in place on AppStore Connect. Let's get into some coding!
-
-This is what we'll have to do now:
-
-1. Initialize the IAP plugin
-2. Handle the IAP events
-3. Deliver our products
-4. Secure the transactions
 
 ## Initialization
 
