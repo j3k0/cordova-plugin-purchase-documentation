@@ -14,11 +14,11 @@ Note that the most up-to-date version is available as a gitbook at https://purch
 
 ### How to get started?
 
-This guide isn't necessary meant to be read from start to finish. Feel free to jump to your section of interest from the summary. Each section should be self-sufficient, giving you links to other sections when required. The [Index](index.md) page is conceived as your navigation entry point.
+This guide isn't meant to be read from start to finish. Feel free to jump to your use case of interest from the summary. Each guide should be self-sufficient.
 
-First, [About IAP Technology](introduction/generalities-about-iap-technology.md) will introduce you to the In-App Purchase technology, in terms of what you can do with it on both iOS and Android, and the difference between those platforms.
+However, the little introduction [About IAP Technology](introduction/generalities-about-iap-technology.md) will introduce you to the In-App Purchase technology, in terms of what you can do with it on both iOS and Android, and the difference between those platforms.
 
-If you think you already know enough about that, you can jump right to your use case using the [Index](index.md) page.
+If you think you already know enough about that, you can jump right to your use case using the [menu](SUMMARY.md) on the left.
 
 ### Contribute to this guide
 

@@ -58,5 +58,5 @@ The plugin requires you to register the full list of all your products and will 
 
 A product cannot be purchased if it's already owned or if there's already a transaction in progress for that product. Each product has a field \(`canPurchase`\) that indicates if it can be purchased or not. Your UI will have to check for that field and display a _Buy_ button only if it's true.
 
-OK, enough with theory! We will get into the technical details in the tutorials. [Let's get started](../index.md).
+OK, enough with theory! We will get into the practical details in the guide.
 

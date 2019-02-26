@@ -1,14 +1,13 @@
 # Table of contents
 
 * [Introduction](README.md)
-* [Index](index.md)
 
-## Introduction
+## Discover
 
 * [About IAP Technology](introduction/generalities-about-iap-technology.md)
 * [About the Plugin](introduction/about-the-plugin.md)
 
-## Guides
+## Use Cases
 
 * [Consumable on Android](guides/consumable-android.md)
 * [Consumable on iOS](guides/consumable-ios.md)

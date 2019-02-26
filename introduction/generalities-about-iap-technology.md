@@ -1,21 +1,19 @@
----
-description: Generalities about IAP technologies that all developers have to know.
----
-
 # About IAP Technology
 
-Present on both iOS and Android, IAP allow you to integrate a variety of virtual products that users can purchase right from inside your application.
+Generalities about IAP technologies that all developers have to know.
+
+Present on both iOS and Android, In-App Purchases (IAP) allow you to integrate a variety of virtual products that users can purchase right from your application.
 
 ## Virtual Products
 
-You can offer 4 families of virtual products:
+You can offer 4 types of virtual products:
 
 * _Auto-Renewing Subscriptions._
-  * A subscription that will be renewed automatically every period, until canceled by the user.
+  * Subscriptions that will be renewed automatically every period, until canceled by the user.
 * _Non-Renewing Subscriptions._
-  * A subscription the user has to renew manually.
+  * Subscriptions that users have to renew manually.
 * _Consumable_ products
-  * Like virtual currencies or alike \(gems, gold, lives, ...\).
+  * Like virtual currencies or similar \(gems, gold, lives, ...\).
   * Stuff that can be purchased multiple times.
 * _Non-Consumable_ products
   * Like unlocking a premium feature.
@@ -27,7 +25,7 @@ Android actually only makes the difference between products incurring recurring 
 
 Purchases are linked to a user's iTunes / Google account. As such, it's made available on all devices for this user.
 
-Test Accounts
+## Test Accounts
 
-
+On both iOS and Android, you can create Test Users that do not pay for the purchases they make. In time, we'll show you how to achieve this.
 
