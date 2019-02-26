@@ -15,12 +15,12 @@
 
 ## Android Setup
 
-* [1. Install Dependencies](android-setup/installing-dependencies.md)
-* [2. Create Cordova Project](android-setup/create-cordova-project.md)
-* [3. Create Google Play Application](android-setup/google-play.md)
-* [4. Install Cordova Purchase Plugin](android-setup/install-cordova-plugin.md)
-* [5. Android Release APK](android-setup/android-release-apk.md)
-* [6. Create In-App Products](android-setup/google-play-products.md)
+* [1. Install Dependencies](android-setup/1.-installing-dependencies.md)
+* [2. Create Cordova Project](android-setup/2.-create-cordova-project.md)
+* [3. Create Google Play Application](android-setup/3.-google-play.md)
+* [4. Install Cordova Purchase Plugin](android-setup/4.-install-cordova-plugin.md)
+* [5. Android Release APK](android-setup/5.-android-release-apk.md)
+* [6. Create In-App Products](android-setup/6.-google-play-products.md)
 * [7. Upload to Google Play](android-setup/7.-upload-to-google-play.md)
 
 ## Android Guides
