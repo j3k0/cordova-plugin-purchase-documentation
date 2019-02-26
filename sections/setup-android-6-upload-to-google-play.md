@@ -1,12 +1,10 @@
-# 7. Upload to Google Play
+# 6. Upload to Google Play
 
-## Upload a Release Build
-
-Once you have [Built Your Release APK](android-release-apk.md), you need to upload it to Google Play in order to be able to test In-App Purchases. In-App Purchase is not enabled in "debug build". In order to test in-app purchase, your APK needs to be signed with your release signing key. In order for Google to know your release signing key for this application, you need to upload a release APK:
+Once you have built your release APK, you need to upload it to Google Play in order to be able to test In-App Purchases. In-App Purchase is not enabled in "debug build". In order to test in-app purchase, your APK needs to be signed with your release signing key. In order for Google to know your release signing key for this application, you need to upload a release APK:
 
 * Signed with this key.
 * Have the BILLING permission enabled
-  * which is done when you [add the plugin to your project](install-cordova-plugin.md), so make sure you didn't skip this step.
+  * it is done when you add the plugin to your project, so make sure you didn't skip this step.
 
 Google already provides [detailed resource on how to upload a release build](https://support.google.com/googleplay/android-developer/answer/7159011). What we want here is to:
 

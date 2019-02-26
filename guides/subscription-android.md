@@ -128,17 +128,15 @@ The Billing Key will be required to install the plugin on Android and setup rece
 
 # 4. Install Cordova Purchase Plugin
 
-To install the plugin, we will use the usual `cordova plugin add` command. But there are little subtleties on both [iOS](install-cordova-plugin.md#ios) and [Android](install-cordova-plugin.md#android).
+To install the plugin, we will use the usual `cordova plugin add` command. There is little subtleties on Android.
 
-## Android
-
-If you need Android support, you need to setup your `BILLING_KEY`.
+When you need Android support, you need to setup your `BILLING_KEY`.
 
 ```text
 cordova plugin add cc.fovea.cordova.purchase  --variable BILLING_KEY="<BILLING_KEY>"
 ```
 
-You can find that piece of information on the Google Play Publisher Console, as [explained here](google-play.md#retrieve-the-billing-key).
+You can find that piece of information on the Google Play Publisher Console, as [explained here](sections/setup-android-3-google-play.md#retrieve-the-billing-key).
 
 Now let's try to build.
 
@@ -155,7 +153,7 @@ BUILD SUCCESSFUL in 2s
 
 All good! Seems like we can build an app with support for the Billing API.
 
-Let's now [Prepare a Release APK](android-release-apk.md).
+Let's now prepare a release APK.
 
 # 5. Android Release APK
 
@@ -194,6 +192,26 @@ Build is ready:
 
 There you go, this is your first release APK.
 
+# 6. Upload to Google Play
+
+Once you have built your release APK, you need to upload it to Google Play in order to be able to test In-App Purchases. In-App Purchase is not enabled in "debug build". In order to test in-app purchase, your APK needs to be signed with your release signing key. In order for Google to know your release signing key for this application, you need to upload a release APK:
+
+* Signed with this key.
+* Have the BILLING permission enabled
+  * it is done when you add the plugin to your project, so make sure you didn't skip this step.
+
+Google already provides [detailed resource on how to upload a release build](https://support.google.com/googleplay/android-developer/answer/7159011). What we want here is to:
+
+1. create an **internal testing release**
+2. **upload** it
+3. **publish** it \(privately probably\).
+
+Once you went over those steps, you can test your app with in-app purchase enabled without uploading to Google Play each time, but you need to sign the APK with the same "release" signing key.
+
+{% hint style="warning" %}
+Note that it might up to 24 hours for your IAP to work after you uploaded the first release APK.
+{% endhint %}
+
 # 6. Create In-App Products
 
 There is still a bit more preparatory work: we need to setup our in-app product.
@@ -224,29 +242,5 @@ And we're done!
 
 {% hint style="info" %}
 There's might be some delay between creating a product on the Google Play Console and seeing it in your app. If your product doesn't show up after 24h, then you should start to worry.
-{% endhint %}
-
-[What's next?](../index.md)
-
-# 7. Upload to Google Play
-
-## Upload a Release Build
-
-Once you have [Built Your Release APK](android-release-apk.md), you need to upload it to Google Play in order to be able to test In-App Purchases. In-App Purchase is not enabled in "debug build". In order to test in-app purchase, your APK needs to be signed with your release signing key. In order for Google to know your release signing key for this application, you need to upload a release APK:
-
-* Signed with this key.
-* Have the BILLING permission enabled
-  * which is done when you [add the plugin to your project](install-cordova-plugin.md), so make sure you didn't skip this step.
-
-Google already provides [detailed resource on how to upload a release build](https://support.google.com/googleplay/android-developer/answer/7159011). What we want here is to:
-
-1. create an **internal testing release**
-2. **upload** it
-3. **publish** it \(privately probably\).
-
-Once you went over those steps, you can test your app with in-app purchase enabled without uploading to Google Play each time, but you need to sign the APK with the same "release" signing key.
-
-{% hint style="warning" %}
-Note that it might up to 24 hours for your IAP to work after you uploaded the first release APK.
 {% endhint %}
 
