@@ -1,4 +1,4 @@
-![](./.gitbook/assets/cordova-plugin-purchase-banner.jpg)
+![](./.gitbook/assets/banner.jpg)
 
 # Introduction
 
