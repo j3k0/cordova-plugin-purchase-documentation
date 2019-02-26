@@ -1,30 +1,3 @@
----
-description: 'We will proceed in 4 steps: setup, initialization, presentation and purchase.'
----
-
-# Consumable on Android
-
-## Setup
-
-Before moving on with this guide, you have to:
-
-1. [Install NodeJS and Cordova](../android-setup/installing-dependencies.md)
-2. [Setup your Cordova project](../android-setup/create-cordova-project.md)
-3. [Prepare an Application on Google Play](../android-setup/google-play.md)
-4. [Install the In-App Purchases plugin](../android-setup/install-cordova-plugin.md)
-5. [Build a Release APK](../android-setup/android-release-apk.md)
-6. [Create a Product on Google Play](../android-setup/google-play-products.md)
-7. [Upload a Release APK to Google Play](../android-setup/7.-upload-to-google-play.md)
-
-Good. Now we have a Cordova application with IAP support enabled and everything is in place on Google Play. Let's get into some coding!
-
-This is what we'll have to do now:
-
-1. Initialize the IAP plugin
-2. Handle the IAP events
-3. Deliver our products
-4. Secure the transactions
-
 ## Initialization
 
 Assuming you're starting from a blank project, we'll add the minimal amount of HTML for the purpose of this tutorial. Let's replace the `<body>` from the `www/index.html` file with the below.

@@ -1,13 +1,13 @@
 # Index
 
-Links to the most relevant pages in this guide. The [summary](SUMMARY.md) page is more exhaustive.
+Links to the most relevant pages in this guide.
 
-#### Generalities
+#### Discover
 
 * [In-App Purchase Technology](introduction/generalities-about-iap-technology.md)
-* [Cordova Plugin](introduction/about-the-plugin.md)
+* [Cordova Purchase Plugin](introduction/about-the-plugin.md)
 
-#### Use cases
+#### Use Cases
 
 * [Non-Consumable on Android](guides/non-consumable-android.md)
 * [Non-Consumable on iOS](guides/non-consumable-ios.md)
