@@ -1,43 +1,45 @@
 # Table of contents
 
 * [Introduction](README.md)
-* [Get Started](lets-get-started.md)
+* [Index](index.md)
 
 ## Introduction
 
 * [About IAP Technology](introduction/generalities-about-iap-technology.md)
 * [About the Plugin](introduction/about-the-plugin.md)
 
-## Guides
+## Full Guides
 
-* [Consumable on Android](flat-guides/full-consumable-android.md)
-* [Consumable on iOS](flat-guides/full-consumable-ios.md)
+* [Consumable on Android](guides/consumable-android.md)
+* [Consumable on iOS](guides/consumable-ios.md)
+* [Subscriptions on Android](guides/subscription-android.md)
+* [Subscriptions on iOS](guides/subscription-ios.md)
 
-## Android Setup
+## Android Setup (Sections)
 
-* [1. Install Dependencies](android-setup/1.-installing-dependencies.md)
-* [2. Create Cordova Project](android-setup/2.-create-cordova-project.md)
-* [3. Create Google Play Application](android-setup/3.-google-play.md)
-* [4. Install Cordova Purchase Plugin](android-setup/4.-install-cordova-plugin.md)
-* [5. Android Release APK](android-setup/5.-android-release-apk.md)
-* [6. Create In-App Products](android-setup/6.-google-play-products.md)
-* [7. Upload to Google Play](android-setup/7.-upload-to-google-play.md)
+* [1. Install Dependencies](sections/setup-android-1-install-dependencies.md)
+* [2. Create Cordova Project](sections/setup-android-2-create-cordova-project.md)
+* [3. Create Google Play Application](sections/setup-android-3-google-play.md)
+* [4. Install Cordova Purchase Plugin](sections/setup-android-4-install-cordova-plugin.md)
+* [5. Android Release APK](sections/setup-android-5-android-release-apk.md)
+* [6. Create In-App Products](sections/setup-android-6-google-play-products.md)
+* [7. Upload to Google Play](sections/setup-android-7-upload-to-google-play.md)
 
-## Android Guides
+## Android Guides (Sections)
 
-* [Consumable on Android](android-guides/consumable-android.md)
-* [Subscription on Android](android-guides/subscription-android.md)
+* [Consumable on Android](sections/consumable-android.md)
+* [Subscription on Android](sections/subscription-android.md)
 
-## Setup for iOS
+## iOS Setup (Sections)
 
-* [1. Install Dependencies](ios-setup/1.-install-dependencies.md)
-* [2. Create Cordova Project](ios-setup/2.-create-cordova-project.md)
-* [3. Setup AppStore Application](ios-setup/3.-create-app-store-application.md)
-* [4. Install and Prepare with XCode](ios-setup/4.-install-cordova-purchase-plugin.md)
-* [5. Create In-App Products](ios-setup/6.-create-in-app-products.md)
+* [1. Install Dependencies](sections/setup-ios-1-install-dependencies.md)
+* [2. Create Cordova Project](sections/setup-ios-2-create-cordova-project.md)
+* [3. Setup AppStore Application](sections/setup-ios-3-create-app-store-application.md)
+* [4. Install and Prepare with XCode](sections/setup-ios-4-install-cordova-plugin.md)
+* [5. Create In-App Products](sections/setup-ios-5-create-in-app-products.md)
 
-## iOS Guides
+## iOS Guides (Sections)
 
-* [Consumable on iOS](ios-guides/consumable-ios.md)
-* [Subscription on iOS](ios-guides/subscription-ios.md)
+* [Consumable on iOS](sections/consumable-ios.md)
+* [Subscription on iOS](sections/subscription-ios.md)
 

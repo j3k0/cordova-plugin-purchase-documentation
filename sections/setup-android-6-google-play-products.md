@@ -30,5 +30,5 @@ And we're done!
 There's might be some delay between creating a product on the Google Play Console and seeing it in your app. If your product doesn't show up after 24h, then you should start to worry.
 {% endhint %}
 
-[What's next?](../lets-get-started.md)
+[What's next?](../index.md)
 
