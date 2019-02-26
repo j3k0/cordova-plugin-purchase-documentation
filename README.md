@@ -1,3 +1,5 @@
+![](./.gitbook/assets/cordova-plugin-purchase-banner.jpg)
+
 # Introduction
 
 Hello reader! You're about to add In-App Purchases to your Cordova Application, let this be your guide in the process.
