@@ -12,17 +12,28 @@ While I'm focusing on Cordova, it should be easy to transpose the tutorials to a
 
 Note that the most up-to-date version is available as a gitbook at https://purchase.cordova.fovea.cc/
 
-### How to get started?
-
-This guide isn't meant to be read from start to finish. Feel free to jump to your use case of interest from the summary. Each guide should be self-sufficient.
-
-However, the little introduction [About IAP Technology](introduction/generalities-about-iap-technology.md) will introduce you to the In-App Purchase technology, in terms of what you can do with it on both iOS and Android, and the difference between those platforms.
-
-If you think you already know enough about that, you can jump right to your use case using the menu on the left, or the file [SUMMARY.md](SUMMARY.md) if you're reading from GitHub.
-
 ### Contribute to this guide
 
 The main repository is hosted on GitHub: https://github.com/j3k0/cordova-plugin-purchase-documentation.
 
 The content is aimed to be digested by [gitbook](https://gitbook.com). Pull requests are welcome.
+
+### How to get started?
+
+The [little introduction to IAP technology](introduction/generalities-about-iap-technology.md) will introduce you to the In-App Purchase technology, in terms of what you can do with it on both iOS and Android, and the difference between those platforms.
+
+If you like a (tiny) bit of theory, you can read the section on [the cordova plugin](introduction/about-the-plugin.md).
+
+Then, you can jump right to your use case.
+
+#### Use Cases
+
+* [Consumable on Android](guides/consumable-android.md)
+* [Consumable on iOS](guides/consumable-ios.md)
+* [(TODO) Non-Consumable on Android](guides/non-consumable-android.md)
+* [(TODO) Non-Consumable on iOS](guides/non-consumable-ios.md)
+* [(TODO) Auto-Renewing Subscription on Android](guides/subscription-android.md)
+* [(TODO) Auto-Renewing Subscription on iOS](guides/subscription-ios.md)
+* [(TODO) Non-Renewing Subscription on Android](guides/nr-subscription-android.md)
+* [(TODO) Non-Renewing Subscription on iOS](guides/nr-subscription-ios.md)
 
