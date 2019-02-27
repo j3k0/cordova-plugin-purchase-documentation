@@ -77,7 +77,7 @@ I'll not guide you through the whole procedure, just create setup your Apple app
 
 Since you are here, let's retrieve the Shared Secret. You can use an App-Specific one or a Master Shared Secret, at your convenience: both will work. Keep the value around, it'll be required, especially if you are implementing subscriptions.
 
-![](../.gitbook/assets/appstore-shared-secret.png)
+![](../assets/appstore-shared-secret.png)
 
 
 
@@ -105,7 +105,7 @@ Get to the project's settings by clicking on the project's icon, which is the to
 
 Select the target, go to _Capabilities_, scroll down to _In-App Purchase_ and make sure it's **"ON".**
 
-![Enabling In-App Purchase Capability in Xcode](../.gitbook/assets/xcode-iap-capability.png)
+![Enabling In-App Purchase Capability in Xcode](../assets/xcode-iap-capability.png)
 
 Now try to **build the app from Xcode**. It might point you to a few stuff it might automatically fix for you if you're starting from a fresh project, like selecting a development team and creating the signing certificate. So just let Xcode do that for you except if you have a good reason not to and know what you're doing.
 
@@ -122,6 +122,10 @@ Even if that sounds stupid, you need to fill-in ALL metadata in order to use the
 {% endhint %}
 
 The process is well explained by Apple, so I'll not enter into more details.
+
+## 6. Create Test Users
+
+In order to test your In-App Purchases during development, you should create some test users.
 
 
 # Coding

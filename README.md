@@ -1,4 +1,4 @@
-![](./.gitbook/assets/banner.jpg)
+![](./assets/banner.jpg)
 
 # Introduction
 

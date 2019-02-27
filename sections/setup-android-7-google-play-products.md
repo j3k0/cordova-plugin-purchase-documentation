@@ -6,7 +6,7 @@ Before creating your In-App Product, you have to [Create an Android Application]
 
 Back in the "Google Play Console", open the "Store presence" ⇒ "In-app products" section.
 
-![](../.gitbook/assets/google-play-in-app-products.png)
+![](../assets/google-play-in-app-products.png)
 
 If you haven't yet uploaded an APK, it'll warn you that you need to upload a Release APK. Here's how you [Build a Release APK](android-release-apk.md) and [Upload it to Google Play](google-play.md#upload-a-release-build).
 
