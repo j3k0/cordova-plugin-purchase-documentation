@@ -247,6 +247,18 @@ And we're done!
 There's might be some delay between creating a product on the Google Play Console and seeing it in your app. If your product doesn't show up after 24h, then you should start to worry.
 {% endhint %}
 
+## 8. Prepare Test Accounts
+
+To test your Google Play Billing implementation with actual in-app purchases, you must use a test account. By default, the only test account registered is the one that's associated with your developer account. You can register additional test accounts by using the Google Play Console.
+
+1. Navigate to Settings > Account details.
+2. In the License Testing section, add your tester's email addresses to Gmail accounts with testing access field.
+3. Save your changes.
+
+{% hint style="info" %}
+Testers can begin making purchases of your in-app products within 15 minutes.
+{% endhint %}
+
 
 # Coding
 
@@ -374,7 +386,7 @@ Let's build and test that!
 
 In-App Purchase on Android will only work on release builds, i.e. builds that are signed with the same certificate that the one you're using for APKs you upload on Google Play.
 
-We went over this already, in the [Android Release APK ](../android-setup/android-release-apk.md)section. This is how we're building the release build:
+We went over this already, in the [Android Release APK](#5-android-release-apk) section. This is how we're building the release build:
 
 ```text
 ./android-release.sh
@@ -382,7 +394,7 @@ We went over this already, in the [Android Release APK ](../android-setup/androi
 
 Feel free to use your own method to create a release APK.
 
-To install the generated APK on a device:
+Install the generated APK **on a real device** (important!):
 
 ```text
 adb install -r path/to/android-release.apk
@@ -398,11 +410,17 @@ If needed, you can them access the logs with `adb`, like this:
 `adb logcat "chromium:I *:E"`
 {% endhint %}
 
-The `android-release.sh` script actually has a shortcut that will build, install and start `adb logcat`:
+The `android-release.sh` script has a shortcut that will build, install and start `adb logcat`:
 
 ```text
 ./android-release.sh run
 ```
+
+You can now make purchase with on of your test accounts.
+
+{% hint style="warning" %}
+A test account can purchase an item in your product list only if the item is published.
+{% endhint %}
 
 ## Purchase
 
@@ -458,13 +476,13 @@ For this tutorial, we will use Fovea's own service which is free while in develo
 
 Copy this line inside the `initStore()` function, anywhere before the initial `store.refresh()`. Also add the recommended `Content-Security-Policy` to your `index.html` as mentioned in the documentation.
 
-Alright, we're done with coding! Let's try the whole thing now. Repeat the steps from the [Testing](non-consumable-android.md#testing) section above:
+Alright, we're done with coding! Let's try the whole thing now. We will repeat the steps from the [Testing](#testing) section above:
 
 ```text
 ./android-release.sh run
 ```
 
-Here you go!
+Here we go. Let's try to purchase from the app, make sure you are using one of the test account.
 
 The full source for this tutorial is available here: [https://gist.github.com/j3k0/3324bb8e759fef4b3054b834a5a88500](https://gist.github.com/j3k0/3324bb8e759fef4b3054b834a5a88500)
 

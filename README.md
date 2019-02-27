@@ -18,7 +18,7 @@ This guide isn't meant to be read from start to finish. Feel free to jump to you
 
 However, the little introduction [About IAP Technology](introduction/generalities-about-iap-technology.md) will introduce you to the In-App Purchase technology, in terms of what you can do with it on both iOS and Android, and the difference between those platforms.
 
-If you think you already know enough about that, you can jump right to your use case using the [menu](SUMMARY.md) on the left.
+If you think you already know enough about that, you can jump right to your use case using the menu on the left, or the file [SUMMARY.md](SUMMARY.md) if you're reading from GitHub.
 
 ### Contribute to this guide
 
