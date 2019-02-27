@@ -4,6 +4,7 @@
 
 ## Discover
 
+* [Micro Example](introduction/micro-example.md)
 * [About IAP Technology](introduction/generalities-about-iap-technology.md)
 * [About the Plugin](introduction/about-the-plugin.md)
 

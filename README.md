@@ -20,7 +20,9 @@ The content is aimed to be digested by [gitbook](https://gitbook.com). Pull requ
 
 ### How to get started?
 
-The [little introduction to IAP technology](introduction/generalities-about-iap-technology.md) will introduce you to the In-App Purchase technology, in terms of what you can do with it on both iOS and Android, and the difference between those platforms.
+The [little introduction to IAP technology](introduction/generalities-about-iap-technology.md) in terms of what you can do with it on both iOS and Android, and the difference between those platforms.
+
+If you're curious to see the code in action, you can also take a look at the [micro example](introduction/micro-example.md).
 
 If you like a (tiny) bit of theory, you can read the section on [the cordova plugin](introduction/about-the-plugin.md).
 
