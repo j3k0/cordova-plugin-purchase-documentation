@@ -14,6 +14,7 @@ First some setup.
 5. Build a Release APK
 6. Create a Product on Google Play
 7. Upload a Release APK to Google Play
+8. Prepare Test Accounts
 
 Of couse you can skip the first few steps if you already have a working application you want to integrate the code into.
 

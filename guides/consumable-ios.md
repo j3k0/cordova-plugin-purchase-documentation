@@ -9,6 +9,7 @@ Here what we'll do.
 3. Setup AppStore Application
 4. Install and Prepare with XCode
 5. Create In-App Products
+6. Prepare Test Accounts
 
 Of couse you can skip the first few steps if you already have a working application you want to integrate the code into.
 
