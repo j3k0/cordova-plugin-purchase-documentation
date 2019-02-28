@@ -42,7 +42,13 @@ function refreshUI() {
 }
 ```
 
-Launching this on a device... You can check what it does on YouTube: https://youtu.be/fLoVePrIhc4
+Launching this on a device...
 
-The project is on GitHub: https://github.com/j3k0/cordova-purchase-micro-example
+{% embed url="https://youtu.be/fLoVePrIhc4" %}
+
+The project is on GitHub: [https://github.com/j3k0/cordova-purchase-micro-example](https://github.com/j3k0/cordova-purchase-micro-example)
+
+| !\[\]\(../assets/micro-example-1.jpg\) | !\[\]\(../assets/micro-example-2.jpg\) | !\[\]\(../assets/micro-example-3.jpg\) | !\[\]\(../assets/micro-example-4.jpg\) |
+| :--- | :--- | :--- | :--- |
+
 

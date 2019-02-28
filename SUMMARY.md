@@ -4,20 +4,20 @@
 
 ## Discover
 
-* [Micro Example](introduction/micro-example.md)
-* [About IAP Technology](introduction/generalities-about-iap-technology.md)
-* [About the Plugin](introduction/about-the-plugin.md)
+* [Micro Example](discover/micro-example.md)
+* [About IAP Technology](discover/generalities-about-iap-technology.md)
+* [About the Plugin](discover/about-the-plugin.md)
 
 ## Use Cases
 
-* [Consumable on Android](guides/consumable-android.md)
-* [Consumable on iOS](guides/consumable-ios.md)
-* [(TODO) Non-Consumable on Android](guides/non-consumable-android.md)
-* [(TODO) Non-Consumable on iOS](guides/non-consumable-ios.md)
-* [(TODO) Auto-Renewing Subscription on Android](guides/subscription-android.md)
-* [(TODO) Auto-Renewing Subscription on iOS](guides/subscription-ios.md)
-* [(TODO) Non-Renewing Subscription on Android](guides/nr-subscription-android.md)
-* [(TODO) Non-Renewing Subscription on iOS](guides/nr-subscription-ios.md)
+* [Consumable on Android](use-cases/consumable-android.md)
+* [Consumable on iOS](use-cases/consumable-ios.md)
+* [\(TODO\) Non-Consumable on Android](use-cases/non-consumable-android.md)
+* [\(TODO\) Non-Consumable on iOS](use-cases/non-consumable-ios.md)
+* [\(TODO\) Auto-Renewing Subscription on Android](use-cases/subscription-android.md)
+* [\(TODO\) Auto-Renewing Subscription on iOS](use-cases/subscription-ios.md)
+* [\(TODO\) Non-Renewing Subscription on Android](use-cases/nr-subscription-android.md)
+* [\(TODO\) Non-Renewing Subscription on iOS](use-cases/nr-subscription-ios.md)
 
 ## Documentation
 

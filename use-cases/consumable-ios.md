@@ -1,5 +1,7 @@
 # Consumable on iOS
 
+## Consumable on iOS
+
 We will proceed in 4 steps: setup, initialization, presentation and purchase.
 
 Here what we'll do.
@@ -20,10 +22,9 @@ Once we have a Cordova iOS application with IAP support enabled and everything i
 3. Deliver our product
 4. Secure the transactions
 
+## Setup
 
-# Setup
-
-## 1. Install Dependencies
+### 1. Install Dependencies
 
 Needless to say, make sure you have the tools installed on your machine. Developing from a mac is generally recommended for doing iOS development, it's way easier. If you only plan on doing Android, then everything will work.
 
@@ -35,9 +36,9 @@ During the writing of this guide, I've been using the following environment:
 
 I'm not saying it won't work with different version. If you start fresh, it might be a good idea to use an up-to-date environment.
 
-## 2. Create Cordova Project
+### 2. Create Cordova Project
 
-### Create the project
+#### Create the project
 
 If it isn't already created:
 
@@ -60,13 +61,13 @@ Let's head into our cordova project's directory \(should match whatever we used 
 $ cd CordovaProject
 ```
 
-### Add iOS platform
+#### Add iOS platform
 
 ```text
 $ cordova platform add ios
 ```
 
-## 3. Setup AppStore Application
+### 3. Setup AppStore Application
 
 First, I assume you have an Apple developer account. If not time to register, because it's mandatory.
 
@@ -74,15 +75,13 @@ Let's now head to the [AppStore Connect](https://appstoreconnect.apple.com) webs
 
 I'll not guide you through the whole procedure, just create setup your Apple application as usual.
 
-### Retrieve the Shared Secret
+#### Retrieve the Shared Secret
 
 Since you are here, let's retrieve the Shared Secret. You can use an App-Specific one or a Master Shared Secret, at your convenience: both will work. Keep the value around, it'll be required, especially if you are implementing subscriptions.
 
-![](../assets/appstore-shared-secret.png)
+![](../.gitbook/assets/appstore-shared-secret.png)
 
-
-
-## 4. Install and Prepare with XCode
+### 4. Install and Prepare with XCode
 
 When you only require iOS support, no need for special command line arguments:
 
@@ -106,15 +105,15 @@ Get to the project's settings by clicking on the project's icon, which is the to
 
 Select the target, go to _Capabilities_, scroll down to _In-App Purchase_ and make sure it's **"ON".**
 
-![Enabling In-App Purchase Capability in Xcode](../assets/xcode-iap-capability.png)
+![Enabling In-App Purchase Capability in Xcode](../.gitbook/assets/xcode-iap-capability.png)
 
 Now try to **build the app from Xcode**. It might point you to a few stuff it might automatically fix for you if you're starting from a fresh project, like selecting a development team and creating the signing certificate. So just let Xcode do that for you except if you have a good reason not to and know what you're doing.
 
 Successful build? You're good to go!
 
-## 5. Create In-App Products
+### 5. Create In-App Products
 
-If you followed the [Setup AppStore Application](3.-create-app-store-application.md) page, you should have everything setup. Head again to the App's In-App Purchases page: select your application, then _Features_, then _In-App Purchases_.
+If you followed the [Setup AppStore Application](https://github.com/j3k0/cordova-plugin-purchase-documentation/tree/bb859549626b9bac5463d841a416de68e2d586ba/guides/3.-create-app-store-application.md) page, you should have everything setup. Head again to the App's In-App Purchases page: select your application, then _Features_, then _In-App Purchases_.
 
 From there you can create your In-App Products. Select the appropriate type, fill in all required metadata and select _cleared for sale_.
 
@@ -124,21 +123,19 @@ Even if that sounds stupid, you need to fill-in ALL metadata in order to use the
 
 The process is well explained by Apple, so I'll not enter into more details.
 
-## 6. Create Test Users
+### 6. Create Test Users
 
 In order to test your In-App Purchases during development, you should create some test users.
 
-You can do so from the AppStore Connect website, in the _Users & Access_ section. There in the sidebar, you should see "Sandbox > Testers". If you don't, it means you don't have enough permissions to create sandbox testers, so ask your administrator.
+You can do so from the AppStore Connect website, in the _Users & Access_ section. There in the sidebar, you should see "Sandbox &gt; Testers". If you don't, it means you don't have enough permissions to create sandbox testers, so ask your administrator.
 
 From there, it's just a matter of hitting "+" and filling the form. While you're at it, create 2-3 test users: it will be handy for testing.
 
-![](../assets/appstore-test-users.png)
+![](../.gitbook/assets/appstore-test-users.png)
 
+## Coding
 
-# Coding
-
-
-## Initialization
+### Initialization
 
 Assuming you're starting from a blank project, we'll add the minimal amount of HTML for the purpose of this tutorial. Let's replace the `<body>` from the `www/index.html` file with the below.
 
@@ -185,7 +182,7 @@ function initStore() {
     store.error(function(error) {
         console.log('ERROR ' + error.code + ': ' + error.message);
     });
-    
+
     // ... MORE HERE SOON
 
     store.refresh();
@@ -196,7 +193,7 @@ Here's a little explanation:
 
 **Lines 5-8**, we check if the plugin is loaded.
 
-**Lines 10-14**, we register the product with ID `consumable1`.  We declare it as a non-consumable \(`store.NON_CONSUMABLE`\). [⇒ API Documentation](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/api.md#registering-products).
+**Lines 10-14**, we register the product with ID `consumable1`. We declare it as a non-consumable \(`store.NON_CONSUMABLE`\). [⇒ API Documentation](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/api.md#registering-products).
 
 **Lines 16-18**, we setup an error handler. It just logs errors to the console.
 
@@ -206,7 +203,7 @@ Here's a little explanation:
 Whatever your setup is, you should make sure this runs as soon as the javascript application starts. You have to be ready to handle IAP events as soon as possible.
 {% endhint %}
 
-## Presentation
+### Presentation
 
 For the sake of this tutorial's simplicity, let's store the user's number of gold coins in localStorage:`window.localStorage.goldCoins`
 
@@ -229,7 +226,7 @@ We'll add a little more at `initStore()` function, line 20.
 store.when('my_consumable1').updated(refreshProductUI);
 ```
 
-Then define  the `refreshProduct()` function at the bottom of the file.
+Then define the `refreshProduct()` function at the bottom of the file.
 
 ```javascript
 function refreshProductUI(product) {
@@ -252,12 +249,11 @@ function refreshProductUI(product) {
 
 **Lines 7-8**, add the "Buy Now!" button if product can be purchased.
 
-If you want a bit more background information about this, please check the [Displaying Products ](../introduction/about-the-plugin.md#displaying-products)section and the [⇒ API Documentation](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/api.md#storeproduct-object) for full details about the fields found for a product.
+If you want a bit more background information about this, please check the [Displaying Products ](../discover/about-the-plugin.md#displaying-products)section and the [⇒ API Documentation](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/api.md#storeproduct-object) for full details about the fields found for a product.
 
 Let's build and test that!
 
-
-## Testing
+### Testing
 
 To test with In-App Purchases enabled, I chose to run my app through Xcode. This way, I can see the logs from both the javascript and native sides, which is useful.
 
@@ -269,7 +265,7 @@ cordova prepare ios
 
 Then switch to Xcode and run.
 
-## Purchase
+### Purchase
 
 Now that we have our purchase button, let's implement the `purchaseConsumable1` button.
 
@@ -281,7 +277,7 @@ function purchaseConsumable1() {
 
 Can it be easier than that? Well, not so fast! The code as it is won't do much with this order request. To process the purchase we have to implement the various steps of the purchase flow.
 
-I already introduced the purchase flow in the introduction of this guide, check the [Purchase process](../introduction/about-the-plugin.md#purchase-process) section if you need a refresher. The official documentation provides more details. [⇒ API Documentation](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/api.md#-purchasing) 
+I already introduced the purchase flow in the introduction of this guide, check the [Purchase process](../discover/about-the-plugin.md#purchase-process) section if you need a refresher. The official documentation provides more details. [⇒ API Documentation](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/api.md#-purchasing)
 
 So the first thing that will happen is that the `canPurchase` state of the product will change to `false`. But remember, we added this in the previous step:
 

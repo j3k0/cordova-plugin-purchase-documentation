@@ -2,7 +2,7 @@
 
 Generalities about IAP technologies that all developers have to know.
 
-Present on both iOS and Android, In-App Purchases (IAP) allow you to integrate a variety of virtual products that users can purchase right from your application.
+Present on both iOS and Android, In-App Purchases \(IAP\) allow you to integrate a variety of virtual products that users can purchase right from your application.
 
 ## Virtual Products
 
@@ -14,7 +14,7 @@ You can offer 4 types of virtual products:
   * Temporary subscriptions that users have to renew manually.
 * _Consumable_ products
   * For virtual currencies or similar \(gems, gold, lives, ...\).
-  * Stuff that can be purchased (and consumed) multiple times.
+  * Stuff that can be purchased \(and consumed\) multiple times.
 * _Non-Consumable_ products
   * For unlocking a premium feature.
   * Stuff that can be purchased only once.

@@ -1,7 +1,8 @@
 # Consumable on Android
 
-In this guide, we will build a small application with a consumable product that works on Android.
+## Consumable on Android
 
+In this guide, we will build a small application with a consumable product that works on Android.
 
 We will proceed in steps: setup, initialization, presentation and purchase.
 
@@ -25,10 +26,9 @@ Once we have a Cordova application with IAP support enabled and everything is in
 3. Deliver our product
 4. Secure the transactions
 
+## Setup
 
-# Setup
-
-## 1. Install Dependencies
+### 1. Install Dependencies
 
 Needless to say, make sure you have the tools installed on your machine. Developing from a mac is generally recommended for doing iOS development, it's way easier. If you only plan on doing Android, then everything will work.
 
@@ -40,11 +40,11 @@ During the writing of this guide, I've been using the following environment:
 
 I'm not saying it won't work with different version. If you start fresh, it might be a good idea to use an up-to-date environment.
 
-## 2. Create Cordova Project
+### 2. Create Cordova Project
 
 Making sure we have a Cordova project that we can build for Android and/or iOS.
 
-### Create the project
+#### Create the project
 
 If it isn't already created:
 
@@ -67,7 +67,7 @@ Let's head into our cordova project's directory \(should match whatever we used 
 $ cd CordovaProject
 ```
 
-### Add Android platform
+#### Add Android platform
 
 ```text
 $ cordova platform add android
@@ -101,11 +101,11 @@ Which outputs:
 
 Alright, seems like we have no problems with our Android build chain. If you do have problems, fixing it is out of scope from this guide but it's required!
 
-## 3. Create Google Play Application
+### 3. Create Google Play Application
 
 Make sure we have a Google Play application created and configured.
 
-## Create the App
+### Create the App
 
 * Open the [Google Play Console](https://play.google.com/apps/publish).
 * Click "Create Application", fill in the required fields.
@@ -114,7 +114,7 @@ Make sure we have a Google Play application created and configured.
 Need more help? I recommend you check [Google's own documentation](https://support.google.com/googleplay/android-developer/answer/113469?hl=en&ref_topic=7072031). It's well detailed, easy to follow and probably the most up-to-date resource you can find.
 {% endhint %}
 
-## Retrieve the Billing Key
+### Retrieve the Billing Key
 
 We need to inform the plugin of our app's `BILLING_KEY`. That piece of information can be found on the Google Play Publisher Console.
 
@@ -130,7 +130,7 @@ That is where you'll find this long Base64 string they call "**Your license key 
 The Billing Key will be required to install the plugin on Android and setup receipt validation.
 {% endhint %}
 
-## 4. Install Cordova Purchase Plugin
+### 4. Install Cordova Purchase Plugin
 
 To install the plugin, we will use the usual `cordova plugin add` command. There is little subtleties on Android.
 
@@ -140,7 +140,7 @@ When you need Android support, you need to setup your `BILLING_KEY`.
 cordova plugin add cc.fovea.cordova.purchase  --variable BILLING_KEY="<BILLING_KEY>"
 ```
 
-You can find that piece of information on the Google Play Publisher Console, as [explained here](#retrieve-the-billing-key).
+You can find that piece of information on the Google Play Publisher Console, as [explained here](consumable-android.md#retrieve-the-billing-key).
 
 Now let's try to build.
 
@@ -159,7 +159,7 @@ All good! Seems like we can build an app with support for the Billing API.
 
 Let's now prepare a release APK.
 
-## 5. Android Release APK
+### 5. Android Release APK
 
 To generate a release build, I generally use the following script: [android-release.sh](https://gist.github.com/j3k0/28f60a7d5622508634d09f94c59d6dfc)
 
@@ -196,7 +196,7 @@ Build is ready:
 
 There you go, this is your first release APK.
 
-## 6. Upload to Google Play
+### 6. Upload to Google Play
 
 Once you have built your release APK, you need to upload it to Google Play in order to be able to test In-App Purchases. In-App Purchase is not enabled in "debug build". In order to test in-app purchase, your APK needs to be signed with your release signing key. In order for Google to know your release signing key for this application, you need to upload a release APK:
 
@@ -216,17 +216,17 @@ Once you went over those steps, you can test your app with in-app purchase enabl
 Note that it might up to 24 hours for your IAP to work after you uploaded the first release APK.
 {% endhint %}
 
-## 6. Create In-App Products
+### 6. Create In-App Products
 
 There is still a bit more preparatory work: we need to setup our in-app product.
 
-Before creating your In-App Product, you have to [Create an Android Application](google-play.md) first. Done already? Let's now setup our in-app product.
+Before creating your In-App Product, you have to [Create an Android Application](https://github.com/j3k0/cordova-plugin-purchase-documentation/tree/bb859549626b9bac5463d841a416de68e2d586ba/guides/google-play.md) first. Done already? Let's now setup our in-app product.
 
 Back in the "Google Play Console", open the "Store presence" ⇒ "In-app products" section.
 
-![](../assets/google-play-in-app-products.png)
+![](../.gitbook/assets/google-play-in-app-products.png)
 
-If you haven't yet uploaded an APK, it'll warn you that you need to upload a Release APK. Here's how you [Build a Release APK](android-release-apk.md) and [Upload it to Google Play](google-play.md#upload-a-release-build).
+If you haven't yet uploaded an APK, it'll warn you that you need to upload a Release APK. Here's how you [Build a Release APK](https://github.com/j3k0/cordova-plugin-purchase-documentation/tree/bb859549626b9bac5463d841a416de68e2d586ba/guides/android-release-apk.md) and [Upload it to Google Play](https://github.com/j3k0/cordova-plugin-purchase-documentation/tree/bb859549626b9bac5463d841a416de68e2d586ba/guides/google-play.md#upload-a-release-build).
 
 Once this is done, you can create a product. Google offers 2 kinds of products:
 
@@ -248,11 +248,11 @@ And we're done!
 There's might be some delay between creating a product on the Google Play Console and seeing it in your app. If your product doesn't show up after 24h, then you should start to worry.
 {% endhint %}
 
-## 8. Prepare Test Accounts
+### 8. Prepare Test Accounts
 
 To test your Google Play Billing implementation with actual in-app purchases, you must use a test account. By default, the only test account registered is the one that's associated with your developer account. You can register additional test accounts by using the Google Play Console.
 
-1. Navigate to Settings > Account details.
+1. Navigate to Settings &gt; Account details.
 2. In the License Testing section, add your tester's email addresses to Gmail accounts with testing access field.
 3. Save your changes.
 
@@ -260,11 +260,9 @@ To test your Google Play Billing implementation with actual in-app purchases, yo
 Testers can begin making purchases of your in-app products within 15 minutes.
 {% endhint %}
 
+## Coding
 
-# Coding
-
-
-## Initialization
+### Initialization
 
 Assuming you're starting from a blank project, we'll add the minimal amount of HTML for the purpose of this tutorial. Let's replace the `<body>` from the `www/index.html` file with the below.
 
@@ -311,7 +309,7 @@ function initStore() {
     store.error(function(error) {
         console.log('ERROR ' + error.code + ': ' + error.message);
     });
-    
+
     // ... MORE HERE SOON
 
     store.refresh();
@@ -322,7 +320,7 @@ Here's a little explanation:
 
 **Lines 5-8**, we check if the plugin is loaded.
 
-**Lines 10-14**, we register the product with ID `consumable1`.  We declare it as a non-consumable \(`store.NON_CONSUMABLE`\). [⇒ API Documentation](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/api.md#registering-products).
+**Lines 10-14**, we register the product with ID `consumable1`. We declare it as a non-consumable \(`store.NON_CONSUMABLE`\). [⇒ API Documentation](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/api.md#registering-products).
 
 **Lines 16-18**, we setup an error handler. It just logs errors to the console.
 
@@ -332,7 +330,7 @@ Here's a little explanation:
 Whatever your setup is, you should make sure this runs as soon as the javascript application starts. You have to be ready to handle IAP events as soon as possible.
 {% endhint %}
 
-## Presentation
+### Presentation
 
 For the sake of this tutorial's simplicity, let's store the user's number of gold coins in localStorage:`window.localStorage.goldCoins`
 
@@ -355,7 +353,7 @@ We'll add a little more at `initStore()` function, line 20.
 store.when('my_consumable1').updated(refreshProductUI);
 ```
 
-Then define  the `refreshProduct()` function at the bottom of the file.
+Then define the `refreshProduct()` function at the bottom of the file.
 
 ```javascript
 function refreshProductUI(product) {
@@ -378,16 +376,15 @@ function refreshProductUI(product) {
 
 **Lines 7-8**, add the "Buy Now!" button if product can be purchased.
 
-If you want a bit more background information about this, please check the [Displaying Products ](../introduction/about-the-plugin.md#displaying-products)section and the [⇒ API Documentation](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/api.md#storeproduct-object) for full details about the fields found for a product.
+If you want a bit more background information about this, please check the [Displaying Products ](../discover/about-the-plugin.md#displaying-products)section and the [⇒ API Documentation](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/api.md#storeproduct-object) for full details about the fields found for a product.
 
 Let's build and test that!
 
-
-## Testing
+### Testing
 
 In-App Purchase on Android will only work on release builds, i.e. builds that are signed with the same certificate that the one you're using for APKs you upload on Google Play.
 
-We went over this already, in the [Android Release APK](#5-android-release-apk) section. This is how we're building the release build:
+We went over this already, in the [Android Release APK](consumable-android.md#5-android-release-apk) section. This is how we're building the release build:
 
 ```text
 ./android-release.sh
@@ -395,7 +392,7 @@ We went over this already, in the [Android Release APK](#5-android-release-apk) 
 
 Feel free to use your own method to create a release APK.
 
-Install the generated APK **on a real device** (important!):
+Install the generated APK **on a real device** \(important!\):
 
 ```text
 adb install -r path/to/android-release.apk
@@ -423,7 +420,7 @@ You can now make purchase with on of your test accounts.
 A test account can purchase an item in your product list only if the item is published.
 {% endhint %}
 
-## Purchase
+### Purchase
 
 Now that we have our purchase button, let's implement the `purchaseConsumable1` button.
 
@@ -435,7 +432,7 @@ function purchaseConsumable1() {
 
 Can it be easier than that? Well, not so fast! The code as it is won't do much with this order request. To process the purchase we have to implement the various steps of the purchase flow.
 
-I already introduced the purchase flow in the introduction, check the [Purchase process](../introduction/about-the-plugin.md#purchase-process) section if you need a refresher. The official documentation provides more details. [⇒ API Documentation](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/api.md#-purchasing) 
+I already introduced the purchase flow in the introduction, check the [Purchase process](../discover/about-the-plugin.md#purchase-process) section if you need a refresher. The official documentation provides more details. [⇒ API Documentation](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/api.md#-purchasing)
 
 So the first thing that will happen is that the `canPurchase` state of the product will change to `false`. But remember, we added this in the previous step:
 
@@ -477,7 +474,7 @@ For this tutorial, we will use Fovea's own service which is free while in develo
 
 Copy this line inside the `initStore()` function, anywhere before the initial `store.refresh()`. Also add the recommended `Content-Security-Policy` to your `index.html` as mentioned in the documentation.
 
-Alright, we're done with coding! Let's try the whole thing now. We will repeat the steps from the [Testing](#testing) section above:
+Alright, we're done with coding! Let's try the whole thing now. We will repeat the steps from the [Testing](consumable-android.md#testing) section above:
 
 ```text
 ./android-release.sh run
