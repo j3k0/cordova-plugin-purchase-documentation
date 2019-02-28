@@ -2,6 +2,7 @@
 
 In this guide, we will build a small application with a consumable product that works on Android.
 
+
 We will proceed in steps: setup, initialization, presentation and purchase.
 
 First some setup.
@@ -23,6 +24,7 @@ Once we have a Cordova application with IAP support enabled and everything is in
 2. Handle the purchase events
 3. Deliver our product
 4. Secure the transactions
+
 
 ## Setup
 
@@ -135,10 +137,10 @@ To install the plugin, we will use the usual `cordova plugin add` command. There
 When you need Android support, you need to setup your `BILLING_KEY`.
 
 ```text
-cordova plugin add cc.fovea.cordova.purchase  --variable BILLING_KEY="<BILLING_KEY>"
+cordova plugin add cc.fovea.cordova.purchase --variable BILLING_KEY="<BILLING_KEY>"
 ```
 
-You can find that piece of information on the Google Play Publisher Console, as [explained here](consumable-android.md#retrieve-the-billing-key).
+You can find that piece of information on the Google Play Publisher Console, as [explained here](#retrieve-the-billing-key).
 
 Now let's try to build.
 
@@ -222,7 +224,7 @@ Back in the "Google Play Console", open the "Store presence" ⇒ "In-app product
 
 ![](../.gitbook/assets/google-play-in-app-products.png)
 
-If you haven't yet uploaded an APK, it'll warn you that you need to upload a _release_ APK.
+If you haven't yet uploaded an APK, it'll warn you that you need to upload a *release* APK.
 
 Once this is done, you can create a product. Google offers 2 kinds of products:
 
@@ -246,7 +248,7 @@ There's might be some delay between creating a product on the Google Play Consol
 
 To test your Google Play Billing implementation with actual in-app purchases, you must use a test account. By default, the only test account registered is the one that's associated with your developer account. You can register additional test accounts by using the Google Play Console.
 
-1. Navigate to Settings &gt; Account details.
+1. Navigate to Settings > Account details.
 2. In the License Testing section, add your tester's email addresses to Gmail accounts with testing access field.
 3. Save your changes.
 
@@ -254,7 +256,9 @@ To test your Google Play Billing implementation with actual in-app purchases, yo
 Testers can begin making purchases of your in-app products within 15 minutes.
 {% endhint %}
 
+
 ## Coding
+
 
 ### Initialization
 
@@ -303,7 +307,7 @@ function initStore() {
     store.error(function(error) {
         console.log('ERROR ' + error.code + ': ' + error.message);
     });
-
+    
     // ... MORE HERE SOON
 
     store.refresh();
@@ -374,11 +378,12 @@ If you want a bit more background information about this, please check the [Disp
 
 Let's build and test that!
 
+
 ### Testing
 
 In-App Purchase on Android will only work on release builds, i.e. builds that are signed with the same certificate that the one you're using for APKs you upload on Google Play.
 
-We went over this already, in the [Android Release APK](consumable-android.md#5-android-release-apk) section. This is how we're building the release build:
+We went over this already, in the [Android Release APK](#5-android-release-apk) section. This is how we're building the release build:
 
 ```text
 ./android-release.sh
@@ -386,7 +391,7 @@ We went over this already, in the [Android Release APK](consumable-android.md#5-
 
 Feel free to use your own method to create a release APK.
 
-Install the generated APK **on a real device** \(important!\):
+Install the generated APK **on a real device** (important!):
 
 ```text
 adb install -r path/to/android-release.apk
@@ -426,7 +431,7 @@ function purchaseConsumable1() {
 
 Can it be easier than that? Well, not so fast! The code as it is won't do much with this order request. To process the purchase we have to implement the various steps of the purchase flow.
 
-I already introduced the purchase flow in the introduction, check the [Purchase process](../discover/about-the-plugin.md#purchase-process) section if you need a refresher. The official documentation provides more details. [⇒ API Documentation](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/api.md#-purchasing)
+I already introduced the purchase flow in the introduction, check the [Purchase process](../discover/about-the-plugin.md#purchase-process) section if you need a refresher. The official documentation provides more details. [⇒ API Documentation](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/api.md#-purchasing) 
 
 So the first thing that will happen is that the `canPurchase` state of the product will change to `false`. But remember, we added this in the previous step:
 
@@ -468,7 +473,7 @@ For this tutorial, we will use Fovea's own service which is free while in develo
 
 Copy this line inside the `initStore()` function, anywhere before the initial `store.refresh()`. Also add the recommended `Content-Security-Policy` to your `index.html` as mentioned in the documentation.
 
-Alright, we're done with coding! Let's try the whole thing now. We will repeat the steps from the [Testing](consumable-android.md#testing) section above:
+Alright, we're done with coding! Let's try the whole thing now. We will repeat the steps from the [Testing](#testing) section above:
 
 ```text
 ./android-release.sh run

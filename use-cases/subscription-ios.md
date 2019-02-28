@@ -1,4 +1,4 @@
-# \(TODO\) Auto-Renewing Subscription on iOS
+# Subscription on iOS
 
 In this guide, we will build a small application with a subscription that works on iOS.
 
@@ -21,6 +21,7 @@ Once we have a Cordova iOS application with IAP support enabled and everything i
 2. Handle the purchase events
 3. Deliver our product
 4. Secure the transactions
+
 
 ## Setup
 
@@ -81,6 +82,8 @@ Since you are here, let's retrieve the Shared Secret. You can use an App-Specifi
 
 ![](../.gitbook/assets/appstore-shared-secret.png)
 
+
+
 ### 4. Install and Prepare with XCode
 
 When you only require iOS support, no need for special command line arguments:
@@ -113,7 +116,7 @@ Successful build? You're good to go!
 
 ### 5. Create In-App Products
 
-If you followed the [Setup AppStore Application](subscription-ios.md#3-setup-appstore-application) section, you should have everything setup. Head again to the App's In-App Purchases page: select your application, then _Features_, then _In-App Purchases_.
+If you followed the [Setup AppStore Application](#3-setup-appstore-application) section, you should have everything setup. Head again to the App's In-App Purchases page: select your application, then _Features_, then _In-App Purchases_.
 
 From there you can create your In-App Products. Select the appropriate type, fill in all required metadata and select _cleared for sale_.
 
@@ -127,11 +130,14 @@ The process is well explained by Apple, so I'll not enter into more details.
 
 In order to test your In-App Purchases during development, you should create some test users.
 
-You can do so from the AppStore Connect website, in the _Users & Access_ section. There in the sidebar, you should see "Sandbox &gt; Testers". If you don't, it means you don't have enough permissions to create sandbox testers, so ask your administrator.
+You can do so from the AppStore Connect website, in the _Users & Access_ section. There in the sidebar, you should see "Sandbox > Testers". If you don't, it means you don't have enough permissions to create sandbox testers, so ask your administrator.
 
 From there, it's just a matter of hitting "+" and filling the form. While you're at it, create 2-3 test users: it will be handy for testing.
 
 ![](../.gitbook/assets/appstore-test-users.png)
 
+
 ## Coding
+
+
 

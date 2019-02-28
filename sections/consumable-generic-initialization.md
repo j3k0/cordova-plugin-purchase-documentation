@@ -57,7 +57,7 @@ Here's a little explanation:
 
 **Lines 5-8**, we check if the plugin is loaded.
 
-**Lines 10-14**, we register the product with ID `consumable1`.  We declare it as a non-consumable \(`store.NON_CONSUMABLE`\). [⇒ API Documentation](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/api.md#registering-products).
+**Lines 10-14**, we register the product with ID `consumable1`. We declare it as a non-consumable \(`store.NON_CONSUMABLE`\). [⇒ API Documentation](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/api.md#registering-products).
 
 **Lines 16-18**, we setup an error handler. It just logs errors to the console.
 
@@ -90,7 +90,7 @@ We'll add a little more at `initStore()` function, line 20.
 store.when('my_consumable1').updated(refreshProductUI);
 ```
 
-Then define  the `refreshProduct()` function at the bottom of the file.
+Then define the `refreshProduct()` function at the bottom of the file.
 
 ```javascript
 function refreshProductUI(product) {
