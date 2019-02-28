@@ -1,9 +1,11 @@
 # Micro Example
 
-In-App Purchase involves a fair amount of configuration. In order to get a glipse at a "finished" integration, I'll show you here a minimal example with some screenshots.
+In-App Purchase involves a fair amount of configuration. In order to get a glimpse at a complete integration, you'll find here a minimal example and the expected result when run on a device.
 
-The example aims to run as a Cordova application. The index.html will load the below javascript. Note that it's a simple example that doesn't handle error cases, but it's fully functional. In-App Purchases don't have to be super hard!
+This example is a Cordova application. The `index.html` does nothing but load `js/index.js`.
 
+{% code-tabs %}
+{% code-tabs-item title="js/index.js" %}
 ```javascript
 document.addEventListener('deviceready', onDeviceReady);
 
@@ -41,13 +43,28 @@ function refreshUI() {
   </div>`;
 }
 ```
+{% endcode-tabs-item %}
+
+{% code-tabs-item title="index.html" %}
+```markup
+<!DOCTYPE html>
+<html>
+    <body>
+      <script type="text/javascript" src="cordova.js"></script>
+      <script type="text/javascript" src="js/index.js"></script>
+    </body>
+</html>
+```
+{% endcode-tabs-item %}
+{% endcode-tabs %}
 
 Launching this on a device...
 
-{% embed url="https://youtu.be/fLoVePrIhc4" %}
+{% embed url="https://youtu.be/fLoVePrIhc4" caption="" %}
 
 The project is on GitHub: [https://github.com/j3k0/cordova-purchase-micro-example](https://github.com/j3k0/cordova-purchase-micro-example)
 
-| ![](../.gitbook/assets/micro-example-1.jpg) | ![](../.gitbook/assets/micro-example-2.jpg) | ![](../.gitbook/assets/micro-example-3.jpg) | ![](../.gitboot/assets/micro-example-4.jpg) |
-| :--- | :--- | :--- | :--- |
+{% hint style="info" %}
+Note that it's a simple example that doesn't handle error cases, but it's fully functional. In-App Purchases don't have to be super hard!
+{% endhint %}
 

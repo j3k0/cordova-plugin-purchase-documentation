@@ -1,3 +1,4 @@
+# \(TODO\) Non-Renewing Subscription on Android
 
 We will proceed in steps: setup, initialization, presentation and purchase.
 
@@ -20,7 +21,6 @@ Once we have a Cordova application with IAP support enabled and everything is in
 2. Handle the purchase events
 3. Deliver our product
 4. Secure the transactions
-
 
 ## Setup
 
@@ -136,7 +136,7 @@ When you need Android support, you need to setup your `BILLING_KEY`.
 cordova plugin add cc.fovea.cordova.purchase  --variable BILLING_KEY="<BILLING_KEY>"
 ```
 
-You can find that piece of information on the Google Play Publisher Console, as [explained here](#retrieve-the-billing-key).
+You can find that piece of information on the Google Play Publisher Console, as [explained here](nr-subscription-android.md#retrieve-the-billing-key).
 
 Now let's try to build.
 
@@ -220,7 +220,7 @@ Back in the "Google Play Console", open the "Store presence" ⇒ "In-app product
 
 ![](../.gitbook/assets/google-play-in-app-products.png)
 
-If you haven't yet uploaded an APK, it'll warn you that you need to upload a *release* APK.
+If you haven't yet uploaded an APK, it'll warn you that you need to upload a _release_ APK.
 
 Once this is done, you can create a product. Google offers 2 kinds of products:
 
@@ -244,7 +244,7 @@ There's might be some delay between creating a product on the Google Play Consol
 
 To test your Google Play Billing implementation with actual in-app purchases, you must use a test account. By default, the only test account registered is the one that's associated with your developer account. You can register additional test accounts by using the Google Play Console.
 
-1. Navigate to Settings > Account details.
+1. Navigate to Settings &gt; Account details.
 2. In the License Testing section, add your tester's email addresses to Gmail accounts with testing access field.
 3. Save your changes.
 
@@ -252,7 +252,5 @@ To test your Google Play Billing implementation with actual in-app purchases, yo
 Testers can begin making purchases of your in-app products within 15 minutes.
 {% endhint %}
 
-
 ## Coding
-
 
