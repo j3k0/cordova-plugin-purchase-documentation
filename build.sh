@@ -18,6 +18,7 @@ for platform in android ios; do
   done
 done
 
+if false; then
 # Setup Android
 (
     echo "# Setup Android"
@@ -35,3 +36,4 @@ done
     echo
     cat ./sections/setup-ios-*.md
 ) > use-cases/setup-ios.md
+fi
