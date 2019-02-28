@@ -5,16 +5,16 @@ for platform in android ios; do
     (
       cat sections/$type-$platform-intro.md sections/generic-$platform-intro.md
       echo 
-      echo '# Setup'
+      echo '## Setup'
       echo
       cat ./sections/setup-$platform-*.md
       echo
-      echo '# Coding'
+      echo '## Coding'
       echo
       cat ./sections/$type-generic-initialization.md
       echo
       cat ./sections/$type-$platform.md
-    ) > guides/$type-$platform.md
+    ) > use-cases/$type-$platform.md
   done
 done
 
@@ -25,7 +25,7 @@ done
     echo "We will setup our Android application."
     echo
     cat ./sections/setup-android-*.md
-) > guides/setup-android.md
+) > use-cases/setup-android.md
 
 # Setup iOS
 (
@@ -34,4 +34,4 @@ done
     echo "We will setup our iOS application."
     echo
     cat ./sections/setup-ios-*.md
-) > guides/setup-ios.md
+) > use-cases/setup-ios.md

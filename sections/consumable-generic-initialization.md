@@ -1,5 +1,5 @@
 
-## Initialization
+### Initialization
 
 Assuming you're starting from a blank project, we'll add the minimal amount of HTML for the purpose of this tutorial. Let's replace the `<body>` from the `www/index.html` file with the below.
 
@@ -67,7 +67,7 @@ Here's a little explanation:
 Whatever your setup is, you should make sure this runs as soon as the javascript application starts. You have to be ready to handle IAP events as soon as possible.
 {% endhint %}
 
-## Presentation
+### Presentation
 
 For the sake of this tutorial's simplicity, let's store the user's number of gold coins in localStorage:`window.localStorage.goldCoins`
 
@@ -113,6 +113,6 @@ function refreshProductUI(product) {
 
 **Lines 7-8**, add the "Buy Now!" button if product can be purchased.
 
-If you want a bit more background information about this, please check the [Displaying Products ](../introduction/about-the-plugin.md#displaying-products)section and the [⇒ API Documentation](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/api.md#storeproduct-object) for full details about the fields found for a product.
+If you want a bit more background information about this, please check the [Displaying Products ](../discover/about-the-plugin.md#displaying-products)section and the [⇒ API Documentation](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/api.md#storeproduct-object) for full details about the fields found for a product.
 
 Let's build and test that!

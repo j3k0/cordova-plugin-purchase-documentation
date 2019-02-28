@@ -48,7 +48,6 @@ Launching this on a device...
 
 The project is on GitHub: [https://github.com/j3k0/cordova-purchase-micro-example](https://github.com/j3k0/cordova-purchase-micro-example)
 
-| !\[\]\(../assets/micro-example-1.jpg\) | !\[\]\(../assets/micro-example-2.jpg\) | !\[\]\(../assets/micro-example-3.jpg\) | !\[\]\(../assets/micro-example-4.jpg\) |
+| ![](../.gitbook/assets/micro-example-1.jpg) | ![](../.gitbook/assets/micro-example-2.jpg) | ![](../.gitbook/assets/micro-example-3.jpg) | ![](../.gitboot/assets/micro-example-4.jpg) |
 | :--- | :--- | :--- | :--- |
-
 

@@ -1,4 +1,3 @@
-# \(TODO\) Non-Consumable on Android
 
 We will proceed in steps: setup, initialization, presentation and purchase.
 
@@ -21,6 +20,7 @@ Once we have a Cordova application with IAP support enabled and everything is in
 2. Handle the purchase events
 3. Deliver our product
 4. Secure the transactions
+
 
 ## Setup
 
@@ -136,7 +136,7 @@ When you need Android support, you need to setup your `BILLING_KEY`.
 cordova plugin add cc.fovea.cordova.purchase  --variable BILLING_KEY="<BILLING_KEY>"
 ```
 
-You can find that piece of information on the Google Play Publisher Console, as [explained here](non-consumable-android.md#retrieve-the-billing-key).
+You can find that piece of information on the Google Play Publisher Console, as [explained here](#retrieve-the-billing-key).
 
 Now let's try to build.
 
@@ -216,27 +216,23 @@ Note that it might up to 24 hours for your IAP to work after you uploaded the fi
 
 There is still a bit more preparatory work: we need to setup our in-app product.
 
-Before creating your In-App Product, you have to [Create an Android Application](https://github.com/j3k0/cordova-plugin-purchase-documentation/tree/bb859549626b9bac5463d841a416de68e2d586ba/guides/google-play.md) first. Done already? Let's now setup our in-app product.
-
 Back in the "Google Play Console", open the "Store presence" ⇒ "In-app products" section.
 
 ![](../.gitbook/assets/google-play-in-app-products.png)
 
-If you haven't yet uploaded an APK, it'll warn you that you need to upload a Release APK. Here's how you [Build a Release APK](https://github.com/j3k0/cordova-plugin-purchase-documentation/tree/bb859549626b9bac5463d841a416de68e2d586ba/guides/android-release-apk.md) and [Upload it to Google Play](https://github.com/j3k0/cordova-plugin-purchase-documentation/tree/bb859549626b9bac5463d841a416de68e2d586ba/guides/google-play.md#upload-a-release-build).
+If you haven't yet uploaded an APK, it'll warn you that you need to upload a *release* APK.
 
 Once this is done, you can create a product. Google offers 2 kinds of products:
 
 * Managed Products
 * Subscriptions
 
-The latest is for auto-renewing subscriptions, in all other cases, you have to create a "Managed Product".
+The latest is for auto-renewing subscriptions, in all other cases, you should a "Managed Product".
 
 * Click the **CREATE** button.
 * Fill in all the required information \(title, description, prices\).
 * Make sure the Status is **ACTIVE**.
 * **SAVE**
-
-At the time of this writing, the purchase plugin doesn't yet support Introductory Prices for Subscription \(you can check the [status of the feature here](https://github.com/j3k0/cordova-plugin-purchase/issues/743)\), so you have to leave this out for now.
 
 And we're done!
 
@@ -248,7 +244,7 @@ There's might be some delay between creating a product on the Google Play Consol
 
 To test your Google Play Billing implementation with actual in-app purchases, you must use a test account. By default, the only test account registered is the one that's associated with your developer account. You can register additional test accounts by using the Google Play Console.
 
-1. Navigate to Settings &gt; Account details.
+1. Navigate to Settings > Account details.
 2. In the License Testing section, add your tester's email addresses to Gmail accounts with testing access field.
 3. Save your changes.
 
@@ -256,5 +252,7 @@ To test your Google Play Billing implementation with actual in-app purchases, yo
 Testers can begin making purchases of your in-app products within 15 minutes.
 {% endhint %}
 
+
 ## Coding
+
 

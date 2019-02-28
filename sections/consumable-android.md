@@ -1,5 +1,5 @@
 
-## Testing
+### Testing
 
 In-App Purchase on Android will only work on release builds, i.e. builds that are signed with the same certificate that the one you're using for APKs you upload on Google Play.
 
@@ -39,7 +39,7 @@ You can now make purchase with on of your test accounts.
 A test account can purchase an item in your product list only if the item is published.
 {% endhint %}
 
-## Purchase
+### Purchase
 
 Now that we have our purchase button, let's implement the `purchaseConsumable1` button.
 
@@ -51,7 +51,7 @@ function purchaseConsumable1() {
 
 Can it be easier than that? Well, not so fast! The code as it is won't do much with this order request. To process the purchase we have to implement the various steps of the purchase flow.
 
-I already introduced the purchase flow in the introduction, check the [Purchase process](../introduction/about-the-plugin.md#purchase-process) section if you need a refresher. The official documentation provides more details. [⇒ API Documentation](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/api.md#-purchasing) 
+I already introduced the purchase flow in the introduction, check the [Purchase process](../discover/about-the-plugin.md#purchase-process) section if you need a refresher. The official documentation provides more details. [⇒ API Documentation](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/api.md#-purchasing) 
 
 So the first thing that will happen is that the `canPurchase` state of the product will change to `false`. But remember, we added this in the previous step:
 

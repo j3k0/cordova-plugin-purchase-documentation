@@ -1,4 +1,4 @@
-## 6. Create Test Users
+### 6. Create Test Users
 
 In order to test your In-App Purchases during development, you should create some test users.
 
@@ -6,5 +6,5 @@ You can do so from the AppStore Connect website, in the _Users & Access_ section
 
 From there, it's just a matter of hitting "+" and filling the form. While you're at it, create 2-3 test users: it will be handy for testing.
 
-![](../assets/appstore-test-users.png)
+![](../.gitbook/assets/appstore-test-users.png)
 

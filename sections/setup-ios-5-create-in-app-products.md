@@ -1,6 +1,6 @@
-## 5. Create In-App Products
+### 5. Create In-App Products
 
-If you followed the [Setup AppStore Application](3.-create-app-store-application.md) page, you should have everything setup. Head again to the App's In-App Purchases page: select your application, then _Features_, then _In-App Purchases_.
+If you followed the [Setup AppStore Application](#3-setup-appstore-application) section, you should have everything setup. Head again to the App's In-App Purchases page: select your application, then _Features_, then _In-App Purchases_.
 
 From there you can create your In-App Products. Select the appropriate type, fill in all required metadata and select _cleared for sale_.
 

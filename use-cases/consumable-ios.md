@@ -1,7 +1,5 @@
 # Consumable on iOS
 
-## Consumable on iOS
-
 We will proceed in 4 steps: setup, initialization, presentation and purchase.
 
 Here what we'll do.
@@ -21,6 +19,7 @@ Once we have a Cordova iOS application with IAP support enabled and everything i
 2. Handle the purchase events
 3. Deliver our product
 4. Secure the transactions
+
 
 ## Setup
 
@@ -81,6 +80,8 @@ Since you are here, let's retrieve the Shared Secret. You can use an App-Specifi
 
 ![](../.gitbook/assets/appstore-shared-secret.png)
 
+
+
 ### 4. Install and Prepare with XCode
 
 When you only require iOS support, no need for special command line arguments:
@@ -113,7 +114,7 @@ Successful build? You're good to go!
 
 ### 5. Create In-App Products
 
-If you followed the [Setup AppStore Application](https://github.com/j3k0/cordova-plugin-purchase-documentation/tree/bb859549626b9bac5463d841a416de68e2d586ba/guides/3.-create-app-store-application.md) page, you should have everything setup. Head again to the App's In-App Purchases page: select your application, then _Features_, then _In-App Purchases_.
+If you followed the [Setup AppStore Application](#3-setup-appstore-application) section, you should have everything setup. Head again to the App's In-App Purchases page: select your application, then _Features_, then _In-App Purchases_.
 
 From there you can create your In-App Products. Select the appropriate type, fill in all required metadata and select _cleared for sale_.
 
@@ -127,13 +128,15 @@ The process is well explained by Apple, so I'll not enter into more details.
 
 In order to test your In-App Purchases during development, you should create some test users.
 
-You can do so from the AppStore Connect website, in the _Users & Access_ section. There in the sidebar, you should see "Sandbox &gt; Testers". If you don't, it means you don't have enough permissions to create sandbox testers, so ask your administrator.
+You can do so from the AppStore Connect website, in the _Users & Access_ section. There in the sidebar, you should see "Sandbox > Testers". If you don't, it means you don't have enough permissions to create sandbox testers, so ask your administrator.
 
 From there, it's just a matter of hitting "+" and filling the form. While you're at it, create 2-3 test users: it will be handy for testing.
 
 ![](../.gitbook/assets/appstore-test-users.png)
 
+
 ## Coding
+
 
 ### Initialization
 
@@ -182,7 +185,7 @@ function initStore() {
     store.error(function(error) {
         console.log('ERROR ' + error.code + ': ' + error.message);
     });
-
+    
     // ... MORE HERE SOON
 
     store.refresh();
@@ -193,7 +196,7 @@ Here's a little explanation:
 
 **Lines 5-8**, we check if the plugin is loaded.
 
-**Lines 10-14**, we register the product with ID `consumable1`. We declare it as a non-consumable \(`store.NON_CONSUMABLE`\). [⇒ API Documentation](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/api.md#registering-products).
+**Lines 10-14**, we register the product with ID `consumable1`.  We declare it as a non-consumable \(`store.NON_CONSUMABLE`\). [⇒ API Documentation](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/api.md#registering-products).
 
 **Lines 16-18**, we setup an error handler. It just logs errors to the console.
 
@@ -226,7 +229,7 @@ We'll add a little more at `initStore()` function, line 20.
 store.when('my_consumable1').updated(refreshProductUI);
 ```
 
-Then define the `refreshProduct()` function at the bottom of the file.
+Then define  the `refreshProduct()` function at the bottom of the file.
 
 ```javascript
 function refreshProductUI(product) {
@@ -253,6 +256,7 @@ If you want a bit more background information about this, please check the [Disp
 
 Let's build and test that!
 
+
 ### Testing
 
 To test with In-App Purchases enabled, I chose to run my app through Xcode. This way, I can see the logs from both the javascript and native sides, which is useful.
@@ -277,7 +281,7 @@ function purchaseConsumable1() {
 
 Can it be easier than that? Well, not so fast! The code as it is won't do much with this order request. To process the purchase we have to implement the various steps of the purchase flow.
 
-I already introduced the purchase flow in the introduction of this guide, check the [Purchase process](../discover/about-the-plugin.md#purchase-process) section if you need a refresher. The official documentation provides more details. [⇒ API Documentation](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/api.md#-purchasing)
+I already introduced the purchase flow in the introduction of this guide, check the [Purchase process](../discover/about-the-plugin.md#purchase-process) section if you need a refresher. The official documentation provides more details. [⇒ API Documentation](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/api.md#-purchasing) 
 
 So the first thing that will happen is that the `canPurchase` state of the product will change to `false`. But remember, we added this in the previous step:
 
@@ -319,7 +323,7 @@ For this tutorial, we will use Fovea's own service which is free during developm
 
 Copy this line inside the `initStore()` function, anywhere before the initial `store.refresh()`. Also add the recommended `Content-Security-Policy` to your `index.html` as mentioned in the documentation.
 
-Alright, we're done with coding! Let's try the whole thing now. Repeat the steps from the [Testing](consumable-ios.md#testing) section above:
+Alright, we're done with coding! Let's try the whole thing now. Repeat the steps from the [Testing](#testing) section above:
 
 ```text
 cordova prepare ios

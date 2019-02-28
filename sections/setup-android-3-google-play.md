@@ -1,8 +1,8 @@
-## 3. Create Google Play Application
+### 3. Create Google Play Application
 
 Make sure we have a Google Play application created and configured.
 
-## Create the App
+### Create the App
 
 * Open the [Google Play Console](https://play.google.com/apps/publish).
 * Click "Create Application", fill in the required fields.
@@ -11,7 +11,7 @@ Make sure we have a Google Play application created and configured.
 Need more help? I recommend you check [Google's own documentation](https://support.google.com/googleplay/android-developer/answer/113469?hl=en&ref_topic=7072031). It's well detailed, easy to follow and probably the most up-to-date resource you can find.
 {% endhint %}
 
-## Retrieve the Billing Key
+### Retrieve the Billing Key
 
 We need to inform the plugin of our app's `BILLING_KEY`. That piece of information can be found on the Google Play Publisher Console.
 

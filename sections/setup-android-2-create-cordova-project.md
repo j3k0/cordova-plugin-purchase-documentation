@@ -1,8 +1,8 @@
-## 2. Create Cordova Project
+### 2. Create Cordova Project
 
 Making sure we have a Cordova project that we can build for Android and/or iOS.
 
-### Create the project
+#### Create the project
 
 If it isn't already created:
 
@@ -25,7 +25,7 @@ Let's head into our cordova project's directory \(should match whatever we used 
 $ cd CordovaProject
 ```
 
-### Add Android platform
+#### Add Android platform
 
 ```text
 $ cordova platform add android

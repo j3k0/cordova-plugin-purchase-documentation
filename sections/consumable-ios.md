@@ -1,5 +1,5 @@
 
-## Testing
+### Testing
 
 To test with In-App Purchases enabled, I chose to run my app through Xcode. This way, I can see the logs from both the javascript and native sides, which is useful.
 
@@ -11,7 +11,7 @@ cordova prepare ios
 
 Then switch to Xcode and run.
 
-## Purchase
+### Purchase
 
 Now that we have our purchase button, let's implement the `purchaseConsumable1` button.
 
@@ -23,7 +23,7 @@ function purchaseConsumable1() {
 
 Can it be easier than that? Well, not so fast! The code as it is won't do much with this order request. To process the purchase we have to implement the various steps of the purchase flow.
 
-I already introduced the purchase flow in the introduction of this guide, check the [Purchase process](../introduction/about-the-plugin.md#purchase-process) section if you need a refresher. The official documentation provides more details. [⇒ API Documentation](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/api.md#-purchasing) 
+I already introduced the purchase flow in the introduction of this guide, check the [Purchase process](../discover/about-the-plugin.md#purchase-process) section if you need a refresher. The official documentation provides more details. [⇒ API Documentation](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/api.md#-purchasing) 
 
 So the first thing that will happen is that the `canPurchase` state of the product will change to `false`. But remember, we added this in the previous step:
 
@@ -65,7 +65,7 @@ For this tutorial, we will use Fovea's own service which is free during developm
 
 Copy this line inside the `initStore()` function, anywhere before the initial `store.refresh()`. Also add the recommended `Content-Security-Policy` to your `index.html` as mentioned in the documentation.
 
-Alright, we're done with coding! Let's try the whole thing now. Repeat the steps from the [Testing](consumable-ios.md#testing) section above:
+Alright, we're done with coding! Let's try the whole thing now. Repeat the steps from the [Testing](#testing) section above:
 
 ```text
 cordova prepare ios
