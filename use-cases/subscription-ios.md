@@ -2,6 +2,9 @@
 
 In this guide, we will build a small application with a subscription that works on iOS.
 
+On iOS, the plugin supports simple subscriptions and subscriptions groups. Introductory prices and promotional offers are supported yet.
+
+Let's dig into this.
 We will proceed in 4 steps: setup, initialization, presentation and purchase.
 
 Here what we'll do.
@@ -139,5 +142,220 @@ From there, it's just a matter of hitting "+" and filling the form. While you're
 
 ## Coding
 
+
+### Initialization
+
+Assuming you're starting from a blank project, we'll add the minimal amount of HTML for the purpose of this tutorial. Let's replace the `<body>` from the `www/index.html` file with the below.
+
+```markup
+<body>
+  <div class="app">
+    <p id="status">Loading...</p>
+    <div id="monthly-purchase">...</div>
+    <div id="yearly-purchase">...</div>
+  </div>
+  <script type="text/javascript" src="cordova.js"></script>
+  <script type="text/javascript" src="js/index.js"></script>
+</body>
+```
+
+Let's also make sure to comment out Cordova template project's CSS.
+
+You also need to enable the `'unsafe-inline'` `Content-Security-Policy` by adding it to the `default-src` section:
+
+```markup
+<meta http-equiv="Content-Security-Policy"
+      content="default-src 'self' 'unsafe-inline' [...]" />
+```
+
+If you're using [Fovea.Billing](https://billing.fovea.cc), you also need to add the validation server to your default-src, find it in the [cordova setup documentation](https://billing-dashboard.fovea.cc/setup/cordova)
+
+Let's now create (or edit) JavaScript file `js/index.js` and load it from `index.html`. The code below initializes the plugin.
+
+```javascript
+document.addEventListener('deviceready', initStore);
+
+function initStore() {
+
+    if (!window.store) {
+        console.log('Store not available');
+        return;
+    }
+
+    store.register([{
+        id:    'monthly',
+        type:   store.PAID_SUBSCRIPTION,
+    }, {
+        id:    'yearly',
+        type:   store.PAID_SUBSCRIPTION
+    });
+
+    store.validator = '<<< YOUR_RECEIPT_VALIDATION_URL >>>';
+
+    store.error(function(error) {
+        console.log('ERROR ' + error.code + ': ' + error.message);
+    });
+    
+    // ... MORE HERE SOON
+
+    store.refresh();
+}
+```
+
+Here's a little explanation:
+
+First, we check if the plugin is loaded.
+
+Then, we register the product with ID `monthly` and `yearly`. We declare it them as renewable subscriptions \(`store.PAID_SUBSCRIPTION`\). [⇒ API Documentation](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/api.md#registering-products).
+
+We setup the link to the receipt validation server. If you're using [Fovea.Billing](https://billing.fovea.cc), you'll [find it here](https://billing-dashboard.fovea.cc/setup/cordova).
+
+We define an error handler. It just logs errors to the console.
+
+Finally, we perform the initial `refresh()` of all product states. [⇒ API Documentation](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/api.md#registering-products).
+
+{% hint style="warning" %}
+Whatever your setup is, you should make sure this runs as soon as the javascript application starts. You have to be ready to handle IAP events as soon as possible.
+{% endhint %}
+
+### Presentation
+
+As a first step, we will simply display the subscription status as provided by the native platform.
+
+```javascript
+function refreshUI() {
+
+    function haveState(value) {
+        return store.get('subscription1').state === value || store.get('subscription2').state === value;
+    }
+    function setStateText(value) {
+        document.getElementById('status').textContent = value;
+    }
+
+    if (haveState('owned'))
+        setStateText('Subscribed');
+    else if (haveState('approved') || haveState('initiated'))
+        setStateText('Processing...');
+    else
+        setStateText('Not Subscribed');
+
+    refreshProduct('monthly');
+    refreshProduct('yearly');
+}
+
+document.addEventListener('deviceready', refreshUI);
+```
+
+This part was easy,. Now for a bit more challenge, let's display the title, description and price of the subscription products.
+
+We'll add a little more to the `initStore()` function, just before `store.refresh()`.
+
+```javascript
+store.when('subscription').updated(refreshUI);
+```
+
+Then define the `refreshProduct()` function at the bottom of the file.
+
+```javascript
+function refreshProduct(id) {
+    const product = store.get(id);
+    const el = document.getElementById(`${id}-purchase`);
+    const info = product.loaded
+        ? `title: ${product.title}<br/>` +
+          `desc: ${product.description}<br/>` +
+          `price: ${product.price}<br/>`
+        : '...';
+    const button = product.canPurchase
+         ? `<button onclick="store.order('${product.id}')">Buy Now!</button>`
+         : '';
+    el.htmlContent = info + button;
+}
+```
+
+The function checks if the product has been loaded, then retrieve and display the product informations.
+
+Then, it adds the "Buy Now!" button, only if the product can be purchased.
+
+If you want a bit more background information about this, please check the introduction's [displaying products](../discover/about-the-plugin.md#displaying-products) section and the [⇒ API Documentation](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/api.md#storeproduct-object) for full details about the fields found for a product.
+
+Now, let's build and test that!
+
+
+
+### Testing
+
+To test with In-App Purchases enabled, I chose to run my app through Xcode. This way, I can see the logs from both the javascript and native sides, which is useful.
+
+To make a build, first update the Xcode project on the console.
+
+```text
+cordova prepare ios
+```
+
+Then switch to Xcode and run.
+
+### Purchase
+
+Now that we have our purchase button, let's implement the `purchaseConsumable1` button.
+
+```javascript
+function purchaseConsumable1() {
+    store.order('my_consumable1');
+}
+```
+
+Can it be easier than that? Well, not so fast! The code as it is won't do much with this order request. To process the purchase we have to implement the various steps of the purchase flow.
+
+I already introduced the purchase flow in the introduction of this guide, check the [Purchase process](../discover/about-the-plugin.md#purchase-process) section if you need a refresher. The official documentation provides more details. [⇒ API Documentation](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/api.md#-purchasing) 
+
+So the first thing that will happen is that the `canPurchase` state of the product will change to `false`. But remember, we added this in the previous step:
+
+```javascript
+store.when('my_consumable1').updated(refreshProductUI);
+```
+
+So we're covered. The UI will be refreshed when `canPurchase` changes, it will not be possible to hit _Purchase_, until `canPurchase` becomes true again.
+
+When the user is done with the native interface \(enter his/her password and confirm\), you'll receive the `approved` event, let's handle it by adding the below to the `initStore()` function, before the call to `store.refresh()`.
+
+```javascript
+store.when('my_consumable1').approved(function(p) {
+    p.verify();
+});
+```
+
+```javascript
+store.when('my_consumable1').verified(finishPurchase);
+```
+
+Then we will add the `finishPurchase` function at the end of our JavaScript file.
+
+```javascript
+function finishPurchase(p) {
+    window.localStorage.goldCoins += 10;
+    refreshGoldCoinsUI();
+    p.finish();
+}
+```
+
+This is a good enough implementation, but let's go one step further and setup a receipt validator. This is optional, but it prevents the easiest for of hacking, so generally a good idea.
+
+For this tutorial, we will use Fovea's own service which is free during development. You can implement your own receipt validation service later if you like.
+
+1. Head to [https://billing.fovea.cc/](https://billing.fovea.cc/) and create an Account.
+2. Setup your project's iOS bundle ID and shared secret, Save.
+3. Go to the [Cordova Setup](https://billing-dashboard.fovea.cc/setup/cordova) page to copy the line `store.validator = "<something>"`.
+
+Copy this line inside the `initStore()` function, anywhere before the initial `store.refresh()`. Also add the recommended `Content-Security-Policy` to your `index.html` as mentioned in the documentation.
+
+Alright, we're done with coding! Let's try the whole thing now. Repeat the steps from the [Testing](#testing) section above:
+
+```text
+cordova prepare ios
+```
+
+Run from Xcode and here you go!
+
+Full source for this tutorial is available here: [https://gist.github.com/j3k0/3324bb8e759fef4b3054b834a5a88500](https://gist.github.com/j3k0/3324bb8e759fef4b3054b834a5a88500)
 
 

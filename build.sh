@@ -8,6 +8,7 @@ for platform in android ios; do
       echo '## Setup'
       echo
       cat ./sections/setup-$platform-*.md
+      cat ./sections/setup-$type-$platform-*.md
       echo
       echo '## Coding'
       echo
