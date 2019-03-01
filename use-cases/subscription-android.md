@@ -340,14 +340,18 @@ Whatever your setup is, you should make sure this runs as soon as the javascript
 As a first step, we will simply display the subscription status as provided by the native platform.
 
 ```javascript
-function refreshUI() {
+// does one of our product have the given state
+function haveState(value) {
+    return store.get('subscription1').state === value || store.get('subscription2').state === value;
+}
 
-    function haveState(value) {
-        return store.get('subscription1').state === value || store.get('subscription2').state === value;
-    }
-    function setStateText(value) {
-        document.getElementById('status').textContent = value;
-    }
+// change the displayed state text in the DOM
+function setStateText(value) {
+    document.getElementById('status').textContent = value;
+}
+
+// full refresh of the UI
+function refreshUI() {
 
     if (haveState('owned'))
         setStateText('Subscribed');
@@ -368,10 +372,12 @@ This part was easy,. Now for a bit more challenge, let's display the title, desc
 We'll add a little more to the `initStore()` function, just before `store.refresh()`.
 
 ```javascript
-store.when('subscription').updated(refreshUI);
+store.when('product').updated(refreshUI);
 ```
 
-Then define the `refreshProduct()` function at the bottom of the file.
+This will call `refreshUI()` whenever any product is updated.
+
+Then let's define the `refreshProduct()` function at the bottom of the file.
 
 ```javascript
 function refreshProduct(id) {
