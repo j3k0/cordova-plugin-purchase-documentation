@@ -12,12 +12,8 @@
 
 * [Consumable on Android](use-cases/consumable-android.md)
 * [Consumable on iOS](use-cases/consumable-ios.md)
-* [\(TODO\) Non-Consumable on Android](use-cases/non-consumable-android.md)
-* [\(TODO\) Non-Consumable on iOS](use-cases/non-consumable-ios.md)
-* [\(TODO\) Auto-Renewing Subscription on Android](use-cases/subscription-android.md)
-* [\(TODO\) Auto-Renewing Subscription on iOS](use-cases/subscription-ios.md)
-* [\(TODO\) Non-Renewing Subscription on Android](use-cases/nr-subscription-android.md)
-* [\(TODO\) Non-Renewing Subscription on iOS](use-cases/nr-subscription-ios.md)
+* [Auto-Renewing Subscription on Android](use-cases/subscription-android.md)
+* [Auto-Renewing Subscription on iOS](use-cases/subscription-ios.md)
 
 ## Documentation
 
