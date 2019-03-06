@@ -10,23 +10,6 @@ Assuming you're starting from a blank project, we'll add the minimal amount of H
   <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://reeceipt-validator.fovea.cc 'unsafe-eval' 'unsafe-inline' gap:; style-src 'self' 'unsafe-inline'; media-src *">
 </head>
 <body style="margin-top: 50px">
-  <div class="app">
-
-    <!-- We'll show errors here -->
-    <div id="error"><br/></div>
-
-    <!-- Status of the subscription -->
-    <p id="status">Loading...</p>
-
-    <!-- Details about the "s1" and "s2" products -->
-    <div id="s1-purchase" style="margin-top: 30px">...</div>
-    <div id="s2-purchase" style="margin-top: 30px">...</div>
-
-    <!-- Open the platforms' subscription management screen -->
-    <button onclick="store.manageSubscriptions()" style="margin-top: 30px">
-      Manage Subscriptions
-    </button>
-  </div>
   <script type="text/javascript" src="cordova.js"></script>
   <script type="text/javascript" src="js/index.js"></script>
 </body>
@@ -35,59 +18,81 @@ Assuming you're starting from a blank project, we'll add the minimal amount of H
 
 Make sure to comment out Cordova template project's CSS.
 
-We enabled the `'unsafe-inline'` `Content-Security-Policy` by adding it to the `default-src` section:
+We enabled the `'unsafe-inline'` `Content-Security-Policy` by adding it to the `default-src` section.
 
-```markup
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' [...]" />
-```
+Since we'll be using [Fovea.Billing](https://billing.fovea.cc), you also need to add your validation server to default-src, find your in the [cordova setup documentation](https://billing-dashboard.fovea.cc/setup/cordova). On my case it's `https://reeceipt-validation.fovea.cc`.
 
-Since we're using [Fovea.Billing](https://billing.fovea.cc), you also need to add the validation server to your default-src, find it in the [cordova setup documentation](https://billing-dashboard.fovea.cc/setup/cordova)
+Let's now or edit the JavaScript file `js/index.js`. Replace the content with the code below, which will setup a minimal application framework and render some HTML into the page based on the app state.
 
-Let's now create (or edit) JavaScript file `js/index.js` and load it from `index.html`. The code below initializes the plugin.
 
 ```javascript
 document.addEventListener('deviceready', onDeviceReady);
 
 function onDeviceReady() {
 
+    const state = {};
+    function setState(attr) {
+        Object.assign(state, attr);
+        render(state);
+    }
+
+    setState({
+        error: '',
+        status: 'Loading...',
+        product1: {},
+        product2: {},
+    });
+
+    // We will initialize the in-app purchase plugin here.
+
+    function render() {
+
+        const body = document.getElementsByTagName('body')[0];
+        body.innerHTML = `
+<pre> 
+${state.error}
+
+subscription: ${state.status}
+</pre>
+        `;
+    }
+}
+```
+
+Now let's initialize the in-app purchase plugin, where indicated in the `onDeviceReady` function.
+
+```javascript
+
     // We should first register all our products or we cannot use them in the app.
     store.register([{
-        alias: 's1',
         id:    'my_subscription1',
         type:   store.PAID_SUBSCRIPTION,
     }, {
-        alias: 's2',
         id:    'my_subscription2',
         type:   store.PAID_SUBSCRIPTION,
     }]);
 
-    // For subscriptions and secured transactions, we setup a receipt validator.
+    // Setup the receipt validator service.
     store.validator = '<<< YOUR_RECEIPT_VALIDATION_URL >>>';
 
-    // Show errors on the dedicated Div.
+    // Show errors for 10 seconds.
     store.error(function(error) {
-      document.getElementById('error').textContent = `ERROR ${error.code}: ${error.message}`;
-      setTimeout(() => {
-        document.getElementById('error').innerHTML = '<br/>';
-      }, 10000);
+        setState({ error: `ERROR ${error.code}: ${error.message}` });
+        setTimeout(function() {
+            setState({ error: `` });
+        }, 10000);
     });
 
-    // Later, we will add events handlers here
+    // Later, we will add our events handlers here
 
     // Load informations about products and purchases
     store.refresh();
-
-    // Later, we will render the page from here
 }
 ```
 
 Here's a little explanation:
 
-We start by registering the product with ID `my_subscription1` and `my_subscription2`, giving them the aliases `s1` and `s2`.
-
-{% hint style="info" %}
-Using aliases is optional, but generally a good idea. This way, you can modify the product ID in the registration call without changing it anywhere else.
-{% endhint %}
+We start by registering the product with ID `my_subscription1` and `my_subscription2`.
 
 We declare the products as renewable subscriptions \(`store.PAID_SUBSCRIPTION`\). [⇒ API Documentation](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/api.md#registering-products).
 
@@ -98,100 +103,101 @@ We setup an error handler. It will display the last error message for 10 seconds
 Finally, we perform the initial `refresh()` of all product states. [⇒ API Documentation](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/api.md#registering-products).
 
 {% hint style="warning" %}
-Whatever your setup is, you should make sure the initialization code runs as soon as the javascript application starts. You have to be ready to handle IAP events as soon as possible.
+Whatever your setup is, you should make sure the initialization code is executed as soon as the javascript application starts. You have to be ready to handle IAP events as soon as possible.
 {% endhint %}
 
 ### Presentation
 
-As a first step, we will simply display the subscription status as provided by the native platform.
+Let's now display the subscription status, as it is provided by the native platform. Before the call to `store.refresh()` we will add an handler for the `update` event:
+
+This hander is called whenever there's a change in our products' state.
 
 ```javascript
-function onDeviceReady() {
+// Called when any subscription product is updated
+store.when('subscription').updated(function() {
+    const product1 = store.get('my_subscription1') || {};
+    const product2 = store.get('my_subscription2') || {};
 
-    // [...] (stuff already in place from above)
+    let status = 'Please subscribe below';
+    if (product1.owned || product2.owned)
+        status = 'Subscribed';
+    else if (product1.state === 'approved' || product2.state === 'approved')
+        status = 'Processing...';
 
-    // Updates the user interface to reflect the initial state
-    renderUI();
-}
+    setState({ product1, product2, status });
+});
+```
 
-// Perform a full render of the user interface
-function renderUI() {
+Now we can display some information about our products from the `render()` function:
 
-    // When either of our susbscription products is owned, display "Subscribed".
-    // If one of them is being purchased or validated, display "Processing".
-    // In all other cases, display "Not Subscribed".
-    if (haveState('owned'))
-        document.getElementById('status').textContent = 'Subscribed';
-    else if (haveState('approved') || haveState('initiated'))
-        document.getElementById('status').textContent = 'Processing...';
-    else
-        document.getElementById('status').textContent = 'Not Subscribed';
+```javascript
+function render() {
 
-    // Render the products' DOM elements "s1-purchase" and "s2-purchase"
-    renderProductUI('s1');
-    renderProductUI('s2');
+    const purchaseProduct1 = '';
+    const purchaseProduct2 = '';
 
-    // Does any our product has the given state?
-    function haveState(value) {
-        return getState('s2') === value || getState('s1') === value;
+    const body = document.getElementsByTagName('body')[0];
+    body.innerHTML = `
+<pre> 
+${state.error}
 
-        function getState(id) {
-            return store.get(id) ? store.get(id).state : '';
-        }
-    }
+subscription: ${state.status}
+
+id:     ${state.product1.id          || ''}
+title:  ${state.product1.title       || ''}
+state:  ${state.product1.state       || ''}
+descr:  ${state.product1.description || ''}
+price:  ${state.product1.price       || ''}
+expiry: ${state.product1.expiryDate  || ''}
+</pre>
+${purchaseProduct1}
+<pre>
+
+id:     ${state.product2.id          || ''}
+title:  ${state.product2.title       || ''}
+descr:  ${state.product2.description || ''}
+price:  ${state.product2.price       || ''}
+state:  ${state.product2.state       || ''}
+expiry: ${state.product2.expiryDate  || ''}
+</pre>
+${purchaseProduct2}
+    `;
 }
 ```
 
-This will update the status of the subscription on screen, let's now define the function that displays the details about our subscription products: titles, descriptions, and prices.
-
-```javascript
-// Refresh the displayed details about a product in the DOM
-function renderProductUI(alias) {
-
-    // Retrieve the product in the store and make sure it exists
-    const product = store.get(alias);
-    if (!product) return;
-
-    // Create and update the HTML content
-    const info = product.loaded
-        ? `title: ${product.title}<br/>` +
-          `desc: ${product.description}<br/>` +
-          `price: ${product.price}<br/>` +
-          `state: ${product.state}<br/>`
-        : '...';
-    const button = product.canPurchase
-        ? `<button style="margin:20px 0" onclick="store.order('${product.id}')">Buy Now!</button>`
-        : '';
-    document.getElementById(`${alias}-purchase`).innerHTML = info + button;
-}
-```
-
-A bit of explanation:
-
- 1. we retrieve the product from its alias.
- 2. when the product have been loaded, we show the metadata (title, description, price, state).
- 3. we show the button if the product can be purchased.
+Whenever anything happens to our product, the interface will now be updated to reflect the current state.
 
 {% hint style="warning" %}
-Displaying your product information this way, i.e. exactly as loaded from the AppStore, is required by Apple. Do otherwise and they might simply reject your application.
+Displaying your product information this way, i.e. exactly as loaded from the Store, is required by Apple and Google. Do otherwise and they might simply reject your application.
 {% endhint %}
 
-{% hint style="warning" %}
-    The buy button `product.canPurchase` should only be displayed when `product.canPurchase` is true. Otherwise, calling `store.order()` will generate an error.
+{% hint style="hint" %}
+You can also disconnect the event handler with `store.off()` so your subscription view is only updated when it's visible.
 {% endhint %}
 
-Finally, we need to make sure that the view is re-rendered each time there's a change in our products' state. Do do so we'll attach an handler to the `updated` event.
+If you want a bit more background information about all of this, please check the introduction's [displaying products](../discover/about-the-plugin.md#displaying-products) section and the [⇒ API Documentation](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/api.md#storeproduct-object) for full details about the fields found for a product.
 
-In our `onDeviceReady()` function, just before the call to `store.refresh()`.
+### Purchase
+
+So far so good, but what if we could actually initiate a purchase? To do so, we'll add a purchase button for both products. We already added placeholders for the purchase buttons, let's create them. Before displaying a purchase button, we need to make sure the user can actually purchase the item. It could be impossible for a few reasons: there's already a purchase in progress, the product is already owned, the feature is disabled for the user (Child Mode).
+
+In our `render()` function, we update the code that initialized `purchaseProduct1` and `purchaseProduct2`.
 
 ```javascript
-store.when('subscription')
-     .updated(renderUI);
+// button for product 1
+const purchaseProduct1 = state.product1.canPurchase
+    ? `<button onclick="store.order('my_subscription1')">Subscribe</button>` : '';
+
+// same for product 2
+const purchaseProduct2 = state.product2.canPurchase
+    ? `<button onclick="store.order('my_subscription2')">Subscribe</button>` : '';
 ```
 
-Whenever anything changes with our product, the interface will be updated.
+{% hint style="warning" %}
+    The buy button should only be displayed when `product.canPurchase` is true. Otherwise, calling `store.order()` will generate an error.
+{% endhint %}
 
-If you want a bit more background information about this, please check the introduction's [displaying products](../discover/about-the-plugin.md#displaying-products) section and the [⇒ API Documentation](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/api.md#storeproduct-object) for full details about the fields found for a product.
+We could make this a little nicer by changing the button labels to "Upgrade" or "Downgrade" when the other product is `owned`, I will let this as an exercise to the reader.
 
-Now, let's build and test that!
+Now, let's build and test!
 
