@@ -1,6 +1,7 @@
 # Table of contents
 
-* [Introduction](README.md)
+* [Home](README.md)
+* [Introduction](introduction.md)
 
 ## Discover
 
