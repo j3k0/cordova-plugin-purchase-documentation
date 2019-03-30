@@ -1,9 +1,5 @@
 # Introduction
 
-![](.gitbook/assets/banner.jpg)
-
-## Introduction
-
 Hello reader! You're about to add In-App Purchases to your Cordova Application, let this be your guide in the process.
 
 I'm Jean-Christophe Hoelt, from Fovea, main developer of the In-App Purchase plugin. I built this guide for you as a collection of step-by-step recipes, each focusing on one specific goal. As soon as you know what your goal is, I will try to explain all the required steps to achieve it. I'll also give you general details about what the In-App Purchase technology is, how it works and what it can do for you.
