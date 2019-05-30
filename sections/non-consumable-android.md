@@ -45,7 +45,7 @@ Now that we have our purchase button, let's implement the `purchaseNonConsumable
 
 ```javascript
 function purchaseNonConsumable1() {
-    store.order('my_non_consumable1');
+    store.order('nonconsumable1');
 }
 ```
 
@@ -56,7 +56,7 @@ I already introduced the purchase flow in the introduction, check the [Purchase 
 So the first thing that will happen is that the `canPurchase` state of the product will change to `false`. But remember, we added this in the previous step:
 
 ```javascript
-store.when('my_non_consumable1 updated', refreshProductUI);
+store.when('nonconsumable1 updated', refreshProductUI);
 ```
 
 So we're covered. The UI will be refreshed when `canPurchase` changes.
@@ -64,13 +64,13 @@ So we're covered. The UI will be refreshed when `canPurchase` changes.
 When the user is done with the native interface \(enter his/her password and confirm\), you'll receive the `approved` event, let's handle it by adding the below to the `initStore()` function, before the call to `store.refresh()`.
 
 ```javascript
-store.when('my_non_consumable1 approved', function(p) {
+store.when('nonconsumable1 approved', function(p) {
     p.verify();
 });
 ```
 
 ```javascript
-store.when('my_non_consumable1 verified', finishPurchase);
+store.when('nonconsumable1 verified', finishPurchase);
 ```
 
 Then we will add the `finishPurchase` function at the end of our JavaScript file.

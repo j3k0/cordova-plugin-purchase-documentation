@@ -12,6 +12,7 @@
 ## Use Cases
 
 * [Non Consumable on Android](use-cases/non-consumable-android.md)
+* [Non Consumable on iOS](use-cases/non-consumable-ios.md)
 * [Consumable on Android](use-cases/consumable-android.md)
 * [Consumable on iOS](use-cases/consumable-ios.md)
 * [Auto-Renewing Subscription on Android](use-cases/subscription-android.md)
