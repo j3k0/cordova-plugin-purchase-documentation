@@ -480,6 +480,6 @@ Alright, we're done with coding! Let's try the whole thing now. We will repeat t
 
 Here we go. Let's try to purchase from the app, make sure you are using one of the test account.
 
-The full source for this tutorial is available here: [https://gist.github.com/j3k0/3324bb8e759fef4b3054b834a5a88500](https://gist.github.com/j3k0/3324bb8e759fef4b3054b834a5a88500)
+The full source for this tutorial is available here: [https://gist.github.com/j3k0/372440b2e9e250f318e669bb94947003](https://gist.github.com/j3k0/372440b2e9e250f318e669bb94947003)
 
 
