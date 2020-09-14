@@ -1,5 +1,19 @@
 #!/bin/bash
 
+echo
+echo "##############################"
+echo "#                            #"
+echo "# usage: ./build.js [--help] #"
+echo "#                            #"
+echo "##############################"
+echo
+
+if [ "x$1" == "x--help" ]; then
+  echo "./build.js will generate the files in ./use-cases/ from files in ./sections/"
+  echo
+  exit 0
+fi
+
 for platform in android ios; do
   for type in consumable subscription non-consumable nr-subscription; do
     (
@@ -38,3 +52,9 @@ if false; then
     cat ./sections/setup-ios-*.md
 ) > use-cases/setup-ios.md
 fi
+
+echo
+echo "########"
+echo "# done #"
+echo "########"
+echo
