@@ -26,7 +26,7 @@ I already introduced the purchase flow in the introduction of this guide, you ca
 When the user is done with the native interface \(i.e. has entered his/her password and confirmed\), your app receives the `approved` event. So let's add more handlers to the `onDeviceReady()` function, before the call to `store.refresh()`.
 
 ```javascript
-store.when('subscription')
+store.when()
      .approved(p => p.verify())
      .verified(p => p.finish())
      .owned(p => console.log(`you now own ${p.alias}`));
@@ -81,6 +81,11 @@ function onDeviceReady() {
             setState({ error: `` });
         }, 10000);
     });
+
+    store.when()
+        .approved(p => p.verify())
+        .verified(p => p.finish())
+        .owned(p => console.log(`you now own ${p.alias}`));
 
     // Called when any subscription product is updated
     store.when('subscription').updated(function() {
