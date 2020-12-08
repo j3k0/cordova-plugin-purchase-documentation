@@ -87,7 +87,7 @@ Since you are here, let's retrieve the Shared Secret. You can use an App-Specifi
 When you only require iOS support, no need for special command line arguments:
 
 ```text
-$ cordova plugin add cc.fovea.cordova.purchase
+$ cordova plugin add cordova-plugin-purchase
 ```
 
 You then have to activate the In-App Purchase capability manually for your application using Xcode. Unfortunately it's not something the plugin can do automatically. So let's first prepare the iOS project:
