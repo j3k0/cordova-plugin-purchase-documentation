@@ -462,4 +462,7 @@ We could make this a little nicer by changing the button labels to "Upgrade" or 
 
 Now, let's build and test!
 
+### Extra step for Android
+
+If using the [Fovea validation service](https://billing.fovea.cc/), expiryDate and some other features of the API for an autorenewing Android subscription will only be available if you complete the 'Connect With Google' step using the explainer [here](https://billing.fovea.cc/documentation/connect-with-google-publisher-api/)
 
