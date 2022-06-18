@@ -122,9 +122,9 @@ So head again to your [Google Play Console](https://play.google.com/apps/publish
 
 In the "_All Applications_" menu, go to the application you want to setup. In my case "_Cordova Purchase Demo_".
 
-From there, find the "_Developments tools_" ⇒ "_Services & APIs_" section \(on the left-side panel\).
+From there, find the "_Monetization setup_" section \(on the left-side panel\).
 
-That is where you'll find this long Base64 string they call "**Your license key for this application**". Keep it around for later reference. That's your **Billing Key**.
+Under **Licensing**, you'll find this long Base64 string (an RSA public key). Keep it around for later reference. That's your **Billing Key**.
 
 {% hint style="info" %}
 The Billing Key will be required to install the plugin on Android and setup receipt validation.
