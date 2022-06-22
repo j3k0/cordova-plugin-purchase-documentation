@@ -365,10 +365,13 @@ const purchaseProduct2 = state.product2.canPurchase
     The buy button should only be displayed when `product.canPurchase` is true. Otherwise, calling `store.order()` will generate an error.
 {% endhint %}
 
-We could make this a little nicer by changing the button labels to "Upgrade" or "Downgrade" when the other product is `owned`, I will let this as an exercise to the reader.
+We could make this a little nicer by changing the button labels to "Upgrade" or "Downgrade" when the other product is `owned`, I will leave this as an exercise to the reader.
 
 Now, let's build and test!
 
+### Extra step for Android
+
+If using the [Fovea validation service](https://billing.fovea.cc/), `expiryDate` and some other features of the API for an auto-renewing Android subscription will only be available if you complete the _"Connect With Google"_ step using the explainer [here](https://billing.fovea.cc/documentation/connect-with-google-publisher-api/).
 
 
 ### Testing

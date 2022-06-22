@@ -124,7 +124,7 @@ In the "_All Applications_" menu, go to the application you want to setup. In my
 
 From there, find the "_Monetization setup_" section \(on the left-side panel\).
 
-Under **Licensing**, you'll find this long Base64 string (an RSA public key). Keep it around for later reference. That's your **Billing Key**.
+Under **Licensing**, you'll find this long Base64-encoded string (an RSA public key). Keep it around for later reference. That's your **Billing Key**.
 
 {% hint style="info" %}
 The Billing Key will be required to install the plugin on Android and setup receipt validation.
@@ -464,5 +464,5 @@ Now, let's build and test!
 
 ### Extra step for Android
 
-If using the [Fovea validation service](https://billing.fovea.cc/), expiryDate and some other features of the API for an autorenewing Android subscription will only be available if you complete the 'Connect With Google' step using the explainer [here](https://billing.fovea.cc/documentation/connect-with-google-publisher-api/)
+If using the [Fovea validation service](https://billing.fovea.cc/), `expiryDate` and some other features of the API for an auto-renewing Android subscription will only be available if you complete the _"Connect With Google"_ step using the explainer [here](https://billing.fovea.cc/documentation/connect-with-google-publisher-api/).
 
