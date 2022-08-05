@@ -462,6 +462,11 @@ We could make this a little nicer by changing the button labels to "Upgrade" or 
 
 Now, let's build and test!
 
+### Extra step for Android
+
+If using the [Fovea validation service](https://billing.fovea.cc/), `expiryDate` and some other features of the API for an auto-renewing Android subscription will only be available if you complete the _"Connect With Google"_ step using the explainer [here](https://billing.fovea.cc/documentation/connect-with-google-publisher-api/).
+
+
 ### Testing
 
 To test on Android with In-App Purchases enabled, I always chose to run my app through Android Studio. This way, I can see the logs from both the javascript and native sides, which is useful.
@@ -620,8 +625,4 @@ ${purchaseProduct2}
 ```
 {% endcode-tabs-item %}
 {% endcode-tabs %}
-
-### Extra step for Android
-
-If using the [Fovea validation service](https://billing.fovea.cc/), `expiryDate` and some other features of the API for an auto-renewing Android subscription will only be available if you complete the _"Connect With Google"_ step using the explainer [here](https://billing.fovea.cc/documentation/connect-with-google-publisher-api/).
 
