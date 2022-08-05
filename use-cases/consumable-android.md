@@ -122,9 +122,9 @@ So head again to your [Google Play Console](https://play.google.com/apps/publish
 
 In the "_All Applications_" menu, go to the application you want to setup. In my case "_Cordova Purchase Demo_".
 
-From there, find the "_Developments tools_" ⇒ "_Services & APIs_" section \(on the left-side panel\).
+From there, find the "_Monetization setup_" section \(on the left-side panel\).
 
-That is where you'll find this long Base64 string they call "**Your license key for this application**". Keep it around for later reference. That's your **Billing Key**.
+Under **Licensing**, you'll find this long Base64-encoded string (an RSA public key). Keep it around for later reference. That's your **Billing Key**.
 
 {% hint style="info" %}
 The Billing Key will be required to install the plugin on Android and setup receipt validation.
@@ -318,7 +318,7 @@ Here's a little explanation:
 
 **Lines 5-8**, we check if the plugin is loaded.
 
-**Lines 10-14**, we register the product with ID `consumable1`. We declare it as a non-consumable \(`store.NON_CONSUMABLE`\). [⇒ API Documentation](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/api.md#registering-products).
+**Lines 10-14**, we register the product with ID `consumable1`. We declare it as a consumable \(`store.CONSUMABLE`\). [⇒ API Documentation](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/api.md#registering-products).
 
 **Lines 16-18**, we setup an error handler. It just logs errors to the console.
 

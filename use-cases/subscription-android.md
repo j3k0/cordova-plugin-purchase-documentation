@@ -122,9 +122,9 @@ So head again to your [Google Play Console](https://play.google.com/apps/publish
 
 In the "_All Applications_" menu, go to the application you want to setup. In my case "_Cordova Purchase Demo_".
 
-From there, find the "_Developments tools_" ⇒ "_Services & APIs_" section \(on the left-side panel\).
+From there, find the "_Monetization setup_" section \(on the left-side panel\).
 
-That is where you'll find this long Base64 string they call "**Your license key for this application**". Keep it around for later reference. That's your **Billing Key**.
+Under **Licensing**, you'll find this long Base64-encoded string (an RSA public key). Keep it around for later reference. That's your **Billing Key**.
 
 {% hint style="info" %}
 The Billing Key will be required to install the plugin on Android and setup receipt validation.
@@ -458,7 +458,7 @@ const purchaseProduct2 = state.product2.canPurchase
     The buy button should only be displayed when `product.canPurchase` is true. Otherwise, calling `store.order()` will generate an error.
 {% endhint %}
 
-We could make this a little nicer by changing the button labels to "Upgrade" or "Downgrade" when the other product is `owned`, I will let this as an exercise to the reader.
+We could make this a little nicer by changing the button labels to "Upgrade" or "Downgrade" when the other product is `owned`, I will leave this as an exercise to the reader.
 
 Now, let's build and test!
 
@@ -620,4 +620,8 @@ ${purchaseProduct2}
 ```
 {% endcode-tabs-item %}
 {% endcode-tabs %}
+
+### Extra step for Android
+
+If using the [Fovea validation service](https://billing.fovea.cc/), `expiryDate` and some other features of the API for an auto-renewing Android subscription will only be available if you complete the _"Connect With Google"_ step using the explainer [here](https://billing.fovea.cc/documentation/connect-with-google-publisher-api/).
 

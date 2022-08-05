@@ -365,10 +365,13 @@ const purchaseProduct2 = state.product2.canPurchase
     The buy button should only be displayed when `product.canPurchase` is true. Otherwise, calling `store.order()` will generate an error.
 {% endhint %}
 
-We could make this a little nicer by changing the button labels to "Upgrade" or "Downgrade" when the other product is `owned`, I will let this as an exercise to the reader.
+We could make this a little nicer by changing the button labels to "Upgrade" or "Downgrade" when the other product is `owned`, I will leave this as an exercise to the reader.
 
 Now, let's build and test!
 
+### Extra step for Android
+
+If using the [Fovea validation service](https://billing.fovea.cc/), `expiryDate` and some other features of the API for an auto-renewing Android subscription will only be available if you complete the _"Connect With Google"_ step using the explainer [here](https://billing.fovea.cc/documentation/connect-with-google-publisher-api/).
 
 
 ### Testing
@@ -391,7 +394,7 @@ We already added a "Buy" button. This button calls the `store.order()` method wh
 
 At this point, the code starts the process but the purchase will remain "processing" forever, in the `approved` state.
 
-For a product in the `approved` state, the transaction has been approved by the user's banking institurion but it won't be finalized until you inform them to do so. You have to deliver whatever the user purchased before finalizing.
+For a product in the `approved` state, the transaction has been approved by the user's banking institution but it won't be finalized until you inform them to do so. You have to deliver whatever the user purchased before finalizing.
 
 I already introduced the purchase flow in the introduction of this guide, you can check the [purchase process](../discover/about-the-plugin.md#purchase-process) section if you need a refresher. The official documentation provides even more details. [⇒ API Documentation](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/api.md#-purchasing) 
 

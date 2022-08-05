@@ -196,7 +196,7 @@ Here's a little explanation:
 
 **Lines 5-8**, we check if the plugin is loaded.
 
-**Lines 10-14**, we register the product with ID `consumable1`. We declare it as a non-consumable \(`store.NON_CONSUMABLE`\). [⇒ API Documentation](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/api.md#registering-products).
+**Lines 10-14**, we register the product with ID `consumable1`. We declare it as a consumable \(`store.CONSUMABLE`\). [⇒ API Documentation](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/api.md#registering-products).
 
 **Lines 16-18**, we setup an error handler. It just logs errors to the console.
 
