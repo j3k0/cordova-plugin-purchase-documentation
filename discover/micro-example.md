@@ -4,8 +4,8 @@ In-App Purchase involves a fair amount of configuration. In order to get a glimp
 
 This example is a Cordova application. The `index.html` does nothing but load `js/index.js`.
 
-{% code-tabs %}
-{% code-tabs-item title="js/index.js" %}
+### js/index.js
+
 ```javascript
 document.addEventListener('deviceready', onDeviceReady);
 
@@ -52,9 +52,9 @@ function refreshUI() {
   </div>`;
 }
 ```
-{% endcode-tabs-item %}
 
-{% code-tabs-item title="index.html" %}
+### index.html
+
 ```markup
 <!DOCTYPE html>
 <html>
@@ -64,8 +64,6 @@ function refreshUI() {
     </body>
 </html>
 ```
-{% endcode-tabs-item %}
-{% endcode-tabs %}
 
 Launching this on a device...
 
@@ -73,7 +71,5 @@ Launching this on a device...
 
 The project is on GitHub: [https://github.com/j3k0/cordova-purchase-micro-example](https://github.com/j3k0/cordova-purchase-micro-example)
 
-{% hint style="info" %}
-Note that it's a simple example that doesn't handle error cases, but it's fully functional. In-App Purchases don't have to hard!
-{% endhint %}
+> Note that it's a simple example that doesn't handle error cases, but it's fully functional. In-App Purchases don't have to hard!
 
