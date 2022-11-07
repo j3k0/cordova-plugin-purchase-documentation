@@ -9,13 +9,20 @@ This example is a Cordova application. The `index.html` does nothing but load `j
 ```javascript
 document.addEventListener('deviceready', onDeviceReady);
 
+var myProduct;
+
 function onDeviceReady() {
+  const {store, ProductType, Platform} = CdvPurchase;
   refreshUI();
-  store.register({type: store.CONSUMABLE, id: 'my_product'});
-  store.when('my_product')
-    .updated(refreshUI)
+  store.register([{
+    type: CdvPurchase.CONSUMABLE,
+    id: 'my_product',
+    platform: Platform.TEST,
+  ]});
+  store.when()
+    .productUpdated(refreshUI)
     .approved(finishPurchase);
-  store.refresh();
+  store.initialize([Platform.TEST]);
 }
 
 function finishPurchase(p) {
@@ -25,21 +32,23 @@ function finishPurchase(p) {
 }
 
 function refreshUI() {
-  const product = store.get('my_product');
-  const button = `<button onclick="store.order('my_product')">Purchase</button>`;
+  const {store, ProductType, Platform} = CdvPurchase;
+  myProduct = store.get('my_product', Platform.TEST);
+  const myTransaction = store.findInLocalReceipts(myProduct);
+  const button = `<button onclick="myProduct.getOffer().order()">Purchase</button>`;
 
   document.getElementsByTagName('body')[0].innerHTML = `
   <div>
     <pre>
       Gold: ${localStorage.goldCoins | 0}
 
-      Product.state: ${product.state}
-             .title: ${product.title}
-             .descr: ${product.description}
-             .price: ${product.price}
+      Product.state: ${myTransaction ? myTransaction.state : ''}
+             .title: ${myProduct ? myProduct.title : ''}
+             .descr: ${myProduct ? myProduct.description : ''}
+             .price: ${myProduct ? myProduct.pricing.price : ''}
 
     </pre>
-    ${product.canPurchase ? button : ''}
+    ${myProduct.canPurchase ? button : ''}
   </div>`;
 }
 ```
@@ -65,6 +74,6 @@ Launching this on a device...
 The project is on GitHub: [https://github.com/j3k0/cordova-purchase-micro-example](https://github.com/j3k0/cordova-purchase-micro-example)
 
 {% hint style="info" %}
-Note that it's a simple example that doesn't handle error cases, but it's fully functional. In-App Purchases don't have to be super hard!
+Note that it's a simple example that doesn't handle error cases, but it's fully functional. In-App Purchases don't have to hard!
 {% endhint %}
 
