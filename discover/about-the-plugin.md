@@ -1,62 +1,57 @@
 # About the Plugin
 
-The Cordova purchase plugin presents a unified interface for all supported platforms: iOS, Android and Windows.
+The Cordova purchase plugin presents a unified interface for all supported platforms: Apple AppStore, Google Play, Windows, Braintree.
 
-The core of the API revolves around two main concepts:
+The main functionalities exposed by the plugin will allow you:
 
-* **States,** associated with in-app products.
-* **Event listeners,** used to track product state changes.
+* Load **Products** - To show information about your In-App Products: title and pricing.
+* Handle the **Purchase flow** - React to events to finalize a pending purchase.
+* **Initiate** a purchases and payments - When users click "buy".
+* Analyze **Purchase Receipts** - To determine what the user owns.
 
-## Product states
-
-The platform associates a state with each In-app products. A product will always be in one of the following states \(simplified view\):
-
-* **registered** \(the product is known to the plugin\)
-* **valid** \(details have been loaded from the store, the product can be purchased\)
-  * **invalid** \(details can't be loaded\).
-* **requested** \(an order have been placed\)
-* **approved** \(the order have been approved\)
-* **finished** \(the app has delivered the order\)
-* **owned** \(the product is owned\)
-
-As a user, you will have to listen to changes happening to the state of your in-app products and act accordingly. The plugin provides an event API through which you'll perform those operations.
-
-Some state changes are your responsibility: registering the product, requesting a purchase, finishing the order. The other state changes are the handled by the platform.
-
-## Purchase process
-
-Purchasing a product is a 4 steps process:
-
-1. **Requesting** a purchase.
-2. Getting **approval** from the bank
-3. **Delivery** by the application
-4. **Finalization**
-
-After an order has been placed, the platform will negotiate the authorization to withdraw an amount from the customer's bank account. Once it gets the approval, the product enters the **approved** state. The app gets notified and should do the following:
-
-1. Check if the transaction receipt is legit
-   * \(fake receipts generators can be used that let users unlock features for free\)
-2. Deliver the product.
-
-When the application has delivered the product, it finalises the order. That's when the money will be transferred to you. This way we ensure that no customers is charged for a product that cannot be delivered.
-
-After finalisation, the product will be owned. Consumable products can be purchased again.
-
-{% hint style="danger" %}
-It looks like a linear process, but don't forget that it can be interrupted at any point! Orders pending approval, approved \(unfinished\) orders can remain in the queue after the application crashed or connection was lost, or... you know, anything can happen.
-
-It's even possible that an order is placed on one device and finalized on another device.
-
-That's why an app must be ready to handle purchase process events as soon as the application is started. A classic mistake is to assume that **approval** can only happen after the user clicked the _Buy_ button, this is just **not** true.
-{% endhint %}
+> A common misconception is that handling the purchase flow should be done after initiating a purchase. Don't forget that users can initiate a transaction from outside the app, for example by redeeming a promo code or when a purchase is shared between users with Family Sharing.
 
 ## Displaying products
 
-Platform owners \(Apple, Google\) request that you load the details for your products from the stores. This ensure that the displayed price always reflects the real details. Hardcoding price will create issues when the actual price will change for reasons outside your control: for instance taxation changes, price tiers changes, etc.
+Platform owners \(Apple, Google, etc.\) request that you load the details for your products from their stores. This ensure that the displayed price always reflects the real details. Hardcoding price will create issues when the actual price changes for reasons outside your control: for instance tax changes, price tiers changes, etc.
 
-The plugin requires you to register the full list of all your products and will take care of loading the details. Your UI should reflect the data loaded by the plugin. It should hide products that aren't loaded yet.
+The plugin requires you to register the list of all your products and will take care of loading the details. Your UI should reflect the data loaded by the plugin. It should hide products that cannot be loaded, as they might not be available anymore.
 
-A product cannot be purchased if it's already owned or if there's already a transaction in progress for that product. Each product has a field \(`canPurchase`\) that indicates if it can be purchased or not. Your UI will have to check for that field and display a _Buy_ button only if it's true.
+Each product has a title, description and a list of available offers. Each offer present different pricing options for the same product. For subscriptions, pricing is defined as a list of phase: for example 3 week for free, followed by 12 months at $1.99 per month, followed by $4.99 per month.
+
+A product can be purchased only if it's not already owned and there's not a transaction in progress for that product. Products have a field \(`canPurchase`\) that indicates if it can be purchased or not. Your UI will have to check for that field and display a _Buy_ button only if `canPurchase` is true.
+
+## Purchase flow
+
+Purchasing a product is a 5 steps process:
+
+1. **Initiate** a purchase.
+2. Get **approval** from the bank.
+3. Validate the **receipt**.
+4. **Deliver** the purchased virtual good.
+5. **Finalize** the transaction.
+
+After an order has been placed (through the app or not), the platform will negotiate the authorization to withdraw an amount from the customer's bank account. Once it gets the approval, your app gets notified of the **approved** transaction and should do the following:
+
+1. Verify if the transaction receipt is legit
+2. Deliver the product.
+
+When the application has delivered the product, it finalizes the order. Only after that, money will be transferred to your account. This method ensures that no customers is charged for a product that couldn't be delivered.
+
+After finalization, non-consumable and subscription products will be owned, consumable products can be purchased again.
+
+The **validation** and **delivery** steps might happen on your server, the plugin will send a receipt to validate, which you'll use to determine what features the user is entitled to. _Our service https://www.iaptic.com/ exists to make that process easier._
+
+> While it might look like a linear process, don't forget that the process can be interrupted and restarted at any point! Transactions can remain pending for approval for a few days (for example with _Ask to Buy_ on devices used by kids), approved and unfinished transactions might remain in the queue after the application crashed or the network connection was lost,... anything can happen.
+> 
+> That's why an app must be ready to handle purchase process events as soon as the application is started. A classic mistake is to assume that **approval** will only happen after the user clicked the _Buy_ button, which is **not** true.
+
+## Requesting payments
+
+The plugin now also supports Braintree, that lets you charge custom amounts to your customers. The process is similar:
+
+1. Initiate a payment request
+2. Get approval
+3. Deliver and finalize the transaction
 
 OK, enough with theory! We will get into the practical details in the guide.
-
