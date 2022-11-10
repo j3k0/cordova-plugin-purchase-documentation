@@ -2,8 +2,8 @@ let appState = 'BASKET';
 let appMessage = '';
 
 function refreshUI() {
-  const {store} = CdvPurchase;
   const el = document.getElementById('app');
+  if (!el) return;
   if (appState === 'BASKET') {
     el.innerHTML = `
       <p>${appMessage}</p>
