@@ -1,4 +1,3 @@
-### 8. Prepare Test Accounts
 
 To test your Google Play Billing implementation with actual in-app purchases, you must use a test account. By default, the only test account registered is the one that's associated with your developer account. You can register additional test accounts by using the Google Play Console.
 

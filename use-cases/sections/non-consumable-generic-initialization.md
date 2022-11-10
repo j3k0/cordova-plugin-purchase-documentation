@@ -1,29 +1,7 @@
 
 ### Initialization
 
-Assuming you're starting from a blank project, we'll add the minimal amount of HTML for the purpose of this tutorial. Let's replace the `<body>` from the `www/index.html` file with the below.
-
-```markup
-<body>
-  <div class="app">
-    <p id="locked">FEATURE LOCKED</p>
-    <div id="nonconsumable1-purchase">Please wait...</div>
-  </div>
-  <script type="text/javascript" src="cordova.js"></script>
-  <script type="text/javascript" src="js/index.js"></script>
-</body>
-```
-
-Let's also make sure to comment out Cordova template project's CSS.
-
-You also need to enable the `'unsafe-inline'` `Content-Security-Policy` by adding it to the `default-src` section:
-
-```markup
-<meta http-equiv="Content-Security-Policy"
-      content="default-src 'self' 'unsafe-inline' [...]" />
-```
-
-You can download the [full index.html file here](https://gist.github.com/j3k0/372440b2e9e250f318e669bb94947003).
+!INCLUDE "./initial-html.md"
 
 We will now create a new JavaScript file and load it from the HTML. The code below will initialize the plugin.
 

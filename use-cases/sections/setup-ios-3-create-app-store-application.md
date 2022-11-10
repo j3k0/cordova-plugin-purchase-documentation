@@ -1,4 +1,3 @@
-### 3. Setup AppStore Application
 
 First, I assume you have an Apple developer account. If not time to register, because it's mandatory.
 

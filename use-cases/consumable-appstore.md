@@ -1,37 +1,21 @@
-We will proceed in 4 steps: setup, initialization, presentation and purchase.
+# Consumable Product for iOS
 
-Here what we'll do.
-
-1. Install Dependencies
-2. Create Cordova Project
-3. Setup AppStore Application
-4. Install and Prepare with XCode
-5. Create In-App Products
-6. Prepare Test Accounts
-
-Of couse you can skip the first few steps if you already have a working application you want to integrate the code into.
-
-Once we have a Cordova iOS application with IAP support enabled and everything is in place on AppStore Connect, we will get into some coding.
-
-1. Initialize the in-app purchase plugin
-2. Handle the purchase events
-3. Deliver our product
-4. Secure the transactions
+This guide uses the plugin at version 13 or later (which is in beta at this stage).
 
 
-## Setup
+## Setup for iOS AppStore
 
 ### 1. Install Dependencies
 
-Needless to say, make sure you have the tools installed on your machine. Developing from a mac is generally recommended for doing iOS development, it's way easier. If you only plan on doing Android, then everything will work.
 
-During the writing of this guide, I've been using the following environment:
+Needless to say, make sure you have the tools installed on your machine. During the writing of this guide, I've been using the following environment:
 
 * **NodeJS** v10.12.0
 * **Cordova** v8.1.2
 * **macOS** 10.14.1
 
 I'm not saying it won't work with different version. If you start fresh, it might be a good idea to use an up-to-date environment.
+
 
 ### 2. Create Cordova Project
 
@@ -57,14 +41,15 @@ Let's head into our cordova project's directory \(should match whatever we used 
 ```text
 $ cd CordovaProject
 ```
-
 #### Add iOS platform
 
 ```text
 $ cordova platform add ios
 ```
 
+
 ### 3. Setup AppStore Application
+
 
 First, I assume you have an Apple developer account. If not time to register, because it's mandatory.
 
@@ -80,7 +65,9 @@ Since you are here, let's retrieve the Shared Secret. You can use an App-Specifi
 
 
 
+
 ### 4. Install and Prepare with XCode
+
 
 When you only require iOS support, no need for special command line arguments:
 
@@ -110,6 +97,9 @@ Now try to **build the app from Xcode**. It might point you to a few stuff it mi
 
 Successful build? You're good to go!
 
+
+### 5. Create In-App Products
+
 ### 5. Create In-App Products
 
 If you followed the [Setup AppStore Application](#3-setup-appstore-application) section, you should have everything setup. Head again to the App's In-App Purchases page: select your application, then _Features_, then _In-App Purchases_.
@@ -122,6 +112,9 @@ Even if that sounds stupid, you need to fill-in ALL metadata in order to use the
 
 The process is well explained by Apple, so I'll not enter into more details.
 
+
+### 6. Create Test Users
+
 ### 6. Create Test Users
 
 In order to test your In-App Purchases during development, you should create some test users.
@@ -131,8 +124,5 @@ You can do so from the AppStore Connect website, in the _Users & Access_ section
 From there, it's just a matter of hitting "+" and filling the form. While you're at it, create 2-3 test users: it will be handy for testing.
 
 ![](../.gitbook/assets/appstore-test-users.png)
-
-
-## Coding
 
 

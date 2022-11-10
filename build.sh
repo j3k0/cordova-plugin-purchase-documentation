@@ -9,49 +9,19 @@ echo "##############################"
 echo
 
 if [ "x$1" == "x--help" ]; then
-  echo "./build.js will generate the files in ./use-cases/ from files in ./sections/"
+  echo "./build.js will generate the files in ./use-cases"
   echo
   exit 0
 fi
 
-for platform in android ios; do
-  for type in consumable subscription non-consumable nr-subscription; do
-    (
-      cat sections/$type-$platform-intro.md sections/generic-$platform-intro.md
-      echo 
-      echo '## Setup'
-      echo
-      cat ./sections/setup-$platform-*.md
-      cat ./sections/setup-$type-$platform-*.md
-      echo
-      echo '## Coding'
-      echo
-      cat ./sections/$type-generic-initialization.md
-      echo
-      cat ./sections/$type-$platform.md
-    ) > use-cases/$type-$platform.md
+cd use-cases || exit 1
+for platform in braintree googleplay appstore; do
+  for type in payment consumable subscription non-consumable nr-subscription; do
+    if test -e $type-$platform.src.md; then
+      markdown-pp -o $type-$platform.md $type-$platform.src.md
+    fi
   done
 done
-
-if false; then
-# Setup Android
-(
-    echo "# Setup Android"
-    echo
-    echo "We will setup our Android application."
-    echo
-    cat ./sections/setup-android-*.md
-) > use-cases/setup-android.md
-
-# Setup iOS
-(
-    echo "# Setup iOS"
-    echo
-    echo "We will setup our iOS application."
-    echo
-    cat ./sections/setup-ios-*.md
-) > use-cases/setup-ios.md
-fi
 
 echo
 echo "########"

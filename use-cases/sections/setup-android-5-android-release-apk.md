@@ -1,4 +1,3 @@
-### 5. Android Release APK
 
 To generate a release build, I generally use the following script: [android-release.sh](https://gist.github.com/j3k0/28f60a7d5622508634d09f94c59d6dfc)
 

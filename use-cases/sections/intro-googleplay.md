@@ -12,7 +12,7 @@ First some setup.
 7. Upload a Release APK to Google Play
 8. Prepare Test Accounts
 
-Of couse you can skip the first few steps if you already have a working application you want to integrate the code into.
+Of course you can skip the first few steps if you already have a working application you want to integrate the code into.
 
 Once we have a Cordova application with IAP support enabled and everything is in place on Google Play, we will get into some coding.
 

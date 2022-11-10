@@ -1,5 +1,3 @@
-### 2. Create Cordova Project
-
 #### Create the project
 
 If it isn't already created:
@@ -22,10 +20,3 @@ Let's head into our cordova project's directory \(should match whatever we used 
 ```text
 $ cd CordovaProject
 ```
-
-#### Add iOS platform
-
-```text
-$ cordova platform add ios
-```
-

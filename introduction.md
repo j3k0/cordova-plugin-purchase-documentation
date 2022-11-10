@@ -8,17 +8,17 @@ Hopefully, it'll contain all the information you need from start to finish.
 
 While I'm focusing on Cordova, it should be easy to transpose the tutorials to all platforms based on Cordova \(PhoneGap, Ionic, ...\).
 
-Note that the most up-to-date version is available as a gitbook at [https://purchase.cordova.fovea.cc/](https://purchase.cordova.fovea.cc/)
+Note that the most up-to-date version is available as a GitBook at [https://purchase.cordova.fovea.cc/](https://purchase.cordova.fovea.cc/)
 
 ### Contribute to this guide
 
-The main repository is hosted on GitHub: [https://github.com/j3k0/cordova-plugin-purchase-documentation](https://github.com/j3k0/cordova-plugin-purchase-documentation).
+The main repository is hosted on GitHub: [https://github.com/j3k0/cordova-plugin-purchase-documentation](https://github.com/j3k0/cordova-plugin-purchase-documentation), this is branch `v13`.
 
 The content is aimed to be digested by [gitbook](https://gitbook.com). Pull requests are welcome.
 
 ### How to get started?
 
-You can then read the [little introduction to IAP technology](discover/generalities-about-iap-technology.md). It'll explain what you can do with it on both iOS and Android, and the difference between those platforms.
+You can read the [little introduction to IAP technology](discover/generalities-about-iap-technology.md). It explains what you can do with it on both iOS and Android and the difference between those platforms.
 
 If you like a \(tiny\) bit of theory, you can read the section on [the cordova plugin](discover/about-the-plugin.md).
 

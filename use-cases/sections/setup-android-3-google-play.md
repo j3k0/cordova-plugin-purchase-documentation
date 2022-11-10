@@ -1,4 +1,3 @@
-### 3. Create Google Play Application
 
 Make sure we have a Google Play application created and configured.
 
