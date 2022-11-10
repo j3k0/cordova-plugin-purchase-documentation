@@ -5,7 +5,7 @@ This guide uses the plugin at version 13 or later (which is in beta at this stag
 
 We will proceed in steps: setup, initialization and payment.
 
-First some setup.
+First we'll details the basic setup steps, of course you can skip the first few steps if you already have a working application you want to integrate the code into.
 
 1. Install NodeJS and Cordova
 2. Setup your Cordova project
@@ -13,12 +13,10 @@ First some setup.
 4. Install the In-App Purchases plugin and Braintree extension
 5. Configure Braintree on [iaptic](https://www.iaptic.com/)
 
-Of course you can skip the first few steps if you already have a working application you want to integrate the code into.
-
-Once we have a Cordova application support enabled and everything is in place on Braintree and Iaptic, we will get into some coding.
+Once we have a Cordova application with Braintree support enabled and everything is in place on Braintree and Iaptic dashboards, we will move to coding a minimal demo app.
 
 1. Initialize the in-app purchase plugin
-2. Initiate the payment request
+2. Launch a payment request
 3. Handle the purchase events
 4. Finalize
 
@@ -191,8 +189,8 @@ let appState = 'BASKET';
 let appMessage = '';
 
 function refreshUI() {
-  const {store} = CdvPurchase;
   const el = document.getElementById('app');
+  if (!el) return;
   if (appState === 'BASKET') {
     el.innerHTML = `
       <p>${appMessage}</p>
@@ -260,3 +258,6 @@ function pay() {
 ```
 
 Let's build and test that!
+## Build and Test
+
+
