@@ -29,5 +29,5 @@ Once we have a Cordova application with Braintree support enabled and everything
 
 ## Build and Test
 
-!INCLUDE "section/payment-braintree-test.md"
+!INCLUDE "sections/payment-braintree-test.md"
 
