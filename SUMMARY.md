@@ -16,6 +16,6 @@
 
 ## Documentation
 
-* [API](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/api.md)
+* [API](https://github.com/j3k0/cordova-plugin-purchase/tree/v13/api)
 * [Troubleshooting](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/troubleshooting.md)
 
