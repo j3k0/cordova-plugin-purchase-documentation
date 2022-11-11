@@ -1,2 +1,0 @@
-# Consumable on Android
-

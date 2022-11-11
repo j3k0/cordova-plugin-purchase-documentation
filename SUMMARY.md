@@ -11,7 +11,7 @@
 
 ## Use Cases
 
-* [Consumable on Android](use-cases/consumable-on-android.md)
+* [Consumable with Google Play](use-cases/consumable-googleplay.md)
 * [Payment Request with Braintree](use-cases/payment-braintree.md)
 
 ## Documentation
