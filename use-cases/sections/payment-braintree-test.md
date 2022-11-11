@@ -8,8 +8,8 @@ You can then make a test payment using one of Braintree's test credit card numbe
 
 Here's the result:
 
-![](../.gitbook/asets/payment-braintree-1.png)
-![](../.gitbook/asets/payment-braintree-2.png)
-![](../.gitbook/asets/payment-braintree-3.png)
-![](../.gitbook/asets/payment-braintree-4.png)
-![](../.gitbook/asets/payment-braintree-5.png)
+![](../.gitbook/assets/payment-braintree-1.png)
+![](../.gitbook/assets/payment-braintree-2.png)
+![](../.gitbook/assets/payment-braintree-3.png)
+![](../.gitbook/assets/payment-braintree-4.png)
+![](../.gitbook/assets/payment-braintree-5.png)
