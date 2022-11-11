@@ -11,11 +11,10 @@
 
 ## Use Cases
 
-* [Consumable on Android](use-cases/consumable-android.md)
+* [Consumable on Android](use-cases/consumable-on-android.md)
 * [Payment Request with Braintree](use-cases/payment-braintree.md)
 
 ## Documentation
 
 * [API](https://github.com/j3k0/cordova-plugin-purchase/tree/v13/api)
 * [Troubleshooting](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/troubleshooting.md)
-

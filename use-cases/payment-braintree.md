@@ -2,7 +2,6 @@
 
 This guide uses the plugin at version 13 or later (which is in beta at this stage).
 
-
 We will proceed in steps: setup, initialization and payment.
 
 First we'll details the basic setup steps, of course you can skip the first few steps if you already have a working application you want to integrate the code into.
@@ -22,9 +21,7 @@ Once we have a Cordova application with Braintree support enabled and everything
 
 ## Setup
 
-
 ### 1. Install Dependencies
-
 
 Needless to say, make sure you have the tools installed on your machine. During the writing of this guide, I've been using the following environment:
 
@@ -33,7 +30,6 @@ Needless to say, make sure you have the tools installed on your machine. During 
 * **macOS** 10.14.1
 
 I'm not saying it won't work with different version. If you start fresh, it might be a good idea to use an up-to-date environment.
-
 
 ### 2. Create a Sandbox Braintree Account
 
@@ -57,7 +53,9 @@ For the most up-to-date information on how to install and setup the plugin, you 
 
 Let's install it:
 
-    cordova plugin add cordova-plugin-purchase-braintree
+```
+cordova plugin add cordova-plugin-purchase-braintree
+```
 
 For this guide, I'll use an android device. As mentioned in the plugin's documentation, we have to add this section to our application's `config.xml`.
 
@@ -69,9 +67,7 @@ For this guide, I'll use an android device. As mentioned in the plugin's documen
 
 ## Code
 
-
 ### Base framework
-
 
 #### index.html
 
@@ -95,8 +91,8 @@ You also need to enable the `'unsafe-inline'` `Content-Security-Policy` by addin
 ```
 
 You can download the [full index.html file here](https://gist.github.com/j3k0/80c69837e5bacf83c4fc2320ba2e5dc2).
-#### javascript
 
+#### javascript
 
 We will now create a new JavaScript file and load it from the HTML. The code below will initialize the plugin.
 
@@ -146,7 +142,7 @@ Here's a little explanation:
 
 As mentioned earlier, we'll use iaptic for the server side integration with Braintree.
 
-We'll instantiate the [iaptic component](https://github.com/j3k0/cordova-plugin-purchase/blob/v13/api/classes/CdvPurchase.Iaptic.md), using the provided `braintreeClientTokenProvider` and `validator` to 
+We'll instantiate the [iaptic component](https://github.com/j3k0/cordova-plugin-purchase/blob/v13/api/classes/CdvPurchase.Iaptic.md), using the provided `braintreeClientTokenProvider` and `validator` to
 
 ```javascript
 function initializeStore() {
@@ -258,21 +254,19 @@ function pay() {
 ```
 
 Let's build and test that!
+
 ## Build and Test
 
 The code above will work on both iOS and Android. We need to pick a test platform, so let's use Android.
 
 We can build and run our app with:
 
-    npx cordova run android
+```
+npx cordova run android
+```
 
 You can then make a test payment using one of Braintree's test credit card numbers, like 4242424242424242.
 
 Here's the result:
 
-![](../.gitbook/asets/payment-braintree-1.png)
-![](../.gitbook/asets/payment-braintree-2.png)
-![](../.gitbook/asets/payment-braintree-3.png)
-![](../.gitbook/asets/payment-braintree-4.png)
-![](../.gitbook/asets/payment-braintree-5.png)
-
+![](../.gitbook/assets/payment-braintree-1.png) ![](../.gitbook/assets/payment-braintree-2.png) ![](../.gitbook/assets/payment-braintree-3.png) ![](../.gitbook/assets/payment-braintree-4.png) ![](../.gitbook/assets/payment-braintree-5.png)
