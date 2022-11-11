@@ -6,7 +6,7 @@ I'm Jean-Christophe Hoelt, from Fovea, main developer of the In-App Purchase plu
 
 Hopefully, it'll contain all the information you need from start to finish.
 
-While I'm focusing on Cordova, it should be easy to transpose the tutorials to all platforms based on Cordova \(PhoneGap, Ionic, ...\).
+While I'm focusing on Cordova, it should be easy to transpose the tutorials to all platforms based on Cordova (PhoneGap, Ionic, ...).
 
 Note that the most up-to-date version is available as a GitBook at [https://purchase.cordova.fovea.cc/](https://purchase.cordova.fovea.cc/)
 
@@ -20,7 +20,7 @@ The content is aimed to be digested by [gitbook](https://gitbook.com). Pull requ
 
 You can read the [little introduction to IAP technology](discover/generalities-about-iap-technology.md). It explains what you can do with it on both iOS and Android and the difference between those platforms.
 
-If you like a \(tiny\) bit of theory, you can read the section on [the cordova plugin](discover/about-the-plugin.md).
+If you like a (tiny) bit of theory, you can read the section on [the cordova plugin](discover/about-the-plugin.md).
 
 If you're curious to see it in action, you can take a look at the [micro example](discover/micro-example.md).
 
@@ -28,12 +28,6 @@ Then you can jump to your use case from the list below, or the sidebar.
 
 #### Use Cases
 
-* [Consumable on Android](use-cases/consumable-android.md)
-* [Consumable on iOS](use-cases/consumable-ios.md)
-* [Auto-Renewing Subscription on Android](use-cases/subscription-android.md)
-* [Auto-Renewing Subscription on iOS](use-cases/subscription-ios.md)
-* [\(TODO\) Non-Consumable on Android](use-cases/non-consumable-android.md)
-* [\(TODO\) Non-Consumable on iOS](use-cases/non-consumable-ios.md)
-* [\(TODO\) Non-Renewing Subscription on Android](use-cases/nr-subscription-android.md)
-* [\(TODO\) Non-Renewing Subscription on iOS](use-cases/nr-subscription-ios.md)
+* [Consumable on Android](use-cases/consumable-on-android.md)
+* [Payment Request with Braintree](use-cases/payment-braintree.md)
 

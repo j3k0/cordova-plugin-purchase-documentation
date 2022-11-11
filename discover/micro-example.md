@@ -6,6 +6,7 @@ This example is a Cordova application. The `index.html` does nothing but load `j
 
 ### js/index.js
 
+{% code lineNumbers="true" %}
 ```javascript
 document.addEventListener('deviceready', onDeviceReady);
 
@@ -52,6 +53,7 @@ function refreshUI() {
   </div>`;
 }
 ```
+{% endcode %}
 
 ### index.html
 
@@ -67,9 +69,8 @@ function refreshUI() {
 
 Launching this on a device...
 
-{% embed url="https://youtu.be/fLoVePrIhc4" caption="" %}
+{% embed url="https://youtu.be/fLoVePrIhc4" %}
 
 The project is on GitHub: [https://github.com/j3k0/cordova-purchase-micro-example](https://github.com/j3k0/cordova-purchase-micro-example)
 
-> Note that it's a simple example that doesn't handle error cases, but it's fully functional. In-App Purchases don't have to hard!
-
+> _Note that it's a simple example that doesn't handle error cases, but it's fully functional. In-App Purchases don't have to hard!_
