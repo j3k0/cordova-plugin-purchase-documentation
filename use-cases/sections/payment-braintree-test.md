@@ -8,8 +8,8 @@ You can then make a test payment using one of Braintree's test credit card numbe
 
 Here's the result:
 
-![](https://github.com/j3k0/cordova-plugin-purchase-documentation/raw/v13/.gitbook/assets/payment-braintree-1.png)
-![](https://github.com/j3k0/cordova-plugin-purchase-documentation/raw/v13/.gitbook/assets/payment-braintree-2.png)
-![](https://github.com/j3k0/cordova-plugin-purchase-documentation/raw/v13/.gitbook/assets/payment-braintree-3.png)
-![](https://github.com/j3k0/cordova-plugin-purchase-documentation/raw/v13/.gitbook/assets/payment-braintree-4.png)
-![](https://github.com/j3k0/cordova-plugin-purchase-documentation/raw/v13/.gitbook/assets/payment-braintree-5.png)
+![](/assets/payment-braintree-1.png)
+![](/assets/payment-braintree-2.png)
+![](/assets/payment-braintree-3.png)
+![](/assets/payment-braintree-4.png)
+![](/assets/payment-braintree-5.png)
