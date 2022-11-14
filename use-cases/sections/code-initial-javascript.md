@@ -1,6 +1,7 @@
 
 We will now create a new JavaScript file and load it from the HTML. The code below will initialize the plugin.
 
+{% code lineNumbers="true" %}
 !INCLUDECODE "code/initial-javascript.js" (javascript)
 
 Here's a little explanation:

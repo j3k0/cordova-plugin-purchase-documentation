@@ -40,7 +40,7 @@ When the application has delivered the product, it finalizes the order. Only aft
 
 After finalization, non-consumable and subscription products will be owned, consumable products can be purchased again.
 
-The **validation** and **delivery** steps might happen on your server, the plugin will send a receipt to validate, which you'll use to determine what features the user is entitled to. _Our service https://www.iaptic.com/ exists to make that process easier._
+The **validation** and **delivery** steps might happen on your server, the plugin will send a receipt to validate, which you'll use to determine what features the user is entitled to. _Our service [iaptic](https://www.iaptic.com/) exists to make that process easier._
 
 > While it might look like a linear process, don't forget that the process can be interrupted and restarted at any point! Transactions can remain pending for approval for a few days (for example with _Ask to Buy_ on devices used by kids), approved and unfinished transactions might remain in the queue after the application crashed or the network connection was lost,... anything can happen.
 > 

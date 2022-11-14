@@ -21,6 +21,7 @@ In particular, it requires a [Client Token](https://developer.paypal.com/braintr
 
 You are responsible for creating a user interface that presents the detail concerning the upcoming payment. Let's create a very simple interface.
 
+{% code lineNumbers="true" %}
 !INCLUDECODE "code/braintree-refreshUI.js" (javascript)
 
 This is a primitive state machine that displays the basket, then the progress of the payment flow. While in the basket, the "Proceed to Payment" button calls the `pay()` function.
@@ -29,6 +30,7 @@ Let's implement that function.
 
 ### Payment request
 
+{% code lineNumbers="true" %}
 !INCLUDECODE "code/braintree-pay.js" (javascript)
 
 Let's build and test that!

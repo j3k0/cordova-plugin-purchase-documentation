@@ -2,7 +2,7 @@
 
 Generalities about IAP technologies that all developers have to know.
 
-Present on both iOS and Android, In-App Purchases \(IAP\) allow you to integrate a variety of virtual products that users can purchase right from your application.
+Present on both iOS (with AppStore) and Android (with Google Play as the most popular option), In-App Purchase \(IAP\) lets you integrate a variety of virtual products that users can purchase right from your application.
 
 ## Virtual Products
 
@@ -19,7 +19,7 @@ You can offer 4 types of virtual products:
 * _Non-Renewing Subscriptions._
   * Temporary subscriptions that users have to renew manually.
 
-Android actually only makes the difference between products incurring recurring or non-recurring payments, i.e. Auto-Renewing Subscriptions vs everything else. But iOS has a strict differentiation between those 4 categories. As such the plugin provides the logic for those 4 categories on both platforms so you can write one code that works everywhere.
+Google Play actually only makes the difference between products incurring recurring or non-recurring payments, i.e. Auto-Renewing Subscriptions vs everything else. But iOS has a strict differentiation between those 4 categories. As such the plugin provides the logic for those 4 categories on both platforms so you can write one code that works everywhere.
 
 ## User Accounts
 

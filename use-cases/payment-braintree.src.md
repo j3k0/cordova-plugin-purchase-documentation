@@ -31,3 +31,6 @@ Once we have a Cordova application with Braintree support enabled and everything
 
 !INCLUDE "sections/payment-braintree-test.md"
 
+## Server-to-server Webhook
+
+!INCLUDE "sections/payment-braintree-iaptic-webhook.md"
