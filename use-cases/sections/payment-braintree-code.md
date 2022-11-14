@@ -9,7 +9,9 @@ As mentioned earlier, we'll use iaptic for the server side integration with Brai
 
 We'll instantiate the [iaptic component](https://github.com/j3k0/cordova-plugin-purchase/blob/v13/api/classes/CdvPurchase.Iaptic.md), using the provided `braintreeClientTokenProvider` and `validator` to 
 
+{% code lineNumbers="true" %}
 !INCLUDECODE "code/braintree-initializeStore.js" (javascript)
+{% endcode %}
 
 We add the standard purchase events handlers for when the transaction is `approved` and the receipt `verified`, with the [`store.when()`](https://github.com/j3k0/cordova-plugin-purchase/blob/v13/api/classes/CdvPurchase.Store.md#when) block.
 
@@ -23,6 +25,7 @@ You are responsible for creating a user interface that presents the detail conce
 
 {% code lineNumbers="true" %}
 !INCLUDECODE "code/braintree-refreshUI.js" (javascript)
+{% endcode %}
 
 This is a primitive state machine that displays the basket, then the progress of the payment flow. While in the basket, the "Proceed to Payment" button calls the `pay()` function.
 
@@ -32,5 +35,6 @@ Let's implement that function.
 
 {% code lineNumbers="true" %}
 !INCLUDECODE "code/braintree-pay.js" (javascript)
+{% endcode %}
 
 Let's build and test that!

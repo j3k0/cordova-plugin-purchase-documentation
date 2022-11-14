@@ -132,6 +132,7 @@ function refreshUI() {
   // Soon...
 }
 ```
+{% endcode %}
 
 Here's a little explanation:
 
@@ -149,6 +150,7 @@ As mentioned earlier, we'll use iaptic for the server side integration with Brai
 
 We'll instantiate the [iaptic component](https://github.com/j3k0/cordova-plugin-purchase/blob/v13/api/classes/CdvPurchase.Iaptic.md), using the provided `braintreeClientTokenProvider` and `validator` to 
 
+{% code lineNumbers="true" %}
 ```javascript
 function initializeStore() {
   const {store, Platform, Iaptic} = CdvPurchase;
@@ -174,6 +176,7 @@ function initializeStore() {
   }]);
 }
 ```
+{% endcode %}
 
 We add the standard purchase events handlers for when the transaction is `approved` and the receipt `verified`, with the [`store.when()`](https://github.com/j3k0/cordova-plugin-purchase/blob/v13/api/classes/CdvPurchase.Store.md#when) block.
 
@@ -211,6 +214,7 @@ function refreshUI() {
   }
 }
 ```
+{% endcode %}
 
 This is a primitive state machine that displays the basket, then the progress of the payment flow. While in the basket, the "Proceed to Payment" button calls the `pay()` function.
 
@@ -259,6 +263,7 @@ function pay() {
   .finished(() => setAppState('PAYMENT_FINISHED'));
 }
 ```
+{% endcode %}
 
 Let's build and test that!
 ## Build and Test
@@ -281,3 +286,4 @@ Of course, your job doesn't end here. Iaptic will send a webhook notification to
 
 ## Server-to-server Webhook
 
+When an identifier user makes a purchase, iaptic sends a notification to your server with the details of the transaction.

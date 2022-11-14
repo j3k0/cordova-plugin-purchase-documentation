@@ -3,6 +3,7 @@ We will now create a new JavaScript file and load it from the HTML. The code bel
 
 {% code lineNumbers="true" %}
 !INCLUDECODE "code/initial-javascript.js" (javascript)
+{% endcode %}
 
 Here's a little explanation:
 
