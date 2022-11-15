@@ -7,7 +7,7 @@
 
 As mentioned earlier, we'll use iaptic for the server side integration with Braintree.
 
-We'll instantiate the [iaptic component](https://github.com/j3k0/cordova-plugin-purchase/blob/v13/api/classes/CdvPurchase.Iaptic.md), using the provided `braintreeClientTokenProvider` and `validator` to 
+We'll instantiate the [iaptic component](https://github.com/j3k0/cordova-plugin-purchase/blob/v13/api/classes/CdvPurchase.Iaptic.md), and use the provided `braintreeClientTokenProvider` and `validator` to handle the server-side part of the purchase process.
 
 {% code lineNumbers="true" %}
 !INCLUDECODE "code/braintree-initializeStore.js" (javascript)
