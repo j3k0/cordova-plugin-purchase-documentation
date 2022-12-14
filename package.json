@@ -1,5 +1,5 @@
 {
-  "devDependencies": {
-    "cordova-plugin-purchase": "github:j3k0/cordova-plugin-purchase#v13"
+  "dependencies": {
+    "cordova-plugin-purchase": "github:j3k0/cordova-plugin-purchase#v13.1.0"
   }
 }

@@ -15,7 +15,19 @@ function pay() {
     platform: Platform.BRAINTREE,
     amountMicros: 9.99 * 1000000,
     currency: 'USD',
-    productIds: ['REAL_GOOD'],
+    items: [{
+      id: 'REAL_GOOD',
+      title: '1x Real Good',
+      pricing: {
+        priceMicros: 5.99 * 1000000,
+      }
+    }, {
+      id: 'DELIVERY_STD',
+      title: 'Standard Delivery',
+      pricing: {
+        priceMicros: 4.00 * 1000000,
+      }
+    }],
 
     // optional fields
     billingAddress: {
