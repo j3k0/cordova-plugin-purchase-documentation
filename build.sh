@@ -1,15 +1,15 @@
 #!/bin/bash
 
 echo
-echo "##############################"
-echo "#                            #"
-echo "# usage: ./build.js [--help] #"
-echo "#                            #"
-echo "##############################"
+echo "##############"
+echo "# ./build.sh #"
+echo "##############"
 echo
 
 if [ "x$1" == "x--help" ]; then
-  echo "./build.js will generate the files in ./use-cases"
+  echo "Usage: ./build.sh [--help]"
+  echo
+  echo "./build.sh will generate the files in ./use-cases"
   echo
   exit 0
 fi
