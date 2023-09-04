@@ -1,13 +1,9 @@
 
-To install the plugin, we will use the usual `cordova plugin add` command. There is little subtleties on Android.
-
-When you need Android support, you need to setup your `BILLING_KEY`.
+To install the plugin, we will use the usual `cordova plugin add` command.
 
 ```text
-cordova plugin add cordova-plugin-purchase --variable BILLING_KEY="<BILLING_KEY>"
+cordova plugin add cordova-plugin-purchase"
 ```
-
-You can find that piece of information on the Google Play Publisher Console, as [explained here](#retrieve-the-billing-key).
 
 Now let's try to build.
 

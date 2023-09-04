@@ -119,35 +119,15 @@ Make sure we have a Google Play application created and configured.
 Need more help? I recommend you check [Google's own documentation](https://support.google.com/googleplay/android-developer/answer/113469?hl=en&ref_topic=7072031). It's well detailed, easy to follow and probably the most up-to-date resource you can find.
 {% endhint %}
 
-### Retrieve the Billing Key
-
-We need to inform the plugin of our app's `BILLING_KEY`. That piece of information can be found on the Google Play Publisher Console.
-
-So head again to your [Google Play Console](https://play.google.com/apps/publish).
-
-In the "_All Applications_" menu, go to the application you want to setup. In my case "_Cordova Purchase Demo_".
-
-From there, find the "_Monetization setup_" section \(on the left-side panel\).
-
-Under **Licensing**, you'll find this long Base64-encoded string (an RSA public key). Keep it around for later reference. That's your **Billing Key**.
-
-{% hint style="info" %}
-The Billing Key will be required to install the plugin on Android and setup receipt validation.
-{% endhint %}
-
 
 ### 4. Install Cordova Purchase Plugin
 
 
-To install the plugin, we will use the usual `cordova plugin add` command. There is little subtleties on Android.
-
-When you need Android support, you need to setup your `BILLING_KEY`.
+To install the plugin, we will use the usual `cordova plugin add` command.
 
 ```text
-cordova plugin add cordova-plugin-purchase --variable BILLING_KEY="<BILLING_KEY>"
+cordova plugin add cordova-plugin-purchase"
 ```
-
-You can find that piece of information on the Google Play Publisher Console, as [explained here](#retrieve-the-billing-key).
 
 Now let's try to build.
 
