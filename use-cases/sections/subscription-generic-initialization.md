@@ -66,10 +66,10 @@ Now let's initialize the in-app purchase plugin, where indicated in the `onDevic
     // We should first register all our products or we cannot use them in the app.
     store.register([{
         id:    'my_subscription1',
-        type:   store.PAID_SUBSCRIPTION,
+        type:   CdvPurchase.ProductType.PAID_SUBSCRIPTION,
     }, {
         id:    'my_subscription2',
-        type:   store.PAID_SUBSCRIPTION,
+        type:   CdvPurchase.ProductType.PAID_SUBSCRIPTION,
     }]);
 
     // Setup the receipt validator service.
@@ -94,7 +94,7 @@ Here's a little explanation:
 
 We start by registering the product with ID `my_subscription1` and `my_subscription2`.
 
-We declare the products as renewable subscriptions \(`store.PAID_SUBSCRIPTION`\). [⇒ API Documentation](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/api.md#registering-products).
+We declare the products as renewable subscriptions \(`CdvPurchase.ProductType.PAID_SUBSCRIPTION`\). [⇒ API Documentation](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/api.md#registering-products).
 
 We setup the link to the receipt validation server. If you're using [Fovea.Billing](https://billing.fovea.cc), you'll [find it here](https://billing-dashboard.fovea.cc/setup/cordova).
 

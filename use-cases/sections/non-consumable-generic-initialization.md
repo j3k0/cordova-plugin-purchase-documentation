@@ -17,7 +17,7 @@ function initStore() {
 
     store.register({
         id:    'nonconsumable1',
-        type:   store.NON_CONSUMABLE
+        type:   CdvPurchase.ProductType.NON_CONSUMABLE
     });
 
     store.error(function(error) {
@@ -34,7 +34,7 @@ Here's a little explanation:
 
 **Lines 5-8**, we check if the plugin is loaded.
 
-**Lines 10-13**, we register the product with ID `nonconsumable1`. We declare it as a non-consumable \(`store.NON_CONSUMABLE`\). [⇒ API Documentation](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/api.md#registering-products).
+**Lines 10-13**, we register the product with ID `nonconsumable1`. We declare it as a non-consumable \(`CdvPurchase.ProductType.NON_CONSUMABLE`\). [⇒ API Documentation](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/api.md#registering-products).
 
 **Lines 15-17**, we setup an error handler. It just logs errors to the console.
 

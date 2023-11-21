@@ -65,10 +65,10 @@ function onDeviceReady() {
     // We should first register all our products or we cannot use them in the app.
     store.register([{
         id:    'my_subscription1',
-        type:   store.PAID_SUBSCRIPTION,
+        type:   CdvPurchase.ProductType.PAID_SUBSCRIPTION,
     }, {
         id:    'my_subscription2',
-        type:   store.PAID_SUBSCRIPTION,
+        type:   CdvPurchase.ProductType.PAID_SUBSCRIPTION,
     }]);
 
     // Setup the receipt validator service.
