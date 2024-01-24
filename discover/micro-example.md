@@ -26,9 +26,9 @@ function onDeviceReady() {
   store.initialize([Platform.TEST]);
 }
 
-function finishPurchase(p) {
+function finishPurchase(transaction) {
   localStorage.goldCoins = (localStorage.goldCoins | 0) + 10;
-  p.finish();
+  transaction.finish();
   refreshUI();
 }
 
