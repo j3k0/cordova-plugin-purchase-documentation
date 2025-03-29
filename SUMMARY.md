@@ -2,12 +2,14 @@
 
 * [Home](README.md)
 * [Introduction](introduction.md)
+* [Migrating to v13](doc/migration-to-v13.md)
 
 ## Discover
 
 * [Micro Example](discover/micro-example.md)
 * [About IAP Technology](discover/generalities-about-iap-technology.md)
 * [About the Plugin](discover/about-the-plugin.md)
+* [Receipt Validation Importance](discover/receipt-validation-importance.md) <!-- Added -->
 
 ## Use Cases
 
@@ -23,9 +25,7 @@
 * [Using the Test Platform](use-cases/test-platform.md)
 * [macOS Specifics](use-cases/macos-specifics.md)
 
-## 
-
 ## References
 
-* [API](https://github.com/j3k0/cordova-plugin-purchase/tree/v13/api)
-<!-- * [Troubleshooting](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/troubleshooting.md) -->
+* [API v13](https://www.iaptic.com/documentation/cordova-plugin-api/)
+* [Troubleshooting](doc/troubleshooting.md)

@@ -23,28 +23,26 @@ A product can be purchased only if it's not already owned and there's not a tran
 
 ## Purchase flow
 
-Purchasing a product is a 5 steps process:
+Purchasing a product is a multi-step process, often asynchronous:
 
-1. **Initiate** a purchase.
-2. Get **approval** from the bank.
-3. Validate the **receipt**.
-4. **Deliver** the purchased virtual good.
-5. **Finalize** the transaction.
+1.  **Initiate** a purchase (either by the user in-app or externally like redeeming a code).
+2.  Platform SDK shows **Payment UI** (user confirms/authenticates).
+3.  Get **approval** notification in the app (payment authorized, but not final).
+4.  **(Crucial Step) Validate the purchase receipt** with a server to confirm legitimacy and get accurate details (like subscription expiry).
+5.  **Deliver** the purchased virtual good or unlock the feature based on the *validated* status.
+6.  **Finalize** (Finish/Acknowledge) the transaction to confirm delivery to the platform.
 
-After an order has been placed (through the app or not), the platform will negotiate the authorization to withdraw an amount from the customer's bank account. Once it gets the approval, your app gets notified of the **approved** transaction and should do the following:
+After an order has been initiated and approved by the platform and user, your app receives the **`approved`** event containing transaction data. **Crucially, you should not grant entitlement based solely on this event.** Instead, your app should:
 
-1. Verify if the transaction receipt is legit
-2. Deliver the product.
+1.  **Verify the transaction receipt** using a secure server. This step confirms the purchase is legitimate and retrieves authoritative details like subscription status and expiry dates directly from Apple/Google.
+2.  **Deliver the product** *after* successful verification.
+3.  **Finalize (finish/acknowledge)** the transaction once the product is delivered. Only after finalization is the purchase considered complete by the platform, and for subscriptions/non-consumables, it prevents the transaction from being presented repeatedly. Finalization also ensures you get paid.
 
-When the application has delivered the product, it finalizes the order. Only after that, money will be transferred to your account. This method ensures that no customers is charged for a product that couldn't be delivered.
-
-After finalization, non-consumable and subscription products will be owned, consumable products can be purchased again.
-
-The **validation** and **delivery** steps might happen on your server, the plugin will send a receipt to validate, which you'll use to determine what features the user is entitled to. _Our service [iaptic](https://www.iaptic.com/) exists to make that process easier._
+The **validation** and **delivery** steps should ideally happen on **your server**. The plugin facilitates sending receipt data to your chosen validation endpoint (e.g., using `transaction.verify()`). _Our service [Iaptic](https://www.iaptic.com/) simplifies this validation process significantly._
 
 > While it might look like a linear process, don't forget that the process can be interrupted and restarted at any point! Transactions can remain pending for approval for a few days (for example with _Ask to Buy_ on devices used by kids), approved and unfinished transactions might remain in the queue after the application crashed or the network connection was lost,... anything can happen.
 > 
-> That's why an app must be ready to handle purchase process events as soon as the application is started. A classic mistake is to assume that **approval** will only happen after the user clicked the _Buy_ button, which is **not** true.
+> That's why an app must be ready to handle purchase process events as soon as the application is started. A classic mistake is to assume that **approval** will only happen after the user clicked the _Buy_ button, which is **not** true. **Equally important is validating every approved transaction before granting entitlement.**
 
 ## Requesting payments
 
