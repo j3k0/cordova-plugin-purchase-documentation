@@ -14,7 +14,9 @@
 * [Consumable with Google Play](use-cases/consumable-googleplay.md)
 * [Payment Request with Braintree](use-cases/payment-braintree.md)
 
-## Documentation
+## 
+
+## References
 
 * [API](https://github.com/j3k0/cordova-plugin-purchase/tree/v13/api)
-* [Troubleshooting](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/troubleshooting.md)
+<!-- * [Troubleshooting](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/troubleshooting.md) -->

@@ -14,8 +14,10 @@ if [ "x$1" == "x--help" ]; then
   exit 0
 fi
 
+PLATFORMS="braintree googleplay appstore"
+
 cd use-cases || exit 1
-for platform in braintree googleplay appstore; do
+for platform in $PLATFORMS; do
   for type in payment consumable subscription non-consumable nr-subscription; do
     if test -e $type-$platform.src.md; then
       markdown-pp -o $type-$platform.md $type-$platform.src.md
