@@ -24,8 +24,6 @@ Once we have a Cordova application with IAP support enabled and everything is in
 4. Secure the transactions
 
 
-
-
 ## Setup for Google Play
 
 ### 1. Install Dependencies
@@ -249,4 +247,5 @@ To test your Google Play Billing implementation with actual in-app purchases, yo
 {% hint style="info" %}
 Testers can begin making purchases of your in-app products within 15 minutes.
 {% endhint %}
+
 

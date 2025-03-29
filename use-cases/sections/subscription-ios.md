@@ -1,160 +1,190 @@
+### Purchase Flow (iOS/App Store Subscription)
 
-### Testing
+With the store initialized, validator configured, and subscription products displayed, we'll now implement the logic for handling the subscription purchase process when the user taps "Subscribe". For subscriptions, verification and finishing are crucial.
 
-To test on iOS with In-App Purchases enabled, I always chose to run my app through Xcode. This way, I can see the logs from both the javascript and native sides, which is useful.
+**Step 1: Implement the Subscription Purchase Action**
 
-To create a build, first update the Xcode project on the console, swith to Xcode and run.
+*   **What:** Fill in the `window.subscribe` function (defined as a stub in the generic section) to call `store.order()` with the selected offer.
+*   **Why:** This initiates the subscription purchase flow with the App Store.
 
-```text
-cordova prepare ios && open platforms/ios/*.xcodeproj
-```
-
-Run.
-
-![](.gitbook/assets/subscribe-init.png)
-
-### Purchase Flow
-
-We already added a "Buy" button. This button calls the `store.order()` method which initiates the purchase flow for a product.
-
-At this point, the code starts the process but the purchase will remain "processing" forever, in the `approved` state.
-
-For a product in the `approved` state, the transaction has been approved by the user's banking institution but it won't be finalized until you inform them to do so. You have to deliver whatever the user purchased before finalizing.
-
-I already introduced the purchase flow in the introduction of this guide, you can check the [purchase process](../discover/about-the-plugin.md#purchase-process) section if you need a refresher. The official documentation provides even more details. [⇒ API Documentation](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/api.md#-purchasing) 
-
-When the user is done with the native interface \(i.e. has entered his/her password and confirmed\), your app receives the `approved` event. So let's add more handlers to the `onDeviceReady()` function, before the call to `store.refresh()`.
+Replace the placeholder `window.subscribe` function in `www/js/index.js` with this implementation:
 
 ```javascript
-store.when()
-     .approved(p => p.verify())
-     .verified(p => p.finish())
-     .owned(p => console.log(`you now own ${p.alias}`));
-```
+// In js/index.js
 
-That's enough for a local implementation (where we don't need to inform a server of changes to the subscription status). Let's try the whole thing now. Repeat the steps from the [testing](#testing) section above:
+// Make this function globally accessible for the button's onclick
+window.subscribe = function(productId, platform, offerId) {
+    console.log(`Subscribe button clicked for ${productId}, offer ${offerId} on ${platform}`);
+    const { store, Platform } = CdvPurchase;
 
-```text
-cordova prepare ios && open platforms/ios/*.xcodeproj
-```
-
-Run from Xcode and here you go! You should be able to purchase your subscriptions.
-
-Full source for this tutorial below:
-
-{% code-tabs %}
-{% code-tabs-item title="js/index.js" %}
-```javascript
-document.addEventListener('deviceready', onDeviceReady);
-
-function onDeviceReady() {
-
-    const state = {};
-    function setState(attr) {
-        Object.assign(state, attr);
-        render(state);
+    // Ensure we're dealing with the correct platform if explicitly passed
+    if (platform !== Platform.APPLE_APPSTORE) {
+        console.error("This function is currently specific to AppStore!");
+        return;
     }
 
-    setState({
-        error: '',
-        status: 'Loading...',
-        product1: {},
-        product2: {},
-    });
+    const product = store.get(productId, Platform.APPLE_APPSTORE);
+    const offer = product?.getOffer(offerId); // Get the specific offer
 
-    // We should first register all our products or we cannot use them in the app.
-    store.register([{
-        id:    'my_subscription1',
-        type:   CdvPurchase.ProductType.PAID_SUBSCRIPTION,
-    }, {
-        id:    'my_subscription2',
-        type:   CdvPurchase.ProductType.PAID_SUBSCRIPTION,
-    }]);
+    if (offer) {
+        console.log(`Initiating order for offer: ${offer.id}`);
+        // Optional: Update UI to indicate processing
+        // setState({ isPurchasing: true });
 
-    // Setup the receipt validator service.
-    store.validator = '<<< YOUR_RECEIPT_VALIDATION_URL >>>';
+        // For subscriptions, you might pass an obfuscated applicationUsername
+        // store.order(offer, { applicationUsername: 'hashedUserId123' })
+        store.order(offer)
+            .then(result => {
+                // Order initiated or cancelled by user
+                if (result && result.code === store.ErrorCode.PAYMENT_CANCELLED) {
+                    console.log("User cancelled the subscription flow.");
+                    // setState({ isPurchasing: false });
+                } else if (result && result.isError) {
+                    console.error("Order initiation failed: " + result.message);
+                    // setState({ isPurchasing: false, error: result.message });
+                } else {
+                    console.log("Subscription order initiated. Waiting for approval...");
+                    // isPurchasing state might remain true
+                }
+            })
+            .catch(err => {
+                 console.error("Unexpected error during subscription order:", err);
+                 // setState({ isPurchasing: false, error: 'Unexpected error' });
+            });
 
-    // Show errors for 10 seconds.
-    store.error(function(error) {
-        setState({ error: `ERROR ${error.code}: ${error.message}` });
-        setTimeout(function() {
-            setState({ error: `` });
-        }, 10000);
-    });
-
-    store.when()
-        .approved(p => p.verify())
-        .verified(p => p.finish())
-        .owned(p => console.log(`you now own ${p.alias}`));
-
-    // Called when any subscription product is updated
-    store.when('subscription').updated(function() {
-        const product1 = store.get('my_subscription1') || {};
-        const product2 = store.get('my_subscription2') || {};
-
-        let status = 'Please subscribe below';
-        if (product1.owned || product2.owned)
-            status = 'Subscribed';
-        else if (product1.state === 'approved' || product2.state === 'approved')
-            status = 'Processing...';
-
-        setState({ product1, product2, status });
-    });
-
-    // Load informations about products and purchases
-    store.refresh();
-
-    function render() {
-
-        const purchaseProduct1 = state.product1.canPurchase
-            ? `<button onclick="store.order('my_subscription1')">Subscribe</button>` : '';
-        const purchaseProduct2 = state.product2.canPurchase
-            ? `<button onclick="store.order('my_subscription2')">Subscribe</button>` : '';
-
-        const body = document.getElementsByTagName('body')[0];
-        body.innerHTML = `
-<pre> 
-${state.error}
-
-subscription: ${state.status}
-
-id:     ${state.product1.id          || ''}
-title:  ${state.product1.title       || ''}
-state:  ${state.product1.state       || ''}
-descr:  ${state.product1.description || ''}
-price:  ${state.product1.price       || ''}
-expiry: ${state.product1.expiryDate  || ''}
-</pre>
-${purchaseProduct1}
-<pre>
-
-id:     ${state.product2.id          || ''}
-title:  ${state.product2.title       || ''}
-descr:  ${state.product2.description || ''}
-price:  ${state.product2.price       || ''}
-state:  ${state.product2.state       || ''}
-expiry: ${state.product2.expiryDate  || ''}
-</pre>
-${purchaseProduct2}
-        `;
+    } else {
+        console.error(`Cannot subscribe: Product (${productId}) or Offer (${offerId}) not found or not loaded yet.`);
+        alert('Unable to subscribe. Product details might still be loading or identifiers are incorrect.');
     }
 }
 ```
-{% endcode-tabs-item %}
 
-{% code-tabs-item title="index.html" %}
-```markup
-<!DOCTYPE html>
-<html>
-<head>
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://reeceipt-validator.fovea.cc 'unsafe-eval' 'unsafe-inline' gap:; style-src 'self' 'unsafe-inline'; media-src *">
-</head>
-<body style="margin-top: 50px">
-  <script type="text/javascript" src="cordova.js"></script>
-  <script type="text/javascript" src="js/index.js"></script>
-</body>
-</html>
+*   **Note:** We retrieve the specific `offer` using `product.getOffer(offerId)`. For simple cases with only one offer per product, you could just use `product.getOffer()`.
+
+**Step 2: Handle the "Approved" State -> Verify**
+
+*   **What:** Add or modify the `.approved()` listener in `initializeStore` to call `transaction.verify()`.
+*   **Why:** When a subscription purchase is approved by Apple, you **must** verify the receipt with your validator. This is the *only* reliable way to get the current subscription status, expiry date, and renewal intent from Apple's servers.
+
+Add/modify the `.approved()` handler within the `store.when()` chain in `initializeStore`:
+
+```javascript
+// Inside initializeStore() -> store.when() chain
+
+    .approved(transaction => {
+        console.log(`Transaction ${transaction.transactionId} approved for ${transaction.products[0]?.id}.`);
+
+        // Verification is REQUIRED for subscriptions to get actual status.
+        if (store.validator) {
+            console.log('Verification required for subscription transaction: ' + transaction.transactionId);
+            // Optional: Update UI to indicate verification is in progress
+            // setState({ isVerifying: true });
+            transaction.verify(); // Initiate verification
+        } else {
+             console.error("VALIDATOR REQUIRED: Cannot reliably manage subscriptions without receipt validation.");
+             alert("Error: Subscription cannot be processed without validation.");
+             // Do NOT finish the transaction here without validation for subscriptions.
+             // It might get stuck or lead to incorrect state.
+        }
+    })
+    // Add .verified() and .finished() next
 ```
-{% endcode-tabs-item %}
-{% endcode-tabs %}
 
+**Step 3: Handle the "Verified" State -> Finish**
+
+*   **What:** Add or modify the `.verified()` listener. This is triggered after successful validation.
+*   **Why:** Upon successful verification, the `VerifiedReceipt` contains the authoritative subscription status from Apple. Now is the time to update your app's state based on this verified data and then **finish** the transaction to acknowledge it with the App Store.
+
+Add/modify the `.verified()` handler within the `store.when()` chain:
+
+```javascript
+// Inside initializeStore() -> store.when() chain
+
+    .verified(receipt => {
+        console.log(`Receipt verified, contains ${receipt.collection.length} verified purchases.`);
+        // Optional: Update UI to clear any "verifying" state
+        // setState({ isVerifying: false });
+
+        // Process the verified data - typically involves updating the UI
+        // based on the content of receipt.collection and store.verifiedPurchases
+        renderUI(); // Re-render the UI with potentially updated subscription status
+
+        // Finish the transaction associated with this receipt.
+        // For subscriptions, finishing acknowledges the transaction.
+        console.log(`Finishing receipt's source transaction: ${receipt.sourceReceipt.transactions[0]?.transactionId}`);
+        receipt.finish(); // Finishes all transactions in the source receipt
+    })
+    // Add .finished() next
+```
+
+*   **Note:** `receipt.finish()` will call `transaction.finish()` on the underlying transaction(s) within the original `Receipt` that was verified.
+
+**Step 4: Handle the "Finished" State**
+
+*   **What:** Add or modify the `.finished()` listener.
+*   **Why:** Confirms the transaction was acknowledged by the App Store. This is mostly for logging or cleanup after the entitlement has already been granted based on the verified receipt.
+
+Add/modify the `.finished()` handler within the `store.when()` chain:
+
+```javascript
+// Inside initializeStore() -> store.when() chain
+
+    .finished(transaction => {
+        console.log(`Transaction ${transaction.transactionId} finished for ${transaction.products[0]?.id}.`);
+        // Subscription state should already be reflected based on verified data.
+        // UI should already be up-to-date via the .verified() handler triggering renderUI().
+    });
+
+// --- Final Initialization Call ---
+// Ensure this is still present at the end of initializeStore()
+store.initialize(...).then(...);
+```
+
+---
+
+**Build and Test (iOS/App Store Subscription)**
+
+Testing subscriptions follows the same general process as non-consumables, but you need to pay attention to renewal cycles and management options.
+
+**1. Prepare & Build:**
+
+*   Save all changes.
+*   Run `cordova prepare ios`.
+*   Run `open platforms/ios/*.xcodeproj`.
+
+**2. Configure & Run in Xcode:**
+
+*   Set up signing and select your physical test device (Simulators don't work reliably).
+*   **Important:** Ensure you have configured a **Receipt Validator URL** in `initializeStore`. Subscription testing *requires* validation.
+*   **Sign Out** of the production App Store on your device (`Settings` -> `App Store` -> Sign Out). Do **NOT** sign into the Sandbox account yet.
+*   Run the app from Xcode (▶).
+
+**3. Test Subscription Purchase:**
+
+*   Observe the UI and Xcode console logs.
+*   Initial status should be "Not Subscribed". Product details should load.
+*   Tap the **"Subscribe"** button for one of your subscription products.
+*   When prompted by the system sheet, **sign in** with your **Sandbox Tester** account.
+*   Confirm the subscription purchase (it will show "[Environment: Sandbox]").
+*   Observe the logs:
+    *   `Transaction ... approved...`
+    *   `Verification required...`
+    *   `(After validator responds) Receipt verified...`
+    *   `Finishing receipt's source transaction...`
+    *   `Transaction ... finished...`
+*   Observe the UI: The `renderUI` function should now detect the active subscription from `store.verifiedPurchases` and display the "Subscribed" status along with the expiry date provided by the validator. The "Subscribe" button for the active plan (and others in the same group) should disappear or change.
+
+**4. Test Renewals (Sandbox):**
+
+*   Sandbox subscriptions renew at an accelerated rate (e.g., a 1-month subscription might renew every 5 minutes).
+*   Keep the app running (or reopen it after the expected renewal time).
+*   You should see new `approved` -> `verified` -> `finished` events logged as the subscription renews automatically. The expiry date displayed in the UI should update accordingly after each verification.
+
+**5. Test Management:**
+
+*   Tap the "Manage Subscription" button (if rendered by your `renderUI` function).
+*   This should open the system's subscription management interface for the Sandbox environment, allowing the test user to change plans or cancel.
+
+---
+
+This completes the subscription purchase flow for iOS/App Store. Remember that accurate status relies heavily on the configured receipt validator.

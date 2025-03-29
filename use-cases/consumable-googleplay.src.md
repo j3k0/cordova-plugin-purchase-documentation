@@ -2,6 +2,6 @@
 
 !INCLUDE "sections/intro-googleplay.md"
 
-
-
 !INCLUDE "sections/setup-googleplay.md"
+
+!INCLUDE "sections/consumable-googleplay-code.md"
