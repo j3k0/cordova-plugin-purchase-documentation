@@ -28,6 +28,15 @@ Then you can jump to your use case from the list below, or the sidebar.
 
 #### Use Cases
 
+* [Using the Test Platform](use-cases/test-platform.md)
 * [Consumable with Google Play](use-cases/consumable-googleplay.md)
+* [Non-Consumable with Google Play](use-cases/non-consumable-googleplay.md)
+* [Subscription with Google Play](use-cases/subscription-googleplay.md)
+* [Non-Renewing Subscription with Google Play](use-cases/non-renewing-googleplay.md)
+* [Consumable with AppStore (iOS & macOS)](use-cases/consumable-appstore.md)
+* [Non-Consumable with AppStore (iOS & macOS)](use-cases/non-consumable-appstore.md)
+* [Subscription with AppStore (iOS & macOS)](use-cases/subscription-appstore.md)
+* [Non-Renewing Subscription with AppStore (iOS & macOS)](use-cases/non-renewing-appstore.md)
 * [Payment Request with Braintree](use-cases/payment-braintree.md)
+* [macOS Specifics](use-cases/macos-specifics.md)
 
