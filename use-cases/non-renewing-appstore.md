@@ -1,19 +1,21 @@
-# Paid Subscription for iOS & macOS
+# Non-Renewing Subscription for iOS & macOS
 
 
 
-# Subscription on iOS
+# Non-Renewing Subscription on iOS & macOS
 
-In this guide, we will build a small application with a subscription that works on iOS.
+This guide demonstrates how to implement a **non-renewing subscription** product using the AppStore platform for iOS and macOS applications.
 
-On iOS, the plugin supports simple subscriptions and subscriptions groups. Introductory prices and promotional offers are supported yet.
+Non-renewing subscriptions grant access to content or services for a **fixed, limited duration** (e.g., 1 month, 6 months, 1 year). Unlike auto-renewing subscriptions, they **do not automatically renew** at the end of the period. The user must explicitly purchase the subscription again to extend access.
 
-Here's what we will build: a simple application to manage a subscription with 2 different levels (basic subscription, and better subscription).
+Key characteristics on Apple platforms:
 
-![](../.gitbook/assets/subscribe-demo.png)
+*   Managed entirely by your application logic after the initial purchase.
+*   Apple does not handle renewals, cancellations, or expiry notifications automatically.
+*   Often used for time-limited access to content archives, seasonal passes, or services where auto-renewal isn't desired or appropriate.
+*   Requires careful handling of expiry dates and potentially syncing purchase status across devices if you support user accounts.
 
-Let's dig into this.
-
+In this guide, we will build a simple application that allows users to purchase a non-renewing subscription which grants access for a defined period.
 ## Setup for iOS AppStore
 
 ### 1. Install Dependencies
@@ -136,30 +138,10 @@ From there, it's just a matter of hitting "+" and filling the form. While you're
 
 ![](../.gitbook/assets/appstore-test-users.png)
 
-### 7. Get a Receipt Validation Server
-
-A proper implementation of subscriptions on iOS requires a receipt validation
-server that'll get used to get the most up-to-date status of a users subscription.
-
-Implementing your own is not in the scope of this guide, so we'll use
-Fovea's dedicated service called Billing.
-
- 1. Create an account on: [https://billing.fovea.cc](https://billing.fovea.cc/).
- 2. Fill in the information for iOS: your **Bundle ID** and the **Shared Secret**.
-
-Once this is done, you can visit the documentation page, keep it around for when
-we'll start the implementation: we'll have to copy-paste the
-`store.validator = ...` line into the code.
-
-{% hint style="info" %}
-The service is free for sandbox receipts validation. When you get to production
-you need to upgrade to a paid plan (see [pricing](https://billing.fovea.cc/pricing/)).
-{% endhint %}
-
 
 ## Code Implementation
 
-This section details the minimal code required to implement a subscription product on iOS and macOS using the AppStore platform.
+This section describes the minimal code required to implement a non-renewing subscription product (granting access for a fixed period) on iOS and macOS using the AppStore platform.
 
 ### Base framework
 
@@ -239,11 +221,11 @@ Here's a little explanation:
 
 ### Initialization & Presentation
 
-Now, we'll initialize the plugin, register our subscription products, and set up the UI to display their status and purchase options. This involves:
-*   Registering products with type `PAID_SUBSCRIPTION`.
-*   Setting up a receipt validator (required for reliable subscription handling).
-*   Displaying product details (title, description, price, expiry).
-*   Showing a "Subscribe" button only when the product `canPurchase`.
+Now, we'll initialize the plugin, register our non-renewing subscription product, and set up the UI to display its status and purchase options. This involves:
+*   Registering the product with type `NON_RENEWING_SUBSCRIPTION`.
+*   Displaying product details (title, description, price, duration).
+*   Displaying the current access expiry date if the subscription is active. *Your application needs to calculate and store this based on purchase history.*
+*   Showing a "Subscribe" or "Extend" button. Non-renewing subscriptions can typically be purchased multiple times to extend access.
 
 
 ### Initialization
@@ -452,170 +434,124 @@ Now, let's build and test!
 
 If using the [Fovea validation service](https://billing.fovea.cc/), `expiryDate` and some other features of the API for an auto-renewing Android subscription will only be available if you complete the _"Connect With Google"_ step using the explainer [here](https://billing.fovea.cc/documentation/connect-with-google-publisher-api/).
 
-### Purchase Flow
-
-Finally, we need to handle the purchase events triggered when the user initiates a subscription purchase. This typically involves:
-*   Initiating the order when the "Subscribe" button is clicked.
-*   Verifying the transaction with the receipt validator upon approval.
-*   Finishing the transaction once verified to grant access.
-
-
-### Testing
-
-To test on iOS with In-App Purchases enabled, I always chose to run my app through Xcode. This way, I can see the logs from both the javascript and native sides, which is useful.
-
-To create a build, first update the Xcode project on the console, swith to Xcode and run.
-
-```text
-cordova prepare ios && open platforms/ios/*.xcodeproj
-```
-
-Run.
-
-![](.gitbook/assets/subscribe-init.png)
+*Note: Adapt the UI logic in `subscription-generic-initialization.md`. The concept of `product.owned` is less relevant here; you need to track ownership and expiry based on purchase history (likely stored locally or synced via your backend). Show "Access until [Your Calculated Expiry Date]".*
 
 ### Purchase Flow
 
-We already added a "Buy" button. This button calls the `store.order()` method which initiates the purchase flow for a product.
+Handling the purchase flow for non-renewing subscriptions on Apple platforms involves purchasing the product and then managing the entitlement period within your application.
+*   Initiate the order when the "Subscribe/Extend" button is clicked.
+*   Handle the `approved` state. Verification is optional but recommended for tracking purchase history reliably.
+*   Call `transaction.finish()` once the purchase is approved (or verified).
+*   Your application must record the purchase time and calculate the expiry date based on the product's defined duration (e.g., 1 month, 1 year).
+*   Store this expiry date persistently (e.g., `localStorage`, secure storage, or synced with your backend).
+*   Implement logic to check the expiry date to grant or deny access to the content/service.
+*   If you support user accounts, you need to sync this entitlement across the user's devices.
 
-At this point, the code starts the process but the purchase will remain "processing" forever, in the `approved` state.
+### Purchase Flow (iOS/macOS Non-Renewing)
 
-For a product in the `approved` state, the transaction has been approved by the user's banking institution but it won't be finalized until you inform them to do so. You have to deliver whatever the user purchased before finalizing.
+Handling the purchase flow for non-renewing subscriptions on Apple platforms involves purchasing the product like any other, acknowledging it, and then managing the entitlement period within your application logic. Apple does not automatically track the expiry or renewal for this type of subscription.
 
-I already introduced the purchase flow in the introduction of this guide, you can check the [purchase process](../discover/about-the-plugin.md#purchase-process) section if you need a refresher. The official documentation provides even more details. [⇒ API Documentation](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/api.md#-purchasing) 
+1.  **Initiate Order:**
+    When the user clicks the "Subscribe" or "Extend" button, call `store.order()` on the relevant offer.
 
-When the user is done with the native interface \(i.e. has entered his/her password and confirmed\), your app receives the `approved` event. So let's add more handlers to the `onDeviceReady()` function, before the call to `store.refresh()`.
-
-```javascript
-store.when()
-     .approved(p => p.verify())
-     .verified(p => p.finish())
-     .owned(p => console.log(`you now own ${p.alias}`));
-```
-
-That's enough for a local implementation (where we don't need to inform a server of changes to the subscription status). Let's try the whole thing now. Repeat the steps from the [testing](#testing) section above:
-
-```text
-cordova prepare ios && open platforms/ios/*.xcodeproj
-```
-
-Run from Xcode and here you go! You should be able to purchase your subscriptions.
-
-Full source for this tutorial below:
-
-{% code-tabs %}
-{% code-tabs-item title="js/index.js" %}
-```javascript
-document.addEventListener('deviceready', onDeviceReady);
-
-function onDeviceReady() {
-
-    const state = {};
-    function setState(attr) {
-        Object.assign(state, attr);
-        render(state);
+    ```javascript
+    function purchaseNonRenewingSubscription() {
+        const offer = store.get('my_non_renewing_sub_id', Platform.APPLE_APPSTORE)?.getOffer();
+        if (offer) {
+            store.order(offer)
+                .then(result => {
+                    if (result && result.isError) {
+                        // Handle error (e.g., payment cancelled)
+                        console.error("Order failed: " + result.message);
+                    } else {
+                        // Optional: Update UI to show processing state if needed
+                        console.log("Order successful, waiting for approval/verification.");
+                    }
+                });
+        } else {
+            console.error("Offer not found for non-renewing subscription.");
+        }
     }
+    ```
 
-    setState({
-        error: '',
-        status: 'Loading...',
-        product1: {},
-        product2: {},
-    });
+2.  **Handle Approval & Verification (Optional but Recommended):**
+    Set up listeners for the `approved` and `verified` states. Verification is useful for obtaining the `purchaseDate` accurately from Apple's servers, which you'll need to calculate the expiry.
 
-    // We should first register all our products or we cannot use them in the app.
-    store.register([{
-        id:    'my_subscription1',
-        type:   CdvPurchase.ProductType.PAID_SUBSCRIPTION,
-    }, {
-        id:    'my_subscription2',
-        type:   CdvPurchase.ProductType.PAID_SUBSCRIPTION,
-    }]);
-
-    // Setup the receipt validator service.
-    store.validator = '<<< YOUR_RECEIPT_VALIDATION_URL >>>';
-
-    // Show errors for 10 seconds.
-    store.error(function(error) {
-        setState({ error: `ERROR ${error.code}: ${error.message}` });
-        setTimeout(function() {
-            setState({ error: `` });
-        }, 10000);
-    });
-
+    ```javascript
+    // In your store initialization (e.g., inside onDeviceReady or initStore)
     store.when()
-        .approved(p => p.verify())
-        .verified(p => p.finish())
-        .owned(p => console.log(`you now own ${p.alias}`));
+        .approved(transaction => {
+            // Optional: Verify the transaction to get accurate purchaseDate
+            // and confirm legitimacy.
+            if (store.validator) {
+                transaction.verify();
+            } else {
+                // No validator, proceed directly to finish/acknowledge
+                // Note: transaction.purchaseDate might be less reliable without validation.
+                acknowledgePurchase(transaction);
+            }
+        })
+        .verified(receipt => {
+            // Acknowledgment is done after verification succeeds
+            const transaction = receipt.transactions.find(t => t.products[0]?.id === 'my_non_renewing_sub_id'); // Find the relevant transaction
+            if (transaction) {
+                acknowledgePurchase(transaction);
+            }
+        });
+    ```
 
-    // Called when any subscription product is updated
-    store.when('subscription').updated(function() {
-        const product1 = store.get('my_subscription1') || {};
-        const product2 = store.get('my_subscription2') || {};
+3.  **Acknowledge (Finish) the Purchase & Calculate Expiry:**
+    Call `transaction.finish()` to acknowledge the purchase with Apple. Crucially, you must then calculate and store the expiry date based on the product's defined duration and the transaction's `purchaseDate`.
 
-        let status = 'Please subscribe below';
-        if (product1.owned || product2.owned)
-            status = 'Subscribed';
-        else if (product1.state === 'approved' || product2.state === 'approved')
-            status = 'Processing...';
+    ```javascript
+    function acknowledgePurchase(transaction) {
+        // Grant entitlement based on the product purchased
+        // 1. Get the accurate purchase date (ideally from verified receipt if possible)
+        const purchaseDate = transaction.purchaseDate || new Date(); // Fallback to now if date missing
 
-        setState({ product1, product2, status });
-    });
+        // 2. Determine the duration from your product definition
+        const productDurationMonths = 6; // Example: Get this (e.g., 6 months) based on transaction.products[0].id
 
-    // Load informations about products and purchases
-    store.refresh();
+        // 3. Calculate expiry date
+        const expiryDate = new Date(purchaseDate);
+        expiryDate.setMonth(expiryDate.getMonth() + productDurationMonths);
 
-    function render() {
+        // 4. Store the expiry date persistently and associate with the user/device
+        //    This might involve localStorage, secure storage, or your backend.
+        //    If syncing across devices, ensure this is tied to the user's account.
+        window.localStorage.setItem('nonRenewingExpiry_' + transaction.products[0].id, expiryDate.toISOString());
+        console.log(`Access granted for ${transaction.products[0].id} until: ${expiryDate.toISOString()}`);
 
-        const purchaseProduct1 = state.product1.canPurchase
-            ? `<button onclick="store.order('my_subscription1')">Subscribe</button>` : '';
-        const purchaseProduct2 = state.product2.canPurchase
-            ? `<button onclick="store.order('my_subscription2')">Subscribe</button>` : '';
+        // 5. Acknowledge the purchase with Apple AppStore
+        transaction.finish();
 
-        const body = document.getElementsByTagName('body')[0];
-        body.innerHTML = `
-<pre> 
-${state.error}
-
-subscription: ${state.status}
-
-id:     ${state.product1.id          || ''}
-title:  ${state.product1.title       || ''}
-state:  ${state.product1.state       || ''}
-descr:  ${state.product1.description || ''}
-price:  ${state.product1.price       || ''}
-expiry: ${state.product1.expiryDate  || ''}
-</pre>
-${purchaseProduct1}
-<pre>
-
-id:     ${state.product2.id          || ''}
-title:  ${state.product2.title       || ''}
-descr:  ${state.product2.description || ''}
-price:  ${state.product2.price       || ''}
-state:  ${state.product2.state       || ''}
-expiry: ${state.product2.expiryDate  || ''}
-</pre>
-${purchaseProduct2}
-        `;
+        // 6. Refresh UI to show the new expiry date
+        refreshUI(); // Ensure your refreshUI reads the stored expiry date
     }
-}
-```
-{% endcode-tabs-item %}
+    ```
 
-{% code-tabs-item title="index.html" %}
-```markup
-<!DOCTYPE html>
-<html>
-<head>
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://reeceipt-validator.fovea.cc 'unsafe-eval' 'unsafe-inline' gap:; style-src 'self' 'unsafe-inline'; media-src *">
-</head>
-<body style="margin-top: 50px">
-  <script type="text/javascript" src="cordova.js"></script>
-  <script type="text/javascript" src="js/index.js"></script>
-</body>
-</html>
-```
-{% endcode-tabs-item %}
-{% endcode-tabs %}
+4.  **Manage Entitlement:**
+    Your application must check the stored expiry date whenever the user tries to access the protected content or service. Sync this state if users can log into accounts on multiple devices.
 
+    ```javascript
+    function hasActiveNonRenewingAccess(productId) {
+        const expiryString = window.localStorage.getItem('nonRenewingExpiry_' + productId);
+        if (!expiryString) return false;
+        const expiryDate = new Date(expiryString);
+        return expiryDate > new Date();
+    }
+
+    // Example usage:
+    if (hasActiveNonRenewingAccess('my_non_renewing_sub_id')) {
+        // Show premium content
+    } else {
+        // Show purchase options
+    }
+    ```
+
+**Key Points:**
+
+*   **Acknowledge:** Always call `transaction.finish()`.
+*   **Track Expiry:** Your app *must* calculate, store, and check the expiry date. Apple does not manage this for non-renewing types.
+*   **Purchase Date:** Use the `transaction.purchaseDate`. Verification (`transaction.verify()`) provides the most reliable date from Apple's servers.
+*   **Persistence & Syncing:** Store the expiry date securely and sync across devices if necessary for your use case.

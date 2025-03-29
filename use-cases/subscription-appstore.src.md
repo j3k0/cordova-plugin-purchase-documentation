@@ -1,6 +1,6 @@
 # Paid Subscription for iOS & macOS
 
-!INCLUDE "sections/plugin-v13.md"
+
 
 !INCLUDE "sections/subscription-ios-intro.md"
 

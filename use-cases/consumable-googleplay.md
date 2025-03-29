@@ -24,7 +24,6 @@ Once we have a Cordova application with IAP support enabled and everything is in
 4. Secure the transactions
 
 
-This guide uses the plugin at version 13 or later (which is in beta at this stage).
 
 
 ## Setup for Google Play

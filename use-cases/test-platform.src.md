@@ -1,6 +1,6 @@
 # Using the Test Platform
 
-!INCLUDE "sections/plugin-v13.md"
+
 
 !INCLUDE "sections/test-platform-intro.md"
 

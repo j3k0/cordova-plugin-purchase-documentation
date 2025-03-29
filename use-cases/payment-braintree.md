@@ -1,6 +1,5 @@
 # Payment Request with Braintree
 
-This guide uses the plugin at version 13 or later (which is in beta at this stage).
 
 
 We will proceed in steps: setup, initialization and payment.

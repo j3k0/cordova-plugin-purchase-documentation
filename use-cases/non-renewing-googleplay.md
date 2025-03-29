@@ -1,12 +1,23 @@
-# Paid Subscription with Google Play
+# Non-Renewing Subscription with Google Play
 
 
 
-# Subscription on Android
+# Non-Renewing Subscription on Android
 
-In this guide, we will build a small application with a subscription that works on Android with Google Play.
+This guide demonstrates how to implement a **non-renewing subscription** product using the Google Play platform for Android applications.
 
+On Google Play, non-renewing subscriptions are technically treated as **one-time products** (similar to consumables or non-consumables) that grant entitlement for a fixed duration. Unlike auto-renewing subscriptions, Google Play **does not automatically manage renewals or cancellations** for these products.
 
+Key characteristics on Google Play:
+
+*   Purchased as a one-time product.
+*   Your application is responsible for determining the access duration based on the product purchased (e.g., a "1 Month Access" product grants 1 month of entitlement).
+*   Your application must track the expiry date based on the purchase time.
+*   Purchases must be **acknowledged** within 3 days using `transaction.finish()` to prevent automatic refunds by Google.
+*   They **should not be consumed**, as consuming them would remove the entitlement.
+*   Users can typically purchase the product again (e.g., buy another month) once access expires, or potentially before expiry to extend access, depending on your app's logic.
+
+In this guide, we will build a simple application that allows users to purchase a non-renewing subscription granting access for a specific period.
 ## Setup for Google Play
 
 ### 1. Install Dependencies
@@ -231,57 +242,10 @@ To test your Google Play Billing implementation with actual in-app purchases, yo
 Testers can begin making purchases of your in-app products within 15 minutes.
 {% endhint %}
 
-### 9. Setup Receipt Validation Server (Google Play)
 
-Reliably managing Android subscriptions, especially determining the exact expiry date and renewal status, requires communication with the **Google Play Developer API**. The purchase plugin itself does not directly communicate with this server-side API. You need an intermediary service for this, often referred to as a receipt validation server.
-
-While you can build your own server to interact with the Google Play Developer API, this guide will use **Iaptic** (the service developed by the plugin's author) which simplifies this process.
-
-**Why is this needed for Android Subscriptions?**
-
-*   **Accurate Expiry Dates:** Local receipt data on Android doesn't always contain a reliable expiry date, especially after renewals or cancellations. The Google Play Developer API is the source of truth.
-*   **Renewal Status:** Checking if a subscription will auto-renew or has been cancelled requires server-side checks.
-*   **Grace Periods & Account Hold:** Handling billing issues requires server-side status information.
-
-**Steps using Iaptic:**
-
-1.  **Create an Iaptic Account:** If you haven't already, sign up at [iaptic.com](https://www.iaptic.com/).
-2.  **Connect with Google Play Developer API:**
-    *   Navigate to your Iaptic project settings.
-    *   Find the "Google Play" section.
-    *   Follow the instructions provided by Iaptic to connect your Google Play Developer account. This typically involves:
-        *   Creating a **Service Account** in your Google Cloud Console project that is linked to your Google Play Developer Console.
-        *   Granting the necessary permissions (like "View financial data" and "Manage orders and subscriptions") to this Service Account within the Google Play Console.
-        *   Uploading the JSON key file for the Service Account to Iaptic.
-    *   Iaptic provides detailed guides for this process: [Connect With Google](https://www.iaptic.com/documentation/connect-with-google-publisher-api/)
-3.  **Configure the Plugin:**
-    *   Go to the "Setup" section in your Iaptic dashboard and find the "Cordova" setup instructions.
-    *   Copy the provided `store.validator` URL. It will look something like `https://validator.iaptic.com/...`.
-    *   Paste this URL into your application's initialization code where you configure the store validator:
-
-    ```javascript
-    // In your initStore() or equivalent function
-    const iaptic = new CdvPurchase.Iaptic({
-      appName: "[Your Iaptic App Name]", // Replace with your actual App Name
-      apiKey: "[Your Iaptic Public Key]" // Replace with your actual Public Key
-    });
-    CdvPurchase.store.validator = iaptic.validator;
-    ```
-
-    *   Ensure your `Content-Security-Policy` in `index.html` allows connections to `validator.iaptic.com` (or your custom Iaptic domain).
-
-{% hint style="info" %}
-Iaptic's validation service is often free or has a generous free tier during development (using test purchases) and offers paid plans for production use. Check their pricing for details.
-{% endhint %}
-
-{% hint style="warning" %}
-Skipping this server-side validation step for Android subscriptions will lead to unreliable expiry date information and difficulty in managing subscription states correctly.
-{% endhint %}
-
-With the validator configured and connected to the Google Play Developer API, the plugin, via Iaptic, can now retrieve accurate subscription details during the validation process.
 ## Code Implementation
 
-This section describes the minimal code required to implement an auto-renewing subscription product on Android using the Google Play platform.
+This section describes the minimal code required to implement a non-renewing subscription product (granting access for a fixed period, like 1 month or 1 year) on Android using the Google Play platform.
 
 ### Base framework
 
@@ -361,12 +325,11 @@ Here's a little explanation:
 
 ### Initialization & Presentation
 
-Now, we'll initialize the plugin, register our subscription products, and set up the UI to display their status and purchase options. This involves:
-*   Registering products with type `PAID_SUBSCRIPTION`.
-*   Setting up a receipt validator connected to the Google Play Developer API (required for reliable subscription handling on Android - see Step 9 in the setup).
-*   Displaying product details (title, description, price, billing period, trial info).
-*   Displaying the current subscription status (subscribed, expired, in grace period) based on verified receipt data.
-*   Showing a "Subscribe" button only when the product `canPurchase`.
+Now, we'll initialize the plugin, register our non-renewing subscription product, and set up the UI to display its status and purchase options. This involves:
+*   Registering the product with type `NON_RENEWING_SUBSCRIPTION`.
+*   Displaying product details (title, description, price, duration).
+*   Displaying the current access expiry date if the subscription is active.
+*   Showing a "Subscribe" or "Extend" button. Google Play treats these similarly to consumables, so they can typically be purchased again once expired (or potentially even before to extend).
 
 
 ### Initialization
@@ -575,172 +538,113 @@ Now, let's build and test!
 
 If using the [Fovea validation service](https://billing.fovea.cc/), `expiryDate` and some other features of the API for an auto-renewing Android subscription will only be available if you complete the _"Connect With Google"_ step using the explainer [here](https://billing.fovea.cc/documentation/connect-with-google-publisher-api/).
 
-*Note: The reliability of fields like `expiryDate` and `owned` status heavily depends on using a receipt validator connected to the Google Play Developer API.*
+*Note: Adapt the UI logic in `subscription-generic-initialization.md`. Instead of just "Subscribed", show "Access until [Expiry Date]". The `product.owned` status for non-renewing subscriptions might depend on local data or validator logic correctly interpreting the expiry.*
 
 ### Purchase Flow
 
-Finally, we handle the purchase events for subscriptions. This requires verification and acknowledging the purchase.
-*   Initiate the order when the "Subscribe" button is clicked. Consider handling upgrades/downgrades using `additionalData` if products are in the same `group` or by specifying `oldPurchaseToken`.
-*   Verify the transaction with the receipt validator upon approval using `transaction.verify()`.
-*   Acknowledge the purchase by calling `receipt.finish()` (or `transaction.finish()`) once verified. This is crucial to prevent automatic refunds and ensures proper subscription state management by Google Play.
+Handling the purchase flow for non-renewing subscriptions on Google Play is similar to consumables or non-consumables in that they need to be **acknowledged**. They grant access for a fixed duration defined by the product.
+*   Initiate the order when the "Subscribe/Extend" button is clicked.
+*   Handle the `approved` state. Verification is optional but recommended.
+*   **Acknowledge** the purchase by calling `transaction.finish()`. This prevents Google Play from automatically refunding after 3 days. **Do not consume** non-renewing subscriptions.
+*   Your application logic should track the expiry date based on the purchase time and product duration to manage access.
 
+### Purchase Flow (Android Non-Renewing)
 
-### Testing
+Handling the purchase flow for non-renewing subscriptions on Google Play requires acknowledging the purchase to Google, similar to non-consumables. Your application logic is responsible for managing the entitlement period.
 
-To test on Android with In-App Purchases enabled, I always chose to run my app through Android Studio. This way, I can see the logs from both the javascript and native sides, which is useful.
+1.  **Initiate Order:**
+    When the user clicks the "Subscribe" or "Extend" button, call `store.order()` on the relevant offer.
 
-To create a build, first update the Android project on the console, run
-
-```text
-cordova prepare android
-```
-
-Run.
-
-![](.gitbook/assets/subscribe-init.png)
-
-### Purchase Flow
-
-We already added a "Buy" button. This button calls the `store.order()` method which initiates the purchase flow for a product.
-
-At this point, the code starts the process but the purchase will remain "processing" forever, in the `approved` state.
-
-For a product in the `approved` state, the transaction has been approved by the user's banking institurion but it won't be finalized until you inform them to do so. You have to deliver whatever the user purchased before finalizing.
-
-I already introduced the purchase flow in the introduction of this guide, you can check the [purchase process](../discover/about-the-plugin.md#purchase-process) section if you need a refresher. The official documentation provides even more details. [⇒ API Documentation](https://github.com/j3k0/cordova-plugin-purchase/blob/master/doc/api.md#-purchasing) 
-
-When the user is done with the native interface (i.e. has entered his/her password and confirmed\), your app receives the `approved` event. So let's add more handlers to the `onDeviceReady()` function, before the call to `store.refresh()`.
-
-```javascript
-store.when()
-     .approved(p => p.verify())
-     .verified(p => p.finish())
-     .owned(p => console.log(`you now own ${p.alias}`));
-```
-
-That's enough for a local implementation (where we don't need to inform a server of changes to the subscription status). Let's try the whole thing now. Repeat the steps from the [testing](#testing) section above:
-
-```text
-cordova prepare android
-```
-
-Run from Android Studio and here you go! You should be able to purchase your subscriptions.
-
-Full source for this tutorial below:
-
-{% code-tabs %}
-{% code-tabs-item title="js/index.js" %}
-```javascript
-document.addEventListener('deviceready', onDeviceReady);
-
-function onDeviceReady() {
-
-    const state = {};
-    function setState(attr) {
-        Object.assign(state, attr);
-        render(state);
+    ```javascript
+    function purchaseNonRenewingSubscription() {
+        const offer = store.get('my_non_renewing_sub_id', Platform.GOOGLE_PLAY)?.getOffer();
+        if (offer) {
+            store.order(offer)
+                .then(result => {
+                    if (result && result.isError) {
+                        // Handle error (e.g., payment cancelled)
+                        console.error("Order failed: " + result.message);
+                    } else {
+                        // Optional: Update UI to show processing state if needed
+                        console.log("Order successful, waiting for approval/verification.");
+                    }
+                });
+        } else {
+            console.error("Offer not found for non-renewing subscription.");
+        }
     }
+    ```
 
-    setState({
-        error: '',
-        status: 'Loading...',
-        product1: {},
-        product2: {},
-    });
+2.  **Handle Approval & Verification (Optional but Recommended):**
+    Set up listeners for the `approved` and `verified` states. Verification adds a layer of security.
 
-    // We should first register all our products or we cannot use them in the app.
-    store.register([{
-        id:    'my_subscription1',
-        type:   CdvPurchase.ProductType.PAID_SUBSCRIPTION,
-    }, {
-        id:    'my_subscription2',
-        type:   CdvPurchase.ProductType.PAID_SUBSCRIPTION,
-    }]);
-
-    // Setup the receipt validator service.
-    store.validator = '<<< YOUR_RECEIPT_VALIDATION_URL >>>';
-
-    // Show errors for 10 seconds.
-    store.error(function(error) {
-        setState({ error: `ERROR ${error.code}: ${error.message}` });
-        setTimeout(function() {
-            setState({ error: `` });
-        }, 10000);
-    });
-
+    ```javascript
+    // In your store initialization (e.g., inside onDeviceReady or initStore)
     store.when()
-        .approved(p => p.verify())
-        .verified(p => p.finish())
-        .owned(p => console.log(`you now own ${p.alias}`));
+        .approved(transaction => {
+            // Optional: Verify the transaction
+            // If you have a validator, verification provides extra security
+            // and potentially fetches accurate purchase/expiry times if needed.
+            if (store.validator) {
+                transaction.verify();
+            } else {
+                // No validator, proceed directly to finish/acknowledge
+                acknowledgePurchase(transaction);
+            }
+        })
+        .verified(receipt => {
+            // Acknowledgment is done after verification succeeds
+            const transaction = receipt.transactions[0]; // Assuming one transaction per receipt here
+            if (transaction) {
+                acknowledgePurchase(transaction);
+            }
+        });
+    ```
 
-    // Called when any subscription product is updated
-    store.when('subscription').updated(function() {
-        const product1 = store.get('my_subscription1') || {};
-        const product2 = store.get('my_subscription2') || {};
+3.  **Acknowledge (Finish) the Purchase:**
+    This is the crucial step for non-renewing subscriptions (and non-consumables) on Google Play. Call `transaction.finish()` to acknowledge the purchase. **Do not consume it.**
 
-        let status = 'Please subscribe below';
-        if (product1.owned || product2.owned)
-            status = 'Subscribed';
-        else if (product1.state === 'approved' || product2.state === 'approved')
-            status = 'Processing...';
+    ```javascript
+    function acknowledgePurchase(transaction) {
+        // Grant entitlement based on the product purchased
+        // e.g., Calculate expiry date: now + product duration
+        const productDurationMonths = 1; // Example: get this from product definition
+        const expiryDate = new Date();
+        expiryDate.setMonth(expiryDate.getMonth() + productDurationMonths);
 
-        setState({ product1, product2, status });
-    });
+        // Store the expiry date persistently
+        window.localStorage.setItem('nonRenewingExpiry', expiryDate.toISOString());
+        console.log(`Access granted until: ${expiryDate.toISOString()}`);
 
-    // Load informations about products and purchases
-    store.refresh();
+        // Acknowledge the purchase with Google Play
+        transaction.finish();
 
-    function render() {
-
-        const purchaseProduct1 = state.product1.canPurchase
-            ? `<button onclick="store.order('my_subscription1')">Subscribe</button>` : '';
-        const purchaseProduct2 = state.product2.canPurchase
-            ? `<button onclick="store.order('my_subscription2')">Subscribe</button>` : '';
-
-        const body = document.getElementsByTagName('body')[0];
-        body.innerHTML = `
-<pre> 
-${state.error}
-
-subscription: ${state.status}
-
-id:     ${state.product1.id          || ''}
-title:  ${state.product1.title       || ''}
-state:  ${state.product1.state       || ''}
-descr:  ${state.product1.description || ''}
-price:  ${state.product1.price       || ''}
-expiry: ${state.product1.expiryDate  || ''}
-</pre>
-${purchaseProduct1}
-<pre>
-
-id:     ${state.product2.id          || ''}
-title:  ${state.product2.title       || ''}
-descr:  ${state.product2.description || ''}
-price:  ${state.product2.price       || ''}
-state:  ${state.product2.state       || ''}
-expiry: ${state.product2.expiryDate  || ''}
-</pre>
-${purchaseProduct2}
-        `;
+        // Refresh UI to show the new expiry date
+        refreshUI(); // Make sure your refreshUI function reads the expiry date
     }
-}
-```
-{% endcode-tabs-item %}
+    ```
 
-{% code-tabs-item title="index.html" %}
-```markup
-<!DOCTYPE html>
-<html>
-<head>
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://reeceipt-validator.fovea.cc 'unsafe-eval' 'unsafe-inline' gap:; style-src 'self' 'unsafe-inline'; media-src *">
-</head>
-<body style="margin-top: 50px">
-  <script type="text/javascript" src="cordova.js"></script>
-  <script type="text/javascript" src="js/index.js"></script>
-</body>
-</html>
-```
-{% endcode-tabs-item %}
-{% endcode-tabs %}
+4.  **Manage Entitlement:**
+    Your application must check the stored expiry date whenever the user tries to access the protected content or service.
 
+    ```javascript
+    function hasActiveNonRenewingAccess() {
+        const expiryString = window.localStorage.getItem('nonRenewingExpiry');
+        if (!expiryString) return false;
+        const expiryDate = new Date(expiryString);
+        return expiryDate > new Date();
+    }
+
+    // Example usage:
+    if (hasActiveNonRenewingAccess()) {
+        // Show premium content
+    } else {
+        // Show purchase options
+    }
+    ```
+
+**Key Points:**
+
+*   **Acknowledge, Don't Consume:** Use `transaction.finish()` to acknowledge. Consuming would remove the entitlement.
+*   **Track Expiry:** Your app must calculate and track the expiry date based on the purchase time and the duration defined for the product ID.
+*   **Persistence:** Store the expiry date reliably (e.g., `localStorage`, secure storage, synced backend).

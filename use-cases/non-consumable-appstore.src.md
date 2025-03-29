@@ -1,6 +1,6 @@
 # Non-Consumable Product for iOS & macOS
 
-!INCLUDE "sections/plugin-v13.md"
+
 
 !INCLUDE "sections/non-consumable-ios-intro.md"
 

@@ -1,6 +1,6 @@
 # Non-Renewing Subscription with Google Play
 
-!INCLUDE "sections/plugin-v13.md"
+
 
 !INCLUDE "sections/non-renewing-android-intro.md"
 

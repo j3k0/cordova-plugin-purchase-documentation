@@ -1,6 +1,6 @@
 # Paid Subscription with Google Play
 
-!INCLUDE "sections/plugin-v13.md"
+
 
 !INCLUDE "sections/subscription-android-intro.md"
 

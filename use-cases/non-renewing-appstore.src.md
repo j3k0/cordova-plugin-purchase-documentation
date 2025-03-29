@@ -1,6 +1,6 @@
 # Non-Renewing Subscription for iOS & macOS
 
-!INCLUDE "sections/plugin-v13.md"
+
 
 !INCLUDE "sections/non-renewing-ios-intro.md"
 

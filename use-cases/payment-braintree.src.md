@@ -1,6 +1,6 @@
 # Payment Request with Braintree
 
-!INCLUDE "sections/plugin-v13.md"
+
 
 We will proceed in steps: setup, initialization and payment.
 
