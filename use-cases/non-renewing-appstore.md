@@ -176,11 +176,8 @@ From there, it's just a matter of hitting "+" and filling the form. While you're
 
 ![](../.gitbook/assets/appstore-test-users.png)
 
+
 *   **Important:** Use these accounts *only* when prompted by your app during a purchase flow on a test device/build. Do not sign into the main App Store settings with them.
-
-### 7. (Recommended) Setup Receipt Validation Service
-
-For secure and reliable purchase handling, especially for subscriptions and non-consumables, set up server-side validation.
 
 ### 7. (Recommended) Setup Receipt Validation Service
 
@@ -249,7 +246,8 @@ Since you are here, let's retrieve the Shared Secret. You can use an App-Specifi
     *   Set `store.validator` to your server's endpoint URL.
     *   You will need the **App-Specific Shared Secret** for your server logic.
 
-**Choosing not to validate receipts server-side will lead to unreliable subscription status, inability to handle renewals/cancellations correctly, and significant security vulnerabilities.***   **Remember:** You'll need the **App-Specific Shared Secret** obtained in Step 3 for your validation server.
+**Choosing not to validate receipts server-side will lead to unreliable subscription status, inability to handle renewals/cancellations correctly, and significant security vulnerabilities.**
+*   **Remember:** You'll need the **App-Specific Shared Secret** obtained in Step 3 for your validation server.
 
 ---
 

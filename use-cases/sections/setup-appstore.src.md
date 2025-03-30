@@ -83,13 +83,11 @@ Define the specific items (consumables, non-consumables, subscriptions) you want
 Create special Apple IDs for testing purchases without real money.
 
 !INCLUDE "setup-ios-6-test-users.md"
+
 *   **Important:** Use these accounts *only* when prompted by your app during a purchase flow on a test device/build. Do not sign into the main App Store settings with them.
 
-### 7. (Recommended) Setup Receipt Validation Service
-
-For secure and reliable purchase handling, especially for subscriptions and non-consumables, set up server-side validation.
-
 !INCLUDE "setup-subscription-ios-7-validation-server.md"
+
 *   **Remember:** You'll need the **App-Specific Shared Secret** obtained in Step 3 for your validation server.
 
 ---
