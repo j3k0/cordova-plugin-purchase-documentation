@@ -54,7 +54,7 @@ Then, configure your Xcode project:
 6.  Click **"+ Capability"** near the top.
 7.  Search for and add **"In-App Purchase"**. It should appear in the capabilities list.
 
-    !INCLUDE "../images/xcode-capability-in-app-purchase.md"
+!INCLUDE "../images/xcode-capability-in-app-purchase.md"
 
 !INCLUDE "setup-ios-4-install-cordova-plugin.md"
 *Note: The included section primarily repeats the capability step, ensure it's consistent.*

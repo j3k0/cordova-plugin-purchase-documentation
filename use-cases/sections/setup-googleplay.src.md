@@ -22,7 +22,7 @@ This section covers the essential steps for setting up your Android app for In-A
 
 ### 2. Create Cordova Project
 
-!INCLUDE "setup-android-2-create-cordova-project.md"
+!INCLUDE "./setup-android-2-create-cordova-project.md"
 
 ### 3. Setup Google Play Application & Billing
 
@@ -31,7 +31,7 @@ This section covers the essential steps for setting up your Android app for In-A
 *   **Billing Setup:** Link a Google Merchant Account if you haven't already. This is usually done under "Setup" -> "Payments profile" in the Play Console. Ensure it's active.
 *   **License Testing:** Add Google accounts (full Gmail addresses) you'll use for testing under "Setup" -> "License testing" in the Play Console. These accounts can make test purchases without being charged real money.
 
-!INCLUDE "setup-android-3-google-play.md"
+!INCLUDE "./setup-android-3-google-play.md"
 
 ### 4. Install Plugin and Configure Project
 
@@ -60,7 +60,7 @@ The plugin automatically adds the necessary `com.android.vending.BILLING` permis
 
 Define each virtual item under your app in the Play Console -> "Monetize" section -> "Products" (for one-time purchases like consumables/non-consumables) or "Subscriptions".
 
-!INCLUDE "setup-android-7-google-play-products.md"
+!INCLUDE "./setup-android-7-google-play-products.md"
 
 ### 6. Upload Signed Build for Testing
 
@@ -72,10 +72,10 @@ Define each virtual item under your app in the Play Console -> "Monetize" sectio
 4.  Ensure your **test account** (from step 3) is added as a tester for that track and has accepted the testing invitation (usually via a Play Store link).
 5.  Install this signed version (or a *subsequent* version signed with the *same key*) onto your test device, ensuring the test account is the primary Google account on the device. Installation *must* typically come via the Play Store's testing mechanism, not `adb install`.
 
-!INCLUDE "setup-android-6-upload-to-google-play.md"
+!INCLUDE "./setup-android-6-upload-to-google-play.md"
 
 ### 7. (Recommended) Setup Receipt Validation Service
 
 Server-side validation is essential for security and reliable subscription management.
 
-!INCLUDE "sections/setup-subscription-android-7-validation-server.md"
+!INCLUDE "./setup-subscription-android-7-validation-server.md"

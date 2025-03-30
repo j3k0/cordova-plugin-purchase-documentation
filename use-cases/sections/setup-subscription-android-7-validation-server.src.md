@@ -23,7 +23,7 @@ For subscriptions (and non-consumables), **server-side receipt validation is ess
         store.initialize([CdvPurchase.Platform.GOOGLE_PLAY]);
         ```
     *   You will need to provide Iaptic with your **Google Play Developer API credentials** (Service Account JSON key). Follow Iaptic's setup guide for instructions.
-        !INCLUDE "setup-android-3-create-play-store-application.md"
+!INCLUDE "setup-android-3-create-play-store-application.md"
 
 2.  **Build Your Own Server:**
     *   Requires significant backend development using the [Google Play Developer API](https://developers.google.com/android-publisher).

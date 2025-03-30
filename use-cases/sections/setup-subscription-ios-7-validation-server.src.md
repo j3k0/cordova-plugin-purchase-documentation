@@ -29,7 +29,7 @@ For subscriptions (and non-consumables), **server-side receipt validation is ess
         }]);
         ```
     *   You will also need the **App-Specific Shared Secret** from App Store Connect for Iaptic to validate iOS receipts. Enter this secret in your Iaptic application settings.
-        !INCLUDE "setup-ios-3-create-app-store-application.md"
+!INCLUDE "./setup-ios-3-create-app-store-application.md"
 
 2.  **Build Your Own Server:**
     *   Requires significant backend development.

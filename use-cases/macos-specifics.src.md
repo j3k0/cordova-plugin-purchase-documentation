@@ -16,8 +16,7 @@ In addition to the **"In-App Purchase"** capability required for iOS, macOS apps
 3.  Go to the **"Signing & Capabilities"** tab.
 4.  Click **"+ Capability"** and add **"App Sandbox"**.
 5.  Under the "App Sandbox" settings, ensure **"Network: Outgoing Connections (Client)"** is checked. This is often required for the app to communicate with validation servers or other necessary network services.
-
-    !INCLUDE "../images/xcode-capability-app-sandbox.md" *(Placeholder: Add image showing sandbox settings)*
+!INCLUDE "../images/xcode-capability-app-sandbox.md"
 6.  Ensure the **"In-App Purchase"** capability is also added, just like for iOS.
 
 ## Testing on macOS

@@ -103,7 +103,6 @@ Then, configure your Xcode project:
 6.  Click **"+ Capability"** near the top.
 7.  Search for and add **"In-App Purchase"**. It should appear in the capabilities list.
 
-    !INCLUDE "../images/xcode-capability-in-app-purchase.md"
 
 
 When you only require iOS support, no need for special command line arguments:
