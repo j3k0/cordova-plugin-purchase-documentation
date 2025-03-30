@@ -39,7 +39,6 @@ Configure your app record and billing settings in the Google Play Console.
 *   **License Testing:** Add the Google account(s) (full Gmail addresses) you will use for testing under "Setup" -> "License testing". These accounts can make test purchases without being charged.
 
 !INCLUDE "./setup-android-3-google-play.md"
-*(Review included content for consistency)*
 
 ### 4. Install Plugin and Configure Project
 
@@ -56,7 +55,6 @@ Install the purchase plugin. The necessary AndroidManifest permission is added a
     ```
 
 !INCLUDE "./setup-android-4-install-cordova-plugin.md"
-*(Review included content for consistency)*
 
 ### 5. Create In-App Products in Google Play Console
 
@@ -81,7 +79,7 @@ Define the specific items (consumables, non-consumables, subscriptions) you want
     keytool -genkey -v -keystore my-release-key.keystore -alias mykeyalias -keyalg RSA -keysize 2048 -validity 10000
     ```
 2.  **Build Signed APK/AAB:** Use the Cordova CLI with build configuration or Android Studio, ensuring you sign with your release key. A helper script can simplify this:
-    !INCLUDE "./setup-android-5-android-release-apk.md" *(Review included script/steps)*
+!INCLUDE "./setup-android-5-android-release-apk.md"
 3.  **Upload to Play Console:**
     *   Go to **Release -> Testing -> Internal testing** (recommended) or Closed testing.
     *   Create a new release and **upload the signed APK or AAB**.
@@ -89,7 +87,6 @@ Define the specific items (consumables, non-consumables, subscriptions) you want
     *   Save and **roll out** the release. It may take time (minutes to hours) to become available to testers.
 
 !INCLUDE "./setup-android-6-upload-to-google-play.md"
-*(Review included content for consistency)*
 
 ### 7. Configure Test Device
 
@@ -98,7 +95,6 @@ Define the specific items (consumables, non-consumables, subscriptions) you want
 *   Install the app **from the Google Play Store** using the testing link/invitation provided by the Play Console. **Do not** install manually via `adb` if possible, as this can cause issues.
 
 !INCLUDE "./setup-android-8-test-accounts.md"
-*(Review included content for consistency)*
 
 ### 8. (Recommended) Setup Receipt Validation Service
 

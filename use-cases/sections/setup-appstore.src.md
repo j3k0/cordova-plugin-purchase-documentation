@@ -46,7 +46,6 @@ Configure your app record and ensure all necessary legal agreements are active.
     4.  **Copy and securely store this secret.** It will be needed for your validation server (e.g., in your Iaptic settings or custom backend).
 
 !INCLUDE "setup-ios-3-create-app-store-application.md"
-*(Review included content for consistency, especially regarding Shared Secret retrieval)*
 
 ### 4. Install Plugin and Configure Xcode Project
 

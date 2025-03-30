@@ -118,7 +118,6 @@ Make sure we have a Google Play application created and configured.
 Need more help? I recommend you check [Google's own documentation](https://support.google.com/googleplay/android-developer/answer/113469?hl=en&ref_topic=7072031). It's well detailed, easy to follow and probably the most up-to-date resource you can find.
 {% endhint %}
 
-*(Review included content for consistency)*
 
 ### 4. Install Plugin and Configure Project
 
@@ -158,7 +157,6 @@ All good! Seems like we can build an app with support for the Billing API.
 
 Let's now prepare a release APK.
 
-*(Review included content for consistency)*
 
 ### 5. Create In-App Products in Google Play Console
 
@@ -209,7 +207,42 @@ There's might be some delay between creating a product on the Google Play Consol
     keytool -genkey -v -keystore my-release-key.keystore -alias mykeyalias -keyalg RSA -keysize 2048 -validity 10000
     ```
 2.  **Build Signed APK/AAB:** Use the Cordova CLI with build configuration or Android Studio, ensuring you sign with your release key. A helper script can simplify this:
-    !INCLUDE "./setup-android-5-android-release-apk.md" *(Review included script/steps)*
+
+To generate a release build, I generally use the following script: [android-release.sh](https://gist.github.com/j3k0/28f60a7d5622508634d09f94c59d6dfc)
+
+The script calls `cordova build android --release` with the correct command line arguments. It requires you have generated a `keystore` file for your application already.
+
+If you haven't generated a keystore file for your application yet, you can use the following command line:
+
+```text
+keytool -genkey -v -keystore android-release.keystore -alias release \
+-keyalg RSA -keysize 2048 -validity 10000
+```
+
+I'll ask you a few questions. The only tricky one is "Do you wan't to use the same password for the alias?", the answer is _yes_. Please note that the above command defines the keystore's `alias` as **release**, you can use any value, but just remember the value you chose.
+
+Keep the `android-release.keystore` file in a safe place, backup it everywhere you can! Don't loose it, don't loose the password. You won't EVER be able to update your app on Google Play without it!
+
+Then build.
+
+```text
+$ export KEYSTORE_ALIAS=release
+$ export KEYSTORE_PASSWORD=my_password
+$ ./android-release.sh
+```
+
+Replace `$KEYSTORE_ALIAS` and `$KEYSTORE_PASSWORD` with whatever match your those from your `keystore` file...
+
+The output should end with a line like this:
+
+```text
+Build is ready:
+
+<SOME_PATH>/android-release-20181015-1145.apk
+```
+
+There you go, this is your first release APK.
+
 3.  **Upload to Play Console:**
     *   Go to **Release -> Testing -> Internal testing** (recommended) or Closed testing.
     *   Create a new release and **upload the signed APK or AAB**.
@@ -235,7 +268,6 @@ Once you went over those steps, you can test your app with in-app purchase enabl
 Note that it might up to 24 hours for your IAP to work after you uploaded the first release APK.
 {% endhint %}
 
-*(Review included content for consistency)*
 
 ### 7. Configure Test Device
 
@@ -254,7 +286,6 @@ To test your Google Play Billing implementation with actual in-app purchases, yo
 Testers can begin making purchases of your in-app products within 15 minutes.
 {% endhint %}
 
-*(Review included content for consistency)*
 
 ### 8. (Recommended) Setup Receipt Validation Service
 

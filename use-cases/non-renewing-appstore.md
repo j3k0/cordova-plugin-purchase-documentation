@@ -120,7 +120,6 @@ Since you are here, let's retrieve the Shared Secret. You can use an App-Specifi
 
 
 
-*(Review included content for consistency, especially regarding Shared Secret retrieval)*
 
 ### 4. Install Plugin and Configure Xcode Project
 
