@@ -75,10 +75,6 @@ Install the purchase plugin and enable the necessary capability in Xcode.
 *   **Cleared for Sale:** Ensure products are marked "Cleared for Sale".
 *   **Metadata:** Fill in all required metadata, including pricing, localization, and review information (even a placeholder screenshot is often needed for testing).
 
-### 6. Create Sandbox Test Users
-
-Create special Apple IDs for testing purchases without real money.
-
 !INCLUDE "setup-ios-6-test-users.md"
 
 *   **Important:** Use these accounts *only* when prompted by your app during a purchase flow on a test device/build. Do not sign into the main App Store settings with them.

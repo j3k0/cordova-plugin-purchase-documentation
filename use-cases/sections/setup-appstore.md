@@ -134,10 +134,6 @@ The process is well explained by Apple, so I'll not enter into more details.
 *   **Cleared for Sale:** Ensure products are marked "Cleared for Sale".
 *   **Metadata:** Fill in all required metadata, including pricing, localization, and review information (even a placeholder screenshot is often needed for testing).
 
-### 6. Create Sandbox Test Users
-
-Create special Apple IDs for testing purchases without real money.
-
 ### 6. Create Test Users
 
 In order to test your In-App Purchases during development, you should create some test users.
