@@ -6,7 +6,7 @@ This use case explains how to implement an **auto-renewing subscription** on iOS
 
 First, ensure your Apple Developer account, App Store Connect (including creating subscription products and groups), and Xcode project are correctly configured.
 
-!INCLUDE "./sections/setup-appstore.md"
+&rArr; [Setup instructions here](/use-cases/setup/setup-appstore).
 
 ## 2. Initialization & UI
 

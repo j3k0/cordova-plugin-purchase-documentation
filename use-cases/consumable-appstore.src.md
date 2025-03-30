@@ -6,7 +6,7 @@ This use case explains how to implement a **consumable** product (like virtual c
 
 First, ensure your Apple Developer account, App Store Connect, and Xcode project are correctly configured for In-App Purchases.
 
-!INCLUDE "./sections/setup-appstore.md"
+&rArr; [Setup instructions here](/use-cases/setup/setup-appstore).
 
 ## 2. Initialization & UI
 
