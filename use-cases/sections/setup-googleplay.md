@@ -1,9 +1,11 @@
 ## Setup for Google Play
 
+This guide details the necessary steps to configure your development environment, Google Play Console, and application settings before implementing In-App Purchases for Android using `cordova-plugin-purchase` v13+.
+
 {% hint style="warning" icon="warning" %}
 **Platform Interfaces Change Frequently!**
 
-The Google Play Console interface and Google's requirements change often. This guide provides a general overview but may become outdated.
+The Google Play Console interface and Google's requirements (like API access or testing procedures) can change. This guide provides a general overview based on common practices but may become outdated.
 
 **Always refer to the official Google documentation as the primary source:**
 *   [Google Play Billing Overview](https://developer.android.com/google/play/billing/billing_overview)
@@ -14,9 +16,9 @@ The Google Play Console interface and Google's requirements change often. This g
 *   [Setting up Google Play Developer API Access](https://developers.google.com/android-publisher/getting_started) (Needed for Server-Side Validation)
 {% endhint %}
 
-This section covers the essential steps for setting up your Android app for In-App Purchases with the Cordova plugin.
-
 ### 1. Install Dependencies
+
+Ensure you have the basic development tools installed (Node.js, Cordova CLI, Android SDK/Studio).
 
 
 Needless to say, make sure you have the tools installed on your machine. During the writing of this guide, I've been using the following environment:
@@ -28,7 +30,9 @@ Needless to say, make sure you have the tools installed on your machine. During 
 I'm not saying it won't work with different version. If you start fresh, it might be a good idea to use an up-to-date environment.
 
 
-### 2. Create Cordova Project
+### 2. Create or Prepare Cordova Project
+
+Set up your Cordova project and add the Android platform.
 
 
 Making sure we have a Cordova project that we can build for Android and/or iOS.
@@ -91,13 +95,16 @@ Which outputs:
 
 Hopefully there's no problems with our Android build chain. If you do have problems, fixing it is out of scope from this guide but it's required!
 
+*   **Important:** Ensure the `<widget id="...">` in your `config.xml` **exactly matches** the **Package Name** (Application ID) you will use in the Google Play Console.
 
-### 3. Setup Google Play Application & Billing
+### 3. Setup Google Play Console Application & Billing
 
-*   **Google Play Developer Account:** Ensure you have an active developer account ([Play Console](https://play.google.com/console/)).
-*   **Create Application:** Create your application entry in the Google Play Console if it doesn't exist yet. You don't need to publish it publicly, but the app record must be created.
-*   **Billing Setup:** Link a Google Merchant Account if you haven't already. This is usually done under "Setup" -> "Payments profile" in the Play Console. Ensure it's active.
-*   **License Testing:** Add Google accounts (full Gmail addresses) you'll use for testing under "Setup" -> "License testing" in the Play Console. These accounts can make test purchases without being charged real money.
+Configure your app record and billing settings in the Google Play Console.
+
+*   **Google Play Developer Account:** You need an active Google Play Developer account ([Play Console](https://play.google.com/console/)).
+*   **Create Application:** Create your application entry in the Play Console if it doesn't exist yet. Use the same Package Name as in your `config.xml`.
+*   **Billing Setup:** Ensure you have set up a Payments Profile linked to your developer account (usually under "Setup" -> "Payments profile"). It must be active to test or publish IAPs.
+*   **License Testing:** Add the Google account(s) (full Gmail addresses) you will use for testing under "Setup" -> "License testing". These accounts can make test purchases without being charged.
 
 
 Make sure we have a Google Play application created and configured.
@@ -111,33 +118,57 @@ Make sure we have a Google Play application created and configured.
 Need more help? I recommend you check [Google's own documentation](https://support.google.com/googleplay/android-developer/answer/113469?hl=en&ref_topic=7072031). It's well detailed, easy to follow and probably the most up-to-date resource you can find.
 {% endhint %}
 
+*(Review included content for consistency)*
 
 ### 4. Install Plugin and Configure Project
 
-Install the plugin:
-```bash
-cordova plugin add cordova-plugin-purchase
+Install the purchase plugin. The necessary AndroidManifest permission is added automatically.
+
+1.  **Install Plugin:**
+    ```bash
+    cordova plugin add cordova-plugin-purchase
+    ```
+2.  **Verify `config.xml` ID:** Double-check that the `<widget id="...">` matches your Google Play Package Name.
+3.  **Verify `AndroidManifest.xml`:** After running `cordova prepare android`, you can optionally check `platforms/android/app/src/main/AndroidManifest.xml` to ensure the following permission is present (the plugin adds it):
+    ```xml
+    <uses-permission android:name="com.android.vending.BILLING" />
+    ```
+
+
+To install the plugin, we will use the usual `cordova plugin add` command.
+
+```text
+cordova plugin add cordova-plugin-purchase"
 ```
 
-The plugin automatically adds the necessary `com.android.vending.BILLING` permission to your `AndroidManifest.xml`. You can verify this in `platforms/android/app/src/main/AndroidManifest.xml` after preparing the platform.
+Now let's try to build.
 
-**Important:** Ensure your `config.xml`'s `<widget id="...">` attribute exactly matches the **Package Name** (Application ID) you configured in the Google Play Console.
-```xml
-<!-- config.xml -->
-<widget id="com.yourcompany.yourapp" version="1.0.0" ...>
-    <!-- ... other settings ... -->
-    <platform name="android">
-        <!-- Plugin adds permission automatically, but verify if needed -->
-        <!-- <config-file target="AndroidManifest.xml" parent="/*">
-            <uses-permission android:name="com.android.vending.BILLING" />
-        </config-file> -->
-    </platform>
-</widget>
+```text
+cordova build android
 ```
+
+Successful build?
+
+```text
+[...]
+BUILD SUCCESSFUL in 2s
+```
+
+All good! Seems like we can build an app with support for the Billing API.
+
+Let's now prepare a release APK.
+
+*(Review included content for consistency)*
 
 ### 5. Create In-App Products in Google Play Console
 
-Define each virtual item under your app in the Play Console -> "Monetize" section -> "Products" (for one-time purchases like consumables/non-consumables) or "Subscriptions".
+Define the specific items (consumables, non-consumables, subscriptions) you want to sell.
+
+*   Navigate to your app in the Play Console.
+*   Go to the "Monetize" section -> "Products" or "Subscriptions".
+*   Click "Create product" or "Create subscription".
+*   Fill in all required details: **Product ID** (unique, used in `store.register`), Name, Description, Price.
+*   **Activate** the product/subscription.
 
 
 There is still a bit more preparatory work: we need to setup our in-app product.
@@ -166,16 +197,24 @@ And we're done!
 There's might be some delay between creating a product on the Google Play Console and seeing it in your app. If your product doesn't show up after 24h, then you should start to worry.
 {% endhint %}
 
+*(Review included content for consistency)*
+*   **Product IDs:** Note down the exact Product IDs.
 
-### 6. Upload Signed Build for Testing
+### 6. Build and Upload a Signed Build for Testing
 
-**Crucial Step:** Google Play Billing requires Google to know the signature of your app to allow purchases, even for testing.
+**CRITICAL STEP:** Google Play Billing requires a **release-signed build** to be uploaded to a testing track before IAPs (even test purchases) will work correctly. Debug builds **will not work**.
 
-1.  **Generate a release signing key** if you don't have one ([Official Guide](https://developer.android.com/studio/publish/app-signing#generate-key)). Keep this key file (`.keystore` or `.jks`) and its passwords extremely safe!
-2.  **Build a signed release APK or AAB** using this key. Debug builds **will not work** for testing IAPs.
-3.  **Upload this build** to a testing track in the Google Play Console (e.g., "Internal testing" is recommended). You don't need to publish publicly.
-4.  Ensure your **test account** (from step 3) is added as a tester for that track and has accepted the testing invitation (usually via a Play Store link).
-5.  Install this signed version (or a *subsequent* version signed with the *same key*) onto your test device, ensuring the test account is the primary Google account on the device. Installation *must* typically come via the Play Store's testing mechanism, not `adb install`.
+1.  **Generate Release Key:** If you don't have one, create a Java Keystore (`.keystore` or `.jks`) using `keytool`. **Back up this file and its passwords securely!** You need it for all future updates.
+    ```bash
+    keytool -genkey -v -keystore my-release-key.keystore -alias mykeyalias -keyalg RSA -keysize 2048 -validity 10000
+    ```
+2.  **Build Signed APK/AAB:** Use the Cordova CLI with build configuration or Android Studio, ensuring you sign with your release key. A helper script can simplify this:
+    !INCLUDE "./setup-android-5-android-release-apk.md" *(Review included script/steps)*
+3.  **Upload to Play Console:**
+    *   Go to **Release -> Testing -> Internal testing** (recommended) or Closed testing.
+    *   Create a new release and **upload the signed APK or AAB**.
+    *   Add your **License Tester** email addresses (from Step 3) to the tester list for this track.
+    *   Save and **roll out** the release. It may take time (minutes to hours) to become available to testers.
 
 
 Once you have built your release APK, you need to upload it to Google Play in order to be able to test In-App Purchases. In-App Purchase is not enabled in "debug build". In order to test in-app purchase, your APK needs to be signed with your release signing key. In order for Google to know your release signing key for this application, you need to upload a release APK:
@@ -196,55 +235,80 @@ Once you went over those steps, you can test your app with in-app purchase enabl
 Note that it might up to 24 hours for your IAP to work after you uploaded the first release APK.
 {% endhint %}
 
+*(Review included content for consistency)*
 
-### 7. (Recommended) Setup Receipt Validation Service
+### 7. Configure Test Device
+
+*   Use a **physical Android device**.
+*   Log into the device **only** with a Google account that is listed as a **License Tester** and is part of the **testing track** you uploaded the build to.
+*   Install the app **from the Google Play Store** using the testing link/invitation provided by the Play Console. **Do not** install manually via `adb` if possible, as this can cause issues.
+
+
+To test your Google Play Billing implementation with actual in-app purchases, you must use a test account. By default, the only test account registered is the one that's associated with your developer account. You can register additional test accounts by using the Google Play Console.
+
+1. Navigate to Settings > Account details.
+2. In the License Testing section, add your tester's email addresses to Gmail accounts with testing access field.
+3. Save your changes.
+
+{% hint style="info" %}
+Testers can begin making purchases of your in-app products within 15 minutes.
+{% endhint %}
+
+*(Review included content for consistency)*
+
+### 8. (Recommended) Setup Receipt Validation Service
 
 Server-side validation is essential for security and reliable subscription management.
 
-### 7. (Recommended) Setup Receipt Validation Service
+### 9. Setup Receipt Validation Server (Google Play)
 
-For subscriptions (and non-consumables), **server-side receipt validation is essential** for security and reliable status tracking.
+Reliably managing Android subscriptions, especially determining the exact expiry date and renewal status, requires communication with the **Google Play Developer API**. The purchase plugin itself does not directly communicate with this server-side API. You need an intermediary service for this, often referred to as a receipt validation server.
 
-{% hint style="info" icon="info" %}
-**Receipt Validation Reminder**
+While you can build your own server to interact with the Google Play Developer API, this guide will use **Iaptic** (the service developed by the plugin's author) which simplifies this process.
 
-Remember, for subscriptions and non-consumables, relying solely on local device data is insecure and unreliable for managing entitlements.
+**Why is this needed for Android Subscriptions?**
 
-**Always implement server-side receipt validation** using your own backend or a service like [Iaptic](https://www.iaptic.com/) to:
-*   Confirm purchase legitimacy.
-*   Get the authoritative subscription status and expiry date.
-*   Prevent fraud.
-*   Support cross-platform/device access.
+*   **Accurate Expiry Dates:** Local receipt data on Android doesn't always contain a reliable expiry date, especially after renewals or cancellations. The Google Play Developer API is the source of truth.
+*   **Renewal Status:** Checking if a subscription will auto-renew or has been cancelled requires server-side checks.
+*   **Grace Periods & Account Hold:** Handling billing issues requires server-side status information.
 
-Ensure `store.validator` is configured in your `initStore()` function.
+**Steps using Iaptic:**
+
+1.  **Create an Iaptic Account:** If you haven't already, sign up at [iaptic.com](https://www.iaptic.com/).
+2.  **Connect with Google Play Developer API:**
+    *   Navigate to your Iaptic project settings.
+    *   Find the "Google Play" section.
+    *   Follow the instructions provided by Iaptic to connect your Google Play Developer account. This typically involves:
+        *   Creating a **Service Account** in your Google Cloud Console project that is linked to your Google Play Developer Console.
+        *   Granting the necessary permissions (like "View financial data" and "Manage orders and subscriptions") to this Service Account within the Google Play Console.
+        *   Uploading the JSON key file for the Service Account to Iaptic.
+    *   Iaptic provides detailed guides for this process: [Connect With Google](https://www.iaptic.com/documentation/connect-with-google-publisher-api/)
+3.  **Configure the Plugin:**
+    *   Go to the "Setup" section in your Iaptic dashboard and find the "Cordova" setup instructions.
+    *   Copy the provided `store.validator` URL. It will look something like `https://validator.iaptic.com/...`.
+    *   Paste this URL into your application's initialization code where you configure the store validator:
+
+    ```javascript
+    // In your initStore() or equivalent function
+    const iaptic = new CdvPurchase.Iaptic({
+      appName: "[Your Iaptic App Name]", // Replace with your actual App Name
+      apiKey: "[Your Iaptic Public Key]" // Replace with your actual Public Key
+    });
+    CdvPurchase.store.validator = iaptic.validator;
+    ```
+
+    *   Ensure your `Content-Security-Policy` in `index.html` allows connections to `validator.iaptic.com` (or your custom Iaptic domain).
+
+{% hint style="info" %}
+Iaptic's validation service is often free or has a generous free tier during development (using test purchases) and offers paid plans for production use. Check their pricing for details.
 {% endhint %}
-**Options:**
 
-1.  **Use Iaptic (Recommended):**
-    *   [Iaptic](https://www.iaptic.com/) handles the complexities of validating Google Play receipts, including the newer SubscriptionV2 API required for Billing Library v5+.
-    *   Sign up and get your API Key and App Name.
-    *   Configure the plugin:
+{% hint style="warning" %}
+Skipping this server-side validation step for Android subscriptions will lead to unreliable expiry date information and difficulty in managing subscription states correctly.
+{% endhint %}
 
-        ```javascript
-        const { store } = CdvPurchase;
-        const iaptic = new CdvPurchase.Iaptic({
-          url: 'https://validator.iaptic.com', // Or your custom endpoint
-          appName: 'YOUR_IAPTIC_APP_NAME',
-          apiKey: 'YOUR_IAPTIC_API_KEY'
-        });
-        store.validator = iaptic.validator;
+With the validator configured and connected to the Google Play Developer API, the plugin, via Iaptic, can now retrieve accurate subscription details during the validation process.*   **Remember:** You'll need **Google Play Developer API access** (via a Service Account JSON key) configured on your validation server.
 
-        store.initialize([CdvPurchase.Platform.GOOGLE_PLAY]);
-        ```
-    *   You will need to provide Iaptic with your **Google Play Developer API credentials** (Service Account JSON key). Follow Iaptic's setup guide for instructions.
+---
 
-2.  **Build Your Own Server:**
-    *   Requires significant backend development using the [Google Play Developer API](https://developers.google.com/android-publisher).
-    *   Specifically, use the `purchases.subscriptionsv2.get` endpoint: [Google Subscription Purchase Get Docs](https://developers.google.com/android-publisher/api-ref/rest/v3/purchases.subscriptionsv2/get).
-    *   Handle API authentication using a Service Account.
-    *   Store and manage subscription status, expiry dates, and renewal events.
-    *   Implement secure communication.
-    *   Set `store.validator` to your server's endpoint URL.
-    *   You will need your **Service Account JSON Key**.
-
-**Skipping server-side validation for Google Play subscriptions is highly problematic as local receipts often lack accurate expiry dates and renewal status information.**
+After completing these steps, your Google Play Console, application build, and test device should be configured to support In-App Purchases using `cordova-plugin-purchase`. You can now proceed to implement the purchase logic in your application code as shown in the specific [Use Cases](..).

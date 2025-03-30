@@ -2,268 +2,488 @@
 
 This section explains how to use the `Test` platform adapter for local development and testing without needing actual store accounts or network connectivity to external services.
 
-### Base framework
+### 1. Base Framework
 
-First, let's set up the basic HTML structure and the initial JavaScript, just like with other platforms.
-
+Ensure you have the basic HTML structure and initial JavaScript setup (waiting for `deviceready`, basic plugin checks, `setStatus` helper, placeholder functions) as outlined in the [Code Framework section](code-framework.md).
 
 #### index.html
 
-Assuming you're starting from a blank project, we'll add the minimal amount of HTML for the purpose of this tutorial. Let's replace the `<body>` from the `www/index.html` file with the below.
+Assuming you're starting from a blank Cordova project, let's set up the minimal HTML needed for the tutorials.
 
-```markup
+**Step 1: Modify `www/index.html`**
+
+Replace the default `<body>` content with the following structure:
+
+```html
 <body>
-  <div id="app"></div>
+  <div class="app">
+    <h1>In-App Purchase Demo</h1>
+    <!-- Area for status messages and errors -->
+    <div id="messages" style="font-style: italic; color: #555; margin-bottom: 10px;">Loading...</div>
+    <hr>
+    <!-- Area to display product details -->
+    <div id="product-details"></div>
+    <hr>
+    <!-- Area for other UI elements (like balance, feature status) -->
+    <div id="user-status"></div>
+     <hr>
+    <!-- Area for management buttons -->
+    <div id="management-buttons"></div>
+  </div>
+
+  <!-- Cordova script -->
   <script type="text/javascript" src="cordova.js"></script>
+  <!-- Your application script -->
   <script type="text/javascript" src="js/index.js"></script>
 </body>
 ```
+*   **Explanation:** We create a main container (`#app`) and add specific `div` elements (`#messages`, `#product-details`, `#user-status`, `#management-buttons`) that subsequent code examples will use to display information dynamically.
 
-Let's also make sure to comment out Cordova template project's CSS.
+**Step 2: Adjust Content Security Policy (CSP)**
 
-You also need to enable the `'unsafe-inline'` `Content-Security-Policy` by adding it to the `default-src` section:
+In the `<head>` of your `www/index.html`, find the `<meta http-equiv="Content-Security-Policy" ...>` tag. You need to modify the `connect-src` directive to allow connections to your receipt validation server. Also, ensure `'unsafe-inline'` is present in `script-src` or `default-src` if your examples use inline `onclick` handlers (though using `addEventListener` in JavaScript is generally preferred).
 
-```markup
+```html
 <meta http-equiv="Content-Security-Policy"
-      content="default-src 'self' 'unsafe-inline' [...]" />
+      content="default-src 'self' data: gap: https://ssl.gstatic.com 'unsafe-eval';
+               style-src 'self' 'unsafe-inline';
+               media-src *;
+               img-src 'self' data: content:;
+               connect-src 'self' https://your-validator-server.com;">
+               <!-- Add other necessary sources -->
 ```
+*   **Explanation:**
+    *   Replace `https://your-validator-server.com` with the actual URL of your receipt validation service (e.g., `https://validator.iaptic.com`). If you don't use a validator initially, you might omit this, but you'll need it later for secure implementations.
+    *   The example keeps other default Cordova CSP directives. Adjust them based on your app's needs.
 
-You can download the [full index.html file here](https://gist.github.com/j3k0/80c69837e5bacf83c4fc2320ba2e5dc2).
-#### javascript
+**Step 3: (Optional) Clean Up Default CSS**
 
+You might want to comment out or remove the default CSS (`www/css/index.css`) from the Cordova template project to avoid style conflicts with the simple examples.
 
-We will now create a new JavaScript file and load it from the HTML. The code below will initialize the plugin.
+#### JavaScript (`www/js/index.js`)
 
-{% code lineNumbers="true" %}
+This section provides the minimal JavaScript foundation needed to start using the `cordova-plugin-purchase` plugin in your `www/js/index.js` file (or equivalent).
+
+{% code title="www/js/index.js" lineNumbers="true" %}
 ```javascript
-// Wait for Cordova to be ready
+// Wait for Cordova's deviceready event
 document.addEventListener('deviceready', onDeviceReady, false);
 
 function onDeviceReady() {
   console.log('Device is ready.');
+  setStatus('Device ready.'); // Update UI status
 
-  // Check if the CdvPurchase plugin is available
+  // --- Essential Plugin Check ---
+  // Verify that the CdvPurchase namespace and store object are available.
   if (!window.CdvPurchase || !window.CdvPurchase.store) {
-      console.error('CdvPurchase plugin is not available. Ensure it is installed and loaded correctly.');
-      document.getElementById('app').innerHTML = 'Error: Purchase plugin not found.';
-      return;
+    const msg = 'CdvPurchase plugin is not available. Ensure it is installed and loaded correctly.';
+    console.error(msg);
+    setStatus('ERROR: ' + msg);
+    // Stop further initialization if the plugin isn't found.
+    return;
   }
 
-  // Alias the store object for easier access
+  // --- Basic Setup (Before Initialization) ---
   const { store, LogLevel, ErrorCode } = CdvPurchase;
-  console.log('CdvPurchase.store object found, version ' + store.version);
+  console.log('CdvPurchase.store available. Version ' + store.version);
 
-  // Optional: Set the verbosity level for debugging
-  // LogLevel.DEBUG provides the most detailed logs
+  // Set the desired verbosity level for the plugin's logger.
+  // LogLevel.DEBUG provides the most detailed logs, useful for development.
+  // Use LogLevel.INFO or LogLevel.WARNING for production.
   store.verbosity = LogLevel.DEBUG;
 
-  // Setup a global error handler for the store
-  store.error(function(error) {
-      console.error('STORE ERROR: Code=' + error.code + ' Message=' + error.message);
-      // Display the error to the user in a dedicated element
-      const errorEl = document.getElementById('error-display'); // Ensure this element exists in your HTML
-      if (errorEl) {
-          errorEl.textContent = 'Error: ' + error.message;
-          // Optionally clear the error after a few seconds
-          setTimeout(() => { if (errorEl.textContent === 'Error: ' + error.message) errorEl.textContent = ''; }, 8000);
-      }
+  // Register a global error handler for the store.
+  // This catches general plugin errors (initialization, setup, etc.).
+  // Purchase-specific errors are typically handled via promises/callbacks.
+  store.error(error => {
+    console.error('STORE ERROR: Code=' + error.code + ' Message=' + error.message);
+    setStatus('ERROR: ' + error.message);
   });
 
-  // Setup a listener for when the store is ready
-  // This guarantees that initialize() has completed successfully
-  store.ready(function() {
-    console.log("CdvPurchase store is ready.");
-    // Initial UI refresh after the store is ready
-    refreshUI();
-  });
+  // --- Defer Specific Initialization ---
+  // Call the main initialization function for your specific use case.
+  // This function (defined elsewhere in your code or the tutorial)
+  // will handle product registration, validator setup, event listeners,
+  // and calling store.initialize().
+  initializeStoreAndSetupListeners();
 
-  // Initialize the store and related components
-  initializeStore();
-
-  // Perform an initial UI refresh (might show loading states)
+  // Initial UI refresh (might show loading states until products load)
   refreshUI();
 }
 
-function initializeStore() {
-  console.log('Calling initializeStore()...');
-  const { store } = CdvPurchase; // Get store instance again
+// --- Helper Functions (Example) ---
 
-  // TODO: Register products using store.register([...])
-  console.log('Registering products...');
-  // store.register([...]); // Add your product registrations here
-
-  // TODO: Set the validator URL or function
-  console.log('Setting validator...');
-  // store.validator = "YOUR_VALIDATOR_URL";
-
-  // TODO: Setup event listeners using store.when()...
-  console.log('Setting up event listeners...');
-  // store.when()...
-
-  // TODO: Call store.initialize([...platforms])
-  console.log('Calling store.initialize()...');
-  // store.initialize([...]);
-}
-
-function refreshUI() {
-  console.log('Calling refreshUI()...');
-  // TODO: Implement UI updates based on product/purchase status
-  // This function will be called by event listeners and after initialization.
-  const appEl = document.getElementById('app');
-  if (appEl) {
-      // Example: Display loading state or initial content
-      // appEl.innerHTML = '<p>Store is initializing...</p>';
-  } else {
-      console.error('App element not found for UI refresh.');
+// Function to update a status message element in the HTML
+function setStatus(message) {
+  console.log('[Status] ' + message);
+  const statusEl = document.getElementById('messages'); // Assumes an element with id="messages" exists
+  if (statusEl) {
+    statusEl.textContent = message;
   }
 }
+
+// --- Placeholder Functions (to be implemented by specific use-case guides) ---
+
+// This function will be implemented in specific guides to register products,
+// set the validator, setup 'when' listeners, and call store.initialize().
+function initializeStoreAndSetupListeners() {
+  console.log('Placeholder: initializeStoreAndSetupListeners() called.');
+  // Example structure (implement in specific guides):
+  // const { store, Platform, ProductType } = CdvPurchase;
+  // store.register([...]);
+  // store.validator = '...';
+  // store.when()...
+  // store.initialize([...]).then(...);
+  setStatus('Store setup needs implementation.');
+}
+
+// This function will be implemented in specific guides to update the UI
+// based on product data, ownership status, etc.
+function refreshUI() {
+  console.log('Placeholder: refreshUI() called.');
+  // Example structure (implement in specific guides):
+  // const product = CdvPurchase.store.get(...);
+  // Update HTML elements based on product.title, product.pricing, product.owned, etc.
+}
+
+// Make purchase function global if called directly from HTML onclick
+// window.myPurchaseFunction = function() { ... }
+
 ```
 {% endcode %}
 
-Here's a little explanation:
+**Explanation:**
 
-**Line 1**, it's important to wait for the "deviceready" event before using cordova plugins.
+1.  **Wait for `deviceready` (Line 2):** Essential first step for any Cordova plugin interaction.
+2.  **Plugin Check (Lines 8-14):** Verifies that `CdvPurchase.store` is available before proceeding.
+3.  **Basic Setup (Lines 17-29):**
+    *   Aliases common plugin members (`store`, `LogLevel`, etc.) for convenience.
+    *   Sets `store.verbosity` to `DEBUG` for detailed logging during development.
+    *   Sets up a global `store.error` handler to catch and log general plugin errors.
+4.  **Deferred Initialization (Line 35):** Calls `initializeStoreAndSetupListeners()`. This function is intentionally left as a placeholder here. Specific use-case guides (like setting up subscriptions or consumables) will provide the implementation for this function, which will include `store.register()`, `store.validator = ...`, `store.when()...`, and `store.initialize()`.
+5.  **Initial UI Refresh (Line 38):** Calls `refreshUI()`, another placeholder function that specific guides will implement to display product information and purchase status.
+6.  **Helper Functions (Lines 43-51):** Includes a basic `setStatus` function as an example for updating the UI.
+7.  **Placeholders (Lines 54-72):** Empty definitions for `initializeStoreAndSetupListeners` and `refreshUI` emphasize that their specific logic depends on the use case and will be provided in subsequent steps of the tutorials.
 
-**Lines 5-8**, we check if the plugin was correctly loaded.
+This minimal base ensures the plugin is loaded and basic logging/error handling is in place before diving into platform-specific or product-type-specific configurations in the main use-case guides.
 
-**Lines 11-13**, we setup an error handler. It just logs errors to the console.
+### 2. Initialization (`initializeStoreAndSetupListeners`)
 
-> Whatever your setup is, you should make sure this runs as soon as the javascript application starts. You have to be ready to handle IAP events as soon as possible.
+Implement the `initializeStoreAndSetupListeners` function to configure and initialize the Test platform. This involves registering test products and setting up event listeners.
 
-### Initialization
-
-To use the test platform, simply include `Platform.TEST` in your `store.initialize()` call. You can use it alongside other platforms or exclusively for testing.
-
+{% code title="www/js/index.js (initializeStoreAndSetupListeners)" lineNumbers="true" %}
 ```javascript
-function initializeStore() {
-  const { store, Platform, ProductType } = CdvPurchase;
+// This function should be called by onDeviceReady after basic setup
+function initializeStoreAndSetupListeners() {
+  console.log('Setting up store for Test Platform...');
+  setStatus('Initializing Test Store...');
 
-  // Register products available on the Test platform
+  const { store, ProductType, Platform, LogLevel, ErrorCode, PaymentMode, RecurrenceMode } = CdvPurchase;
+
+  // --- Register Test Products ---
+  // You MUST register the products you intend to use with the Test platform.
   store.register([
-    // Use a built-in test product
+    // 1. Using built-in test products (convenient for standard types)
+    { id: 'test-consumable', type: ProductType.CONSUMABLE, platform: Platform.TEST },
+    { id: 'test-non-consumable', type: ProductType.NON_CONSUMABLE, platform: Platform.TEST },
+    { id: 'test-subscription', type: ProductType.PAID_SUBSCRIPTION, platform: Platform.TEST },
+    // This one starts as already owned/approved
+    { id: 'test-subscription-active', type: ProductType.PAID_SUBSCRIPTION, platform: Platform.TEST },
+    // This one simulates a purchase failure
+    { id: 'test-consumable-fail', type: ProductType.CONSUMABLE, platform: Platform.TEST },
+
+    // 2. Defining and registering a custom test product inline
     {
-      id: 'test-consumable', // Matches CdvPurchase.Test.testProducts.CONSUMABLE.id
-      type: ProductType.CONSUMABLE,
-      platform: Platform.TEST
-    },
-    // Use another built-in test product
-    {
-      id: 'test-subscription-active', // Matches CdvPurchase.Test.testProducts.PAID_SUBSCRIPTION_ACTIVE.id
-      type: ProductType.PAID_SUBSCRIPTION,
-      platform: Platform.TEST
-    },
-    // Define and register a custom test product inline
-    {
-      id: 'custom-test-nonconsumable',
+      id: 'custom_test_feature',
       type: ProductType.NON_CONSUMABLE,
       platform: Platform.TEST,
-      title: 'Unlock My Feature (Test)',
-      description: 'A custom non-consumable for testing.',
-      pricing: { // Simple pricing, or use PricingPhase[] for subscriptions
-        price: '$0.99',
+      title: 'Unlock Custom Feature (Test)',
+      description: 'A non-consumable defined directly in register.',
+      pricing: { // Simple pricing for non-consumable
+        price: '$1.49',
         currency: 'USD',
-        priceMicros: 990000
+        priceMicros: 1490000
       }
+    },
+    // 3. Defining a custom test subscription inline
+    {
+      id: 'custom_test_sub_monthly',
+      type: ProductType.PAID_SUBSCRIPTION,
+      platform: Platform.TEST,
+      title: 'Custom Monthly Sub (Test)',
+      description: 'A subscription with a trial.',
+      pricing: [ // Array of PricingPhase for subscriptions
+        { // Trial Phase
+          price: '$0.00', currency: 'USD', priceMicros: 0,
+          paymentMode: PaymentMode.FREE_TRIAL,
+          recurrenceMode: RecurrenceMode.FINITE_RECURRING,
+          billingCycles: 1, billingPeriod: 'P1W' // 1 week trial
+        },
+        { // Regular Phase
+          price: '$4.99', currency: 'USD', priceMicros: 4990000,
+          paymentMode: PaymentMode.PAY_AS_YOU_GO,
+          recurrenceMode: RecurrenceMode.INFINITE_RECURRING,
+          billingPeriod: 'P1M' // $4.99 per month
+        }
+      ]
     }
-    // ... other products for other platforms can also be registered
   ]);
 
-  // Optionally set a validator if you want to test validation logic
-  // The Test adapter provides a mock validator.
-  // store.validator = "TEST_VALIDATOR_URL"; // Or use a function
+  // --- Optional: Mock Validator ---
+  // If you set a validator URL, the Test platform provides a mock function
+  // that simulates a successful validation after a short delay.
+  // This helps test the .verified() event flow.
+  // store.validator = "TEST_VALIDATOR"; // Any non-empty string enables mock validation
 
-  // Initialize the store, including the Test platform
-  store.initialize([Platform.TEST /*, other platforms... */])
-    .then(() => {
-      console.log('Store ready, including Test platform.');
-      refreshUI(); // Update UI after initialization
-    });
-
-  // Setup standard event handlers
+  // --- Setup Event Listeners ---
   store.when()
-    .productUpdated(refreshUI)
-    .receiptUpdated(refreshUI)
-    .approved(transaction => {
-      console.log('Test purchase approved: ' + transaction.transactionId);
-      // Typically verify, but for Test platform, validation is mocked
-      // transaction.verify(); // This would call the mock validator if set
-      transaction.finish(); // Finish the transaction
+    .productUpdated(product => {
+      console.log('Product updated: ' + product.id);
+      refreshUI(); // Update the UI with product details
     })
-    .verified(receipt => { // Only called if a validator is set
-      console.log('Test receipt verified.');
+    .approved(transaction => {
+      console.log(`Approved: ![{transaction.transactionId} for ](<html>
+<head><title>405 Not Allowed</title></head>
+<body bgcolor="white">
+<center><h1>405 Not Allowed</h1></center>
+</body>
+</html> "{transaction.transactionId} for ")
+{transaction.products[0].id}`);
+      setStatus(`Approved ${transaction.products[0].id}. Verifying...`);
+      // For the Test platform, verify() simulates success immediately (or after 500ms if validator is set)
+      transaction.verify();
+    })
+    .verified(receipt => {
+      console.log(`Verified: ${receipt.id}`);
+      setStatus(`Verified ${receipt.collection[0]?.id ?? ''}. Finishing...`);
+      // Finish the transaction to acknowledge/consume it
       receipt.finish();
+    })
+    .finished(transaction => {
+      console.log(`Finished: ${transaction.transactionId} for ${transaction.products[0].id}`);
+      setStatus(`Purchase complete for ${transaction.products[0].id}!`);
+      // Grant entitlement based on product type
+      if (transaction.products[0].id.includes('consumable')) {
+        grantCoins(1); // Example: grant 1 unit
+      } else {
+        grantEntitlement(transaction.products[0].id); // For non-consumables/subs
+      }
+      refreshUI(); // Update UI after granting
+    })
+    .cancelled(transaction => {
+      console.log('Cancelled:', transaction.transactionId);
+      setStatus('Purchase cancelled.');
+      refreshUI();
+    });
+    // Global store.error handler is already set up in initial script
+
+  // --- Initialize the Store ---
+  // Initialize ONLY the Test platform.
+  store.initialize([Platform.TEST])
+    .then(() => {
+      console.log('Test Store initialized successfully.');
+      setStatus('Test Store ready.');
+      refreshUI(); // Render the UI with initial product data
+    })
+    .catch(err => {
+      console.error('Test Store initialization failed:', err);
+      setStatus('Test Store failed to initialize.');
     });
 }
 
-// Remember to implement refreshUI() to display products
+// --- UI Rendering ---
+// (Includes placeholders for balance/feature status - adapt as needed)
+let userCoinBalance = 0; // Example balance
+const FEATURE_KEY = 'isCustomFeatureUnlocked'; // Example key
+
 function refreshUI() {
-  // Your UI update logic here...
-  // It should iterate through store.products and store.localReceipts/verifiedPurchases
-  // and display relevant information and purchase buttons.
-  // See examples in other tutorials (e.g., subscription-generic-initialization.md)
-  // for UI rendering patterns.
+  console.log('Refreshing Test UI...');
+  const { store, Platform, Utils } = CdvPurchase;
+
+  const productsEl = document.getElementById('product-details');
+  const statusEl = document.getElementById('user-status');
+  if (!productsEl || !statusEl) return;
+
+  // Display Balance/Feature Status (Example)
+  const featureUnlocked = localStorage.getItem(FEATURE_KEY) === 'YES';
+  statusEl.innerHTML = `<b>Coins: ${userCoinBalance}</b> | <b>Custom Feature: ${featureUnlocked ? 'Unlocked' : 'Locked'}</b>`;
+
+  // Display Products
+  productsEl.innerHTML = store.products
+    .filter(p => p.platform === Platform.TEST) // Show only test products
+    .map(product => {
+      let productHtml = `<div><h4>${product.title || product.id} (${product.type})</h4>`;
+      if (product.description) productHtml += `<p>${product.description}</p>`;
+
+      const offer = product.getOffer(); // Get the default offer
+      if (offer) {
+        const priceDetails = offer.pricingPhases.map(phase => {
+           let phaseDesc = `${phase.price}`;
+           if (phase.billingPeriod) phaseDesc += ` / ${Utils.formatDurationEN(phase.billingPeriod, { omitOne: true })}`;
+           if (phase.paymentMode === PaymentMode.FREE_TRIAL) phaseDesc = `Free Trial (${Utils.formatDurationEN(phase.billingPeriod)})`;
+           return phaseDesc;
+        }).join(' then ');
+        productHtml += `<p>Price: ${priceDetails}</p>`;
+
+        // Determine if owned (using store.owned which checks verified/local)
+        const owned = store.owned(product);
+
+        if (owned && product.type !== ProductType.CONSUMABLE) {
+          productHtml += `<p><em>(Owned)</em></p>`;
+          if (product.type === ProductType.PAID_SUBSCRIPTION) {
+             const purchase = store.findInVerifiedReceipts(product) ?? store.findInLocalReceipts(product);
+             if (purchase?.expirationDate) {
+                 productHtml += `<p>Expires: ${purchase.expirationDate.toLocaleDateString()}</p>`;
+             }
+          }
+        } else if (offer.canPurchase) {
+          productHtml += `<button onclick="buyTestProduct('${product.id}')">Buy</button>`;
+        } else {
+          productHtml += `<p>(Cannot purchase)</p>`;
+        }
+      } else {
+        productHtml += '<p>Offer not available.</p>';
+      }
+      productHtml += `</div>`;
+      return productHtml;
+    }).join('<hr/>');
 }
+
+// --- Placeholder for Purchase Action ---
+window.buyTestProduct = function(productId) {
+  console.log(`Placeholder: buyTestProduct('${productId}') called.`);
+  alert('Purchase logic needs implementation (see test-platform-purchase.js).');
+};
+
+// --- Placeholder for Granting Logic ---
+function grantCoins(amount) {
+  console.log(`Placeholder: Granting ${amount} coins.`);
+  userCoinBalance += amount;
+  // Persist balance securely in a real app
+}
+function grantEntitlement(productId) {
+  console.log(`Placeholder: Granting entitlement for ${productId}.`);
+  if (productId === 'custom_test_feature') {
+    localStorage.setItem(FEATURE_KEY, 'YES'); // INSECURE EXAMPLE
+  }
+  // Handle subscription activation if needed
+}
+
+// Initial UI update on device ready
+document.addEventListener('deviceready', () => {
+  if (typeof initializeStoreAndSetupListeners === 'function') {
+     // Called by onDeviceReady
+  } else {
+     initializeStoreAndSetupListeners = initializeStore;
+     initializeStoreAndSetupListeners();
+  }
+  refreshUI();
+}, false);
+
+// Ensure setStatus and Utils are defined
+if (typeof setStatus !== 'function') { setStatus = (message) => console.log('[Status] ' + message); }
+if (!CdvPurchase.Utils) CdvPurchase.Utils = {};
+if (!CdvPurchase.Utils.formatDurationEN) { CdvPurchase.Utils.formatDurationEN = (iso) => iso || ''; }
+
 ```
+{% endcode %}
 
-### Built-in Test Products
+**Explanation:**
 
-The `Test` platform comes with predefined products you can register by ID:
+*   **Register Test Products (Lines 11-65):**
+    *   You **must** register any product ID you want to use with `Platform.TEST`.
+    *   You can use built-in product definitions like `CdvPurchase.Test.testProducts.CONSUMABLE` (Lines 15-24) for convenience. See the code comments or API docs for available built-in products (`CONSUMABLE`, `NON_CONSUMABLE`, `PAID_SUBSCRIPTION`, `PAID_SUBSCRIPTION_ACTIVE`, `CONSUMABLE_FAILING`).
+    *   You can also define **custom test products** directly within `store.register` (Lines 27-65). Provide `id`, `type`, `platform: Platform.TEST`, and optionally `title`, `description`, and `pricing`. The `pricing` can be a simple object for one-time purchases or an array of `PricingPhase` objects for subscriptions.
+*   **Mock Validator (Lines 68-72):** If you set `store.validator` to any non-empty string (e.g., `"TEST_VALIDATOR"`), the Test platform will simulate a successful validation response after a 500ms delay when `transaction.verify()` is called. This allows you to test the `.verified()` event flow.
+*   **Event Listeners (Lines 75-100):** Basic listeners are set up:
+    *   `productUpdated`: Refreshes the UI when product details are ready.
+    *   `approved`: Calls `transaction.verify()` (which triggers the mock validation if enabled).
+    *   `verified`: Calls `receipt.finish()` to complete the transaction.
+    *   `finished`: Calls functions to grant the item (`grantCoins` or `grantEntitlement`) and refreshes the UI.
+    *   `cancelled`: Updates the status message.
+*   **Initialize Store (Lines 103-112):** Calls `store.initialize([Platform.TEST])` to activate *only* the Test adapter.
 
-*   **`CdvPurchase.Test.testProducts.CONSUMABLE` (id: `test-consumable`)**: A standard consumable product. Purchase simulation succeeds by default.
-*   **`CdvPurchase.Test.testProducts.CONSUMABLE_FAILING` (id: `test-consumable-fail`)**: A consumable product whose purchase simulation will always fail (unless forced via prompt).
-*   **`CdvPurchase.Test.testProducts.NON_CONSUMABLE` (id: `test-non-consumable`)**: A standard non-consumable product. Purchase simulation succeeds by default. Can only be "purchased" once per session unless app state is cleared.
-*   **`CdvPurchase.Test.testProducts.PAID_SUBSCRIPTION` (id: `test-subscription`)**: A standard auto-renewing subscription. Includes a 3-week trial phase followed by monthly billing. Purchase simulation succeeds by default. Renews every few minutes during the test session.
-*   **`CdvPurchase.Test.testProducts.PAID_SUBSCRIPTION_ACTIVE` (id: `test-subscription-active`)**: An auto-renewing subscription that starts in the `APPROVED` state (simulating an existing subscription). Renews every few minutes during the test session.
+### 3. Purchase Flow (`buyTestProduct`)
 
-You register these using their predefined `id` and `type` with `platform: Platform.TEST`. Their title, description, and pricing are predefined within the adapter.
+Implement the function called by your "Buy" buttons to initiate a test purchase using `offer.order()`.
 
-### Custom Test Products
-
-You can define your own test products directly within the `store.register` call, as shown in the initialization example for `custom-test-nonconsumable`.
-
-*   Provide `id`, `type`, and `platform: Platform.TEST`.
-*   Optionally provide `title`, `description`, `group`.
-*   Provide pricing information using `pricing`:
-    *   For simple one-time payments (consumable/non-consumable): `{ price: string, currency: string, priceMicros: number }`
-    *   For subscriptions (paid/non-renewing): Use an array of `PricingPhase` objects, similar to how you'd define real product pricing.
-
-Alternatively, use the `CdvPurchase.Test.registerTestProduct()` function *before* `store.register` if you prefer to define them separately.
-
+{% code title="www/js/index.js (buyTestProduct)" lineNumbers="true" %}
 ```javascript
-// Defined before store.register
-CdvPurchase.Test.registerTestProduct({
-  id: 'another-custom-sub',
-  type: ProductType.PAID_SUBSCRIPTION,
-  platform: Platform.TEST, // platform is actually ignored by registerTestProduct but good practice
-  title: 'My Custom Sub',
-  pricing: [{ price: '$4.99', currency: 'USD', priceMicros: 4990000, billingPeriod: 'P1M', recurrenceMode: RecurrenceMode.INFINITE_RECURRING, paymentMode: PaymentMode.PAY_AS_YOU_GO }]
-});
+// This function is called by the "Buy" buttons in the UI
+window.buyTestProduct = function(productId) {
+  console.log(`Buy button clicked for test product: ${productId}`);
+  const { store, Platform, ErrorCode } = CdvPurchase;
 
-// Then register it with the store
-store.register({
-  id: 'another-custom-sub',
-  type: ProductType.PAID_SUBSCRIPTION,
-  platform: Platform.TEST,
-});
+  const product = store.get(productId, Platform.TEST);
+  const offer = product?.getOffer(); // Get the default offer
+
+  if (offer) {
+    setStatus(`Initiating purchase for ${productId}...`);
+    console.log(`Ordering offer: ${offer.id}`);
+
+    offer.order()
+      .then(result => {
+        // Promise resolves when the prompt() is dismissed or if there's an immediate error.
+        // The final outcome (approved, cancelled, failed) is handled by the event listeners.
+        if (result && result.isError) {
+          // This typically catches errors *before* the prompt, like "cannot purchase".
+          // The prompt interaction itself usually triggers listeners, not this promise rejection.
+          setStatus(`Order failed: ${result.message}`);
+        } else {
+          // Order initiated, waiting for user interaction with the prompt...
+          // Status will be updated by .approved, .cancelled, or .error listeners.
+        }
+        refreshUI(); // Refresh UI, e.g., disable button temporarily
+      })
+      .catch(err => {
+        // Catch unexpected errors during order initiation
+        console.error(`Unexpected error ordering ${productId}:`, err);
+        setStatus('Unexpected error during purchase.');
+        refreshUI();
+      });
+
+  } else {
+    console.error(`Cannot purchase: Product (${productId}) or offer not found.`);
+    setStatus('Error: Unable to purchase. Product/Offer missing.');
+  }
+}
+
+// --- Explanation of the Prompt ---
+/*
+When offer.order() is called for Platform.TEST, the following happens:
+
+1. A JavaScript `prompt()` dialog appears in the browser/WebView.
+2. The prompt message asks:
+   `Do you want to purchase ![{productId} for ](<html>
+<head><title>405 Not Allowed</title></head>
+<body bgcolor="white">
+<center><h1>405 Not Allowed</h1></center>
+</body>
+</html> "{productId} for ")
+{price}? Enter "Y" to confirm. Enter "E" to fail with an error. Anything else to cancel.`
+3. User Interaction:
+   - Entering "Y" (case-insensitive) and clicking OK: Simulates a successful purchase approval. The `.approved()` event listener will be triggered shortly after.
+   - Entering "E" (case-insensitive) and clicking OK: Simulates a purchase failure. The global `store.error()` handler will be triggered with an ErrorCode.PURCHASE error.
+   - Clicking "Cancel" or entering anything else and clicking OK: Simulates the user cancelling the purchase. The `.cancelled()` event listener will be triggered.
+*/
+
+// Ensure setStatus and refreshUI are defined (should be in initialization script)
+if (typeof setStatus !== 'function') { setStatus = (message) => console.log('[Status] ' + message); }
+if (typeof refreshUI !== 'function') { refreshUI = () => console.log('Placeholder: refreshUI()'); }
+
 ```
+{% endcode %}
 
-### Purchase Flow with Test Platform
+**Explanation:**
 
-When you call `store.order(offer)` for a `Test` platform product:
+*   **Get Offer (Lines 6-8):** Retrieves the product and its default offer.
+*   **Call `offer.order()` (Line 14):** This is the key call to start the purchase simulation.
+*   **Prompt Interaction (Lines 30-42):** When `offer.order()` runs for `Platform.TEST`:
+    *   A standard JavaScript `prompt()` dialog appears.
+    *   It asks the user to confirm (`Y`), fail (`E`), or cancel.
+    *   **"Y"**: Simulates approval -> triggers `.approved()` listener.
+    *   **"E"**: Simulates failure -> triggers global `store.error()` handler.
+    *   **Cancel/Other**: Simulates cancellation -> triggers `.cancelled()` listener.
+*   **Promise Handling (Lines 15-28):** The promise returned by `order()` resolves/rejects quickly after the prompt is dismissed, mainly indicating if the *request* was initiated or immediately failed/cancelled. The final purchase *outcome* is handled by the event listeners.
 
-1.  A standard JavaScript `prompt()` dialog appears.
-2.  It asks: `Do you want to purchase ${offer.productId} for ${offer.pricingPhases[0].price}? Enter "Y" to confirm. Enter "E" to fail with an error. Anything else to cancel.`
-3.  **Entering "Y" (case-insensitive):** Simulates a successful purchase. The transaction moves to the `APPROVED` state, triggering the `.approved()` handler.
-4.  **Entering "E" (case-insensitive):** Simulates a purchase failure. The `store.order()` promise rejects with an `IError` (code `ErrorCode.PURCHASE`).
-5.  **Entering anything else or cancelling the prompt:** Simulates user cancellation. The `store.order()` promise rejects with an `IError` (code `ErrorCode.PAYMENT_CANCELLED`).
-
-This allows you to test the different outcomes of your purchase flow logic locally.
-
-### Receipt Validation
-
-If you set `store.validator`, the `Test` adapter provides a mock validation function. When `transaction.verify()` is called:
-*   It waits for 500ms (simulating network delay).
-*   It returns a mock `VerifiedReceipt` based on the local `Transaction` data.
-*   It triggers the `.verified()` event handler.
-
-This allows testing of your receipt validation and entitlement logic without needing a real validation server during development.
+This setup allows you to test the full client-side purchase lifecycle locally using simple prompts for interaction. Remember to replace the Test platform logic with real platform adapters and server-side validation for production.

@@ -1,83 +1,32 @@
-# Subscription on AppStore
+# Subscription on AppStore (iOS & macOS)
 
-This use case explains how to implement an auto-renewing subscription on iOS using the App Store.
+This use case explains how to implement an **auto-renewing subscription** on iOS and macOS using the App Store platform and `cordova-plugin-purchase` v13+. Reliable subscription management **requires server-side receipt validation**.
+
+## 1. Platform Setup
+
+First, ensure your Apple Developer account, App Store Connect (including creating subscription products and groups), and Xcode project are correctly configured.
 
 !INCLUDE "../sections/setup-appstore.md"
 
-## Initialization
+## 2. Initialization & UI
 
-We use the generic subscription initialization structure. The core logic for checking ownership and rendering the UI relies heavily on **verified receipt data** because local information about subscription status and expiry is unreliable on iOS.
+Next, set up the basic JavaScript to initialize the plugin, register your subscription products (including `group` if applicable), configure the **mandatory validator**, and display subscription status based on **verified** receipt data.
 
 !INCLUDE "../sections/subscription-generic-initialization.md"
+*   **Note:** Replace placeholder product IDs (`'subscription_monthly'`, `'subscription_yearly'`) and the group name (`'premium_access'`) with your actual values. Ensure your `store.validator` URL is correctly configured.
 
-```javascript
-// --- Specific Implementations for Subscription Status ---
+## 3. Purchase Flow
 
-// This function updates the UI based on verified subscription status
-function renderUI() {
-    const messagesEl = document.getElementById('messages');
-    const statusEl = document.getElementById('subscription-status');
-    if (!messagesEl || !statusEl) return;
-
-    messagesEl.textContent = 'Store ready.'; // Clear status
-
-    // ** Check ownership using store.owned() which relies on verified receipts **
-    const isActive = CdvPurchase.store.owned('subscription1'); // Use your actual Subscription ID
-
-    if (isActive) {
-        const purchase = CdvPurchase.store.findInVerifiedReceipts({ id: 'subscription1' }); // Find the verified purchase details
-        let statusText = 'Subscription: ACTIVE';
-        if (purchase?.expiryDate) {
-            const dateStr = new Date(purchase.expiryDate).toLocaleDateString();
-            statusText += ` (Renews/Expires: ${dateStr})`;
-        }
-        // Check for potential issues flagged by the validator
-        if (purchase?.renewalIntent === CdvPurchase.RenewalIntent.LAPSE) {
-            statusText += ' <span style="color:orange;">[Will Expire]</span>';
-        }
-        if (purchase?.isBillingRetryPeriod) {
-            statusText += ' <span style="color:red;">[Billing Issue!]</span>';
-        }
-        statusEl.innerHTML = statusText;
-        // Unlock premium features in your app
-    } else {
-        statusEl.textContent = 'Subscription: Inactive';
-        // Lock premium features
-    }
-
-    // Re-render product display to update purchase/manage buttons
-    const product = CdvPurchase.store.get('subscription1');
-    if (product) renderProduct(product);
-}
-
-// --- Ensure required functions are available ---
-// These should be defined in the included generic section or here.
-
-// function renderProduct(product) { ... } // Included & Modified above for Manage button
-// function requestPurchase(platform, productId, offerId) { ... } // Included
-// function manageSubscription(platform) { ... } // Included
-// function updateMessages(text) { ... } // Included
-// function log(msg) { ... } // Included
-
-// --- Final Setup ---
-
-// Initial UI render on device ready depends on validated data,
-// so we mostly rely on the callbacks from initStore.
-document.addEventListener('deviceready', () => {
-    updateMessages('Checking subscription status...');
-    // Initial renderUI might show "Inactive" until verification completes.
-    renderUI();
-}, false);
-```
-
-## Purchase & Validation Flow
-
-The core logic is in the included generic section. For subscriptions:
-
-1.  **Validation is Mandatory:** You **must** set up `store.validator`. The `approved` event triggers `transaction.verify()`.
-2.  **Grant Entitlement on Verification:** The `verified` event receives the validated receipt. The `renderUI` function (called from `finished` or `productUpdated`/`receiptUpdated` listeners) checks `store.owned()` based on this verified data to unlock/lock features.
-3.  **Finish Transaction:** `receipt.finish()` is called after verification to acknowledge the transaction to Apple.
-
-## iOS Specific Notes
+Implement the logic to handle the subscription purchase or plan change process. This involves initiating the order, verifying the transaction via your validator, and acknowledging the purchase with `receipt.finish()`.
 
 !INCLUDE "../sections/subscription-ios.md"
+
+## 4. Receipt Validation (Mandatory)
+
+Server-side validation is **essential** for subscriptions to determine the current status, expiry date, renewal intent, and handle events like renewals, cancellations, and billing issues.
+
+!INCLUDE "../sections/receipt-validation-reminder.md"
+
+## 5. Testing
+
+Follow the specific testing procedures for iOS/macOS Sandbox environments outlined in the platform-specific purchase flow section above. Pay close attention to testing initial purchases, accelerated renewals, cancellations, and plan changes (if applicable) via the Sandbox subscription management UI.

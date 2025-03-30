@@ -1,62 +1,104 @@
 # macOS Specifics
 
-Implementing In-App Purchases on macOS using the `cordova-plugin-purchase` is very similar to iOS, as both platforms use Apple's StoreKit framework. However, there are a few specific setup steps and considerations.
+Implementing In-App Purchases on macOS using the `cordova-plugin-purchase` is very similar to iOS, as both platforms utilize Apple's StoreKit framework. However, there are a few specific setup steps and testing procedures unique to macOS.
+
+{% hint style="warning" icon="warning" %}
+**Platform Interfaces Change Frequently!**
+
+The App Store Connect interface, Xcode capabilities, and macOS testing procedures can change. This guide provides a general overview but may become outdated.
+
+**Always refer to the official Apple documentation as the primary source:**
+*   [App Store Connect Help](https://help.apple.com/app-store-connect/)
+*   [macOS App Sandbox](https://developer.apple.com/documentation/security/app_sandbox)
+*   [Testing In-App Purchases on macOS](https://developer.apple.com/documentation/storekit/testing_in-app_purchases_on_macos) (Search Apple Developer Docs for latest testing guides)
+{% endhint %}
 
 ## Prerequisites
 
-*   Follow the general [Setup for iOS AppStore](../sections/setup-appstore.md) guide, as most steps apply to macOS as well (App Store Connect setup, product creation, shared secret).
-*   Ensure you have the `cordova-osx` platform added to your project (`cordova platform add osx`).
+1.  **Cordova macOS Platform:** Ensure you have added the macOS platform to your project:
+    ```bash
+    cordova platform add osx
+    ```
+2.  **App Store Connect Setup:** Complete the general [Setup for AppStore](sections/setup-appstore.md) guide. Most steps (Apple Developer Account, App Record, Agreements, Product Creation, Shared Secret, Sandbox Users) are identical for iOS and macOS apps distributed via the App Store.
 
 ## Xcode Project Configuration
 
-In addition to the **"In-App Purchase"** capability required for iOS, macOS apps typically require the **"App Sandbox"** capability for distribution through the Mac App Store.
+For macOS apps, especially those intended for the Mac App Store, you typically need to enable the **App Sandbox** capability in addition to **In-App Purchase**.
 
-1.  Open your project in Xcode (`platforms/osx/YourApp.xcworkspace`).
-2.  Select your project target in the Project Navigator.
-3.  Go to the **"Signing & Capabilities"** tab.
-4.  Click **"+ Capability"** and add **"App Sandbox"**.
-5.  Under the "App Sandbox" settings, ensure **"Network: Outgoing Connections (Client)"** is checked. This is often required for the app to communicate with validation servers or other necessary network services.
-6.  Ensure the **"In-App Purchase"** capability is also added, just like for iOS.
+1.  **Prepare Project:**
+    ```bash
+    cordova prepare osx
+    ```
+2.  **Open Workspace:** Open the `.xcworkspace` file located in `platforms/osx/` using Xcode.
+    ```bash
+    open platforms/osx/*.xcworkspace
+    ```
+3.  **Select Target:** In Xcode's Project Navigator (left sidebar), select your main application target.
+4.  **Signing & Capabilities Tab:** Go to the "Signing & Capabilities" tab.
+5.  **Add Capabilities:**
+    *   Click **"+ Capability"**.
+    *   Search for and add **"In-App Purchase"**.
+    *   Click **"+ Capability"** again.
+    *   Search for and add **"App Sandbox"**.
+6.  **Configure App Sandbox:**
+    *   Under the newly added "App Sandbox" section, review the permissions.
+    *   Ensure **"Network: Outgoing Connections (Client)"** is **checked**. This is usually required for your app to communicate with external services, including potentially your receipt validation server.
+
+*(Ensure this image shows the macOS capabilities screen with App Sandbox and Network checked)*
 
 ## Testing on macOS
 
-Testing macOS In-App Purchases uses **Sandbox Tester accounts** created in App Store Connect, similar to iOS. However, the login process is different:
+Testing macOS In-App Purchases requires using **Sandbox Tester accounts** but involves a specific login procedure different from iOS:
 
-1.  **Sign Out of Mac App Store:** Crucially, you must **sign out** of your regular Apple ID in the **Mac App Store application** (Store menu -> Sign Out). *Do not* sign out of iCloud system-wide.
-2.  **Launch Your Test Build:** Run your application build directly from Xcode or as an exported `.app` file (signed with your Development certificate).
-3.  **Initiate Purchase:** When you attempt to make an In-App Purchase within your test build, macOS will prompt you to sign in.
-4.  **Sign In with Sandbox Account:** Use the email and password for one of your **Sandbox Tester accounts** created in App Store Connect. **Do not** use your regular Apple ID.
-5.  **Complete Purchase:** Proceed through the purchase flow. It will use the sandbox environment and won't charge real money.
+1.  **Sign Out of Mac App Store:**
+    *   Open the **App Store** application on your Mac (the application used to download apps, *not* App Store Connect).
+    *   Go to the **Store** menu in the menu bar.
+    *   Select **Sign Out**. You must be signed out of any production Apple ID in the Mac App Store app itself.
+    *   **Important:** Do *not* sign out of your primary iCloud account in System Preferences/Settings, only sign out from the *App Store application*.
+2.  **Launch Your Test Build:**
+    *   Build and run your application directly from Xcode onto your Mac (select "My Mac" as the target device).
+    *   Alternatively, you can archive and export a "Development" signed build (`.app` file) and run that.
+3.  **Initiate Purchase Within Your App:**
+    *   Navigate to the purchase section within your running test build and attempt to buy an In-App Purchase.
+4.  **Sign In When Prompted by Your App:**
+    *   Your app (via StoreKit) will present a system login prompt.
+    *   Enter the email and password for one of your **Sandbox Tester accounts** (created in App Store Connect). **Do NOT use your regular/production Apple ID.**
+5.  **Complete Purchase:**
+    *   Follow the prompts to confirm the purchase. It will use the sandbox environment and will not involve real money.
 
 {% hint style="danger" icon="skull" %}
-**Do NOT sign in with a Sandbox account directly into the Mac App Store application.** You must sign out of the production store and sign in with the Sandbox account *only when prompted by your app during a purchase*. Signing into the main Mac App Store with a Sandbox account can invalidate the account.
+**Crucial Testing Point:** Never sign into the main **Mac App Store application** using a Sandbox Tester account. Only use Sandbox credentials when prompted *by your application* during a test purchase. Signing into the production Mac App Store app with a Sandbox account can corrupt or invalidate that test account.
 {% endhint %}
 
 ## Code Implementation
 
-The JavaScript code using `CdvPurchase.store` is generally **identical** to the iOS implementation for the same product types (Consumable, Non-Consumable, Subscription). Refer to the relevant iOS use-case guides:
+The JavaScript code using `CdvPurchase.store` for handling products, offers, purchases, validation, and events is generally **identical** for macOS and iOS. Both use `Platform.APPLE_APPSTORE`.
 
-*   [Consumable with AppStore](consumable-appstore.md)
-*   [Non-Consumable with AppStore](non-consumable-appstore.md)
-*   [Subscription with AppStore](subscription-appstore.md)
-*   [Non-Renewing Subscription with AppStore](non-renewing-appstore.md)
+Refer to the relevant iOS use-case guides for code examples:
 
-Remember to set the platform correctly when registering products if you are building for multiple platforms:
+*   [Consumable (AppStore)](consumable-appstore.md)
+*   [Non-Consumable (AppStore)](non-consumable-appstore.md)
+*   [Subscription (AppStore)](subscription-appstore.md)
+*   [Non-Renewing Subscription (AppStore)](non-renewing-appstore.md)
+
+**Example Registration:**
 
 ```javascript
 const { store, ProductType, Platform } = CdvPurchase;
 
+// Registering a product for macOS uses the same platform identifier as iOS
 store.register({
-    id: 'my_macos_feature',
+    id: 'my_macos_premium_feature', // Your product ID from App Store Connect
     type: ProductType.NON_CONSUMABLE,
     platform: Platform.APPLE_APPSTORE // Correct for both iOS and macOS
 });
 
-// ... rest of your initialization and event handlers ...
+// ... rest of your initialization (including validator) and event handlers ...
 ```
 
-**Receipt Validation:** Use the same validation endpoint and App-Specific Shared Secret as you would for iOS. The receipt format is largely the same.
+**Receipt Validation:** Use the same server-side validation endpoint and **App-Specific Shared Secret** as you would for your iOS app. The receipt format generated by macOS StoreKit is compatible.
 
 ## Distribution
 
-When distributing your macOS app outside the Mac App Store (e.g., direct download), you cannot use StoreKit In-App Purchases. You would need to integrate a different payment provider like Stripe or Braintree (using their respective web/SDK solutions, potentially outside this plugin's scope for macOS unless specifically supported by an extension). For Mac App Store distribution, follow Apple's submission guidelines.
+*   **Mac App Store:** If distributing through the Mac App Store, ensure all capabilities (App Sandbox, In-App Purchase) are correctly configured and follow Apple's submission guidelines.
+*   **Outside Mac App Store (Direct Distribution/Notarization):** StoreKit In-App Purchases **cannot** be used for apps distributed outside the Mac App Store. For direct distribution, you must integrate a third-party payment provider (e.g., Stripe, Paddle, Braintree via their web/desktop SDKs). This typically falls outside the direct scope of the `cordova-plugin-purchase` StoreKit integration, although the Braintree *payment request* functionality might still be usable if the Braintree extension supports macOS contexts (check the extension's documentation).

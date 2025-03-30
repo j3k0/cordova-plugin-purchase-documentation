@@ -1,8 +1,7 @@
-
 #### index.html
 
 !INCLUDE "./code-initial-html.md"
 
-#### javascript
+#### JavaScript (`www/js/index.js`)
 
 !INCLUDE "./code-initial-javascript.md"

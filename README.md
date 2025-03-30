@@ -10,9 +10,9 @@ Need professional help and support? [Contact Me](mailto:hoelt@fovea.cc).
 
 ## Summary
 
-This plugin allows **In-App Purchases** (IAP) to be made from **Cordova, Capacitor, and Ionic** applications.
+This plugin allows **In-App Purchases** (IAP) to be made from **Cordova, Capacitor, and Ionic** applications using a single, unified JavaScript API.
 
-It provides a unified JavaScript API to handle in-app purchases across multiple platforms, simplifying development and maintenance.
+It simplifies handling in-app purchases across multiple platforms by abstracting platform-specific complexities.
 
 **Supported Platforms & Features:**
 
@@ -36,7 +36,7 @@ It provides a unified JavaScript API to handle in-app purchases across multiple 
 
 ## Documentation
 
-This documentation provides guides and use cases for implementing In-App Purchases (IAP) using the `cordova-plugin-purchase` plugin.
+This documentation provides guides and use cases for implementing In-App Purchases (IAP) using the `cordova-plugin-purchase` plugin (version 13+).
 
 **Key Sections:**
 
@@ -61,7 +61,7 @@ cordova plugin add cordova-plugin-purchase
 npm install cordova-plugin-purchase
 npx cap sync
 ```
-*(No specific Capacitor integration code is needed; use the Cordova plugin directly as shown in the examples).*
+*(No specific Capacitor integration code is needed; use the Cordova plugin directly via the `CdvPurchase` global namespace as shown in the examples).*
 
 ### Ionic
 
@@ -77,63 +77,124 @@ See the [Introduction](introduction.md#recommended-plugins) for optional plugins
 
 ## Quick Start Example (Test Platform)
 
+This example demonstrates the basic flow using the built-in **Test Platform**, which requires no App Store or Google Play setup.
+
+**1. Wait for Device Ready:**
+Ensure all plugin interactions happen after the `deviceready` event.
+
 ```typescript
-import 'cordova-plugin-purchase'; // Import for typings (optional but recommended)
+document.addEventListener('deviceready', initializeStore, false);
+```
 
-document.addEventListener('deviceready', async () => {
+**2. Initialize Store & Register Product:**
+Inside your `initializeStore` function:
 
+```typescript
+async function initializeStore() {
+  // Import necessary members from the CdvPurchase namespace
   const { store, ProductType, Platform, LogLevel, ErrorCode } = CdvPurchase;
 
-  // Set verbosity level
+  // Optional: Set log level for detailed debugging
   store.verbosity = LogLevel.DEBUG;
 
-  // Log errors
+  // Optional: Basic error logging
   store.error(err => {
     console.error("STORE ERROR: " + err.code + " " + err.message);
   });
 
-  // Register a test product
+  // Register the test product
   store.register({
-    id: 'test_consumable',
+    id: 'test_consumable', // A built-in test product ID
     type: ProductType.CONSUMABLE,
     platform: Platform.TEST,
   });
 
-  // Handle purchase approval
+  // Setup event listeners (see next step)
+  setupListeners();
+
+  // Initialize the Test platform
+  try {
+    await store.initialize([Platform.TEST]);
+    console.log('Store initialized!');
+    displayTestProduct(); // Function to show product info and buy button
+  } catch (err) {
+    console.error('Store initialization failed:', err);
+  }
+}
+```
+
+**3. Setup Event Listeners:**
+Handle the purchase lifecycle events.
+
+```typescript
+function setupListeners() {
+  const { store } = CdvPurchase;
   store.when()
+    .productUpdated(product => {
+      // Called when product details are loaded or updated
+      console.log('Product updated: ' + product.id);
+      displayTestProduct(); // Update UI
+    })
     .approved(transaction => {
       console.log('Purchase Approved:', transaction.transactionId);
-      // Verify purchase (Test platform provides mock verification)
+      // Purchase successful on the platform, now verify it.
+      // For the Test platform, verify() simulates success immediately.
       transaction.verify();
     })
     .verified(receipt => {
-      console.log('Purchase Verified:', receipt.id);
-      // Finish the transaction to consume/acknowledge
+      console.log('Purchase Verified.');
+      // Purchase is valid. Unlock content / grant item.
+      // Finish the transaction to acknowledge/consume it.
       receipt.finish();
     })
     .finished(transaction => {
       console.log('Purchase Finished:', transaction.transactionId);
       alert('Test purchase complete!');
+      // Update UI, e.g., grant coins, unlock feature
+    })
+    .cancelled(transaction => {
+      console.log('Purchase Cancelled:', transaction.transactionId);
+      alert('Purchase cancelled.');
+    })
+    .error(err => {
+      console.error('Store Error Handled:', err);
+      alert('An error occurred: ' + err.message);
     });
-
-  // Initialize the store with the Test platform
-  try {
-    await store.initialize([Platform.TEST]);
-    console.log('Store initialized!');
-
-    // Get product details
-    const product = store.get('test_consumable', Platform.TEST);
-    console.log('Test Product:', JSON.stringify(product));
-
-    // Example: Initiate a purchase (will show a prompt)
-    // product?.getOffer()?.order();
-
-  } catch (err) {
-    console.error('Store initialization failed:', err);
-  }
-
-}, false);
+}
 ```
+
+**4. Display Product and Purchase Button:**
+Create functions to show product info and trigger the purchase.
+
+```typescript
+function displayTestProduct() {
+  const { store } = CdvPurchase;
+  const product = store.get('test_consumable', Platform.TEST);
+  const appEl = document.getElementById('app');
+  if (!appEl) return;
+
+  if (product) {
+    appEl.innerHTML = `
+      <h2>${product.title}</h2>
+      <p>${product.description}</p>
+      <p>Price: ${product.pricing?.price ?? 'N/A'}</p>
+      <button id="buy-button">Buy</button>
+    `;
+    const buyButton = document.getElementById('buy-button');
+    buyButton?.addEventListener('click', () => {
+      const offer = product.getOffer();
+      if (offer) {
+        offer.order(); // Initiate the purchase
+      } else {
+        alert('Offer not available.');
+      }
+    });
+  } else {
+    appEl.innerHTML = '<p>Loading test product...</p>';
+  }
+}
+```
+*   **Note:** This example uses the `CdvPurchase` global namespace.
 
 ## Contributing
 

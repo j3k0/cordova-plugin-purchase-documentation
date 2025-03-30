@@ -2,146 +2,53 @@
 
 This section explains how to use the `Test` platform adapter for local development and testing without needing actual store accounts or network connectivity to external services.
 
-### Base framework
+### 1. Base Framework
 
-First, let's set up the basic HTML structure and the initial JavaScript, just like with other platforms.
+Ensure you have the basic HTML structure and initial JavaScript setup (waiting for `deviceready`, basic plugin checks, `setStatus` helper, placeholder functions) as outlined in the [Code Framework section](code-framework.md).
 
 !INCLUDE "./code-framework.md"
 
-### Initialization
+### 2. Initialization (`initializeStoreAndSetupListeners`)
 
-To use the test platform, simply include `Platform.TEST` in your `store.initialize()` call. You can use it alongside other platforms or exclusively for testing.
+Implement the `initializeStoreAndSetupListeners` function to configure and initialize the Test platform. This involves registering test products and setting up event listeners.
 
-```javascript
-function initializeStore() {
-  const { store, Platform, ProductType } = CdvPurchase;
+{% code title="www/js/index.js (initializeStoreAndSetupListeners)" lineNumbers="true" %}
+!INCLUDECODE "../code/test-platform-initialization.js" (javascript)
+{% endcode %}
 
-  // Register products available on the Test platform
-  store.register([
-    // Use a built-in test product
-    {
-      id: 'test-consumable', // Matches CdvPurchase.Test.testProducts.CONSUMABLE.id
-      type: ProductType.CONSUMABLE,
-      platform: Platform.TEST
-    },
-    // Use another built-in test product
-    {
-      id: 'test-subscription-active', // Matches CdvPurchase.Test.testProducts.PAID_SUBSCRIPTION_ACTIVE.id
-      type: ProductType.PAID_SUBSCRIPTION,
-      platform: Platform.TEST
-    },
-    // Define and register a custom test product inline
-    {
-      id: 'custom-test-nonconsumable',
-      type: ProductType.NON_CONSUMABLE,
-      platform: Platform.TEST,
-      title: 'Unlock My Feature (Test)',
-      description: 'A custom non-consumable for testing.',
-      pricing: { // Simple pricing, or use PricingPhase[] for subscriptions
-        price: '$0.99',
-        currency: 'USD',
-        priceMicros: 990000
-      }
-    }
-    // ... other products for other platforms can also be registered
-  ]);
+**Explanation:**
 
-  // Optionally set a validator if you want to test validation logic
-  // The Test adapter provides a mock validator.
-  // store.validator = "TEST_VALIDATOR_URL"; // Or use a function
+*   **Register Test Products (Lines 11-65):**
+    *   You **must** register any product ID you want to use with `Platform.TEST`.
+    *   You can use built-in product definitions like `CdvPurchase.Test.testProducts.CONSUMABLE` (Lines 15-24) for convenience. See the code comments or API docs for available built-in products (`CONSUMABLE`, `NON_CONSUMABLE`, `PAID_SUBSCRIPTION`, `PAID_SUBSCRIPTION_ACTIVE`, `CONSUMABLE_FAILING`).
+    *   You can also define **custom test products** directly within `store.register` (Lines 27-65). Provide `id`, `type`, `platform: Platform.TEST`, and optionally `title`, `description`, and `pricing`. The `pricing` can be a simple object for one-time purchases or an array of `PricingPhase` objects for subscriptions.
+*   **Mock Validator (Lines 68-72):** If you set `store.validator` to any non-empty string (e.g., `"TEST_VALIDATOR"`), the Test platform will simulate a successful validation response after a 500ms delay when `transaction.verify()` is called. This allows you to test the `.verified()` event flow.
+*   **Event Listeners (Lines 75-100):** Basic listeners are set up:
+    *   `productUpdated`: Refreshes the UI when product details are ready.
+    *   `approved`: Calls `transaction.verify()` (which triggers the mock validation if enabled).
+    *   `verified`: Calls `receipt.finish()` to complete the transaction.
+    *   `finished`: Calls functions to grant the item (`grantCoins` or `grantEntitlement`) and refreshes the UI.
+    *   `cancelled`: Updates the status message.
+*   **Initialize Store (Lines 103-112):** Calls `store.initialize([Platform.TEST])` to activate *only* the Test adapter.
 
-  // Initialize the store, including the Test platform
-  store.initialize([Platform.TEST /*, other platforms... */])
-    .then(() => {
-      console.log('Store ready, including Test platform.');
-      refreshUI(); // Update UI after initialization
-    });
+### 3. Purchase Flow (`buyTestProduct`)
 
-  // Setup standard event handlers
-  store.when()
-    .productUpdated(refreshUI)
-    .receiptUpdated(refreshUI)
-    .approved(transaction => {
-      console.log('Test purchase approved: ' + transaction.transactionId);
-      // Typically verify, but for Test platform, validation is mocked
-      // transaction.verify(); // This would call the mock validator if set
-      transaction.finish(); // Finish the transaction
-    })
-    .verified(receipt => { // Only called if a validator is set
-      console.log('Test receipt verified.');
-      receipt.finish();
-    });
-}
+Implement the function called by your "Buy" buttons to initiate a test purchase using `offer.order()`.
 
-// Remember to implement refreshUI() to display products
-function refreshUI() {
-  // Your UI update logic here...
-  // It should iterate through store.products and store.localReceipts/verifiedPurchases
-  // and display relevant information and purchase buttons.
-  // See examples in other tutorials (e.g., subscription-generic-initialization.md)
-  // for UI rendering patterns.
-}
-```
+{% code title="www/js/index.js (buyTestProduct)" lineNumbers="true" %}
+!INCLUDECODE "../code/test-platform-purchase.js" (javascript)
+{% endcode %}
 
-### Built-in Test Products
+**Explanation:**
 
-The `Test` platform comes with predefined products you can register by ID:
+*   **Get Offer (Lines 6-8):** Retrieves the product and its default offer.
+*   **Call `offer.order()` (Line 14):** This is the key call to start the purchase simulation.
+*   **Prompt Interaction (Lines 30-42):** When `offer.order()` runs for `Platform.TEST`:
+    *   A standard JavaScript `prompt()` dialog appears.
+    *   It asks the user to confirm (`Y`), fail (`E`), or cancel.
+    *   **"Y"**: Simulates approval -> triggers `.approved()` listener.
+    *   **"E"**: Simulates failure -> triggers global `store.error()` handler.
+    *   **Cancel/Other**: Simulates cancellation -> triggers `.cancelled()` listener.
+*   **Promise Handling (Lines 15-28):** The promise returned by `order()` resolves/rejects quickly after the prompt is dismissed, mainly indicating if the *request* was initiated or immediately failed/cancelled. The final purchase *outcome* is handled by the event listeners.
 
-*   **`CdvPurchase.Test.testProducts.CONSUMABLE` (id: `test-consumable`)**: A standard consumable product. Purchase simulation succeeds by default.
-*   **`CdvPurchase.Test.testProducts.CONSUMABLE_FAILING` (id: `test-consumable-fail`)**: A consumable product whose purchase simulation will always fail (unless forced via prompt).
-*   **`CdvPurchase.Test.testProducts.NON_CONSUMABLE` (id: `test-non-consumable`)**: A standard non-consumable product. Purchase simulation succeeds by default. Can only be "purchased" once per session unless app state is cleared.
-*   **`CdvPurchase.Test.testProducts.PAID_SUBSCRIPTION` (id: `test-subscription`)**: A standard auto-renewing subscription. Includes a 3-week trial phase followed by monthly billing. Purchase simulation succeeds by default. Renews every few minutes during the test session.
-*   **`CdvPurchase.Test.testProducts.PAID_SUBSCRIPTION_ACTIVE` (id: `test-subscription-active`)**: An auto-renewing subscription that starts in the `APPROVED` state (simulating an existing subscription). Renews every few minutes during the test session.
-
-You register these using their predefined `id` and `type` with `platform: Platform.TEST`. Their title, description, and pricing are predefined within the adapter.
-
-### Custom Test Products
-
-You can define your own test products directly within the `store.register` call, as shown in the initialization example for `custom-test-nonconsumable`.
-
-*   Provide `id`, `type`, and `platform: Platform.TEST`.
-*   Optionally provide `title`, `description`, `group`.
-*   Provide pricing information using `pricing`:
-    *   For simple one-time payments (consumable/non-consumable): `{ price: string, currency: string, priceMicros: number }`
-    *   For subscriptions (paid/non-renewing): Use an array of `PricingPhase` objects, similar to how you'd define real product pricing.
-
-Alternatively, use the `CdvPurchase.Test.registerTestProduct()` function *before* `store.register` if you prefer to define them separately.
-
-```javascript
-// Defined before store.register
-CdvPurchase.Test.registerTestProduct({
-  id: 'another-custom-sub',
-  type: ProductType.PAID_SUBSCRIPTION,
-  platform: Platform.TEST, // platform is actually ignored by registerTestProduct but good practice
-  title: 'My Custom Sub',
-  pricing: [{ price: '$4.99', currency: 'USD', priceMicros: 4990000, billingPeriod: 'P1M', recurrenceMode: RecurrenceMode.INFINITE_RECURRING, paymentMode: PaymentMode.PAY_AS_YOU_GO }]
-});
-
-// Then register it with the store
-store.register({
-  id: 'another-custom-sub',
-  type: ProductType.PAID_SUBSCRIPTION,
-  platform: Platform.TEST,
-});
-```
-
-### Purchase Flow with Test Platform
-
-When you call `store.order(offer)` for a `Test` platform product:
-
-1.  A standard JavaScript `prompt()` dialog appears.
-2.  It asks: `Do you want to purchase ${offer.productId} for ${offer.pricingPhases[0].price}? Enter "Y" to confirm. Enter "E" to fail with an error. Anything else to cancel.`
-3.  **Entering "Y" (case-insensitive):** Simulates a successful purchase. The transaction moves to the `APPROVED` state, triggering the `.approved()` handler.
-4.  **Entering "E" (case-insensitive):** Simulates a purchase failure. The `store.order()` promise rejects with an `IError` (code `ErrorCode.PURCHASE`).
-5.  **Entering anything else or cancelling the prompt:** Simulates user cancellation. The `store.order()` promise rejects with an `IError` (code `ErrorCode.PAYMENT_CANCELLED`).
-
-This allows you to test the different outcomes of your purchase flow logic locally.
-
-### Receipt Validation
-
-If you set `store.validator`, the `Test` adapter provides a mock validation function. When `transaction.verify()` is called:
-*   It waits for 500ms (simulating network delay).
-*   It returns a mock `VerifiedReceipt` based on the local `Transaction` data.
-*   It triggers the `.verified()` event handler.
-
-This allows testing of your receipt validation and entitlement logic without needing a real validation server during development.
+This setup allows you to test the full client-side purchase lifecycle locally using simple prompts for interaction. Remember to replace the Test platform logic with real platform adapters and server-side validation for production.

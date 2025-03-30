@@ -1,20 +1,17 @@
 ### Purchase Flow (iOS/App Store Non-Renewing Subscription)
 
-Handling non-renewing subscriptions on iOS/App Store involves acknowledging the purchase and, crucially, calculating and storing the access duration within your application logic, as Apple does not manage this period.
+This section implements the purchase logic for **non-renewing subscriptions** on **iOS/App Store**, assuming you have completed the [generic non-renewing initialization](non-renewing-generic-initialization.md). Your application manages the entitlement period, and you **must acknowledge** the purchase using `transaction.finish()`.
 
-**Step 1: Implement the Purchase Action**
+**Step 1: Implement the Purchase Action (`purchaseNonRenewing`)**
 
-*   **What:** Implement the function called by your "Subscribe" or "Extend Access" button (let's call it `window.purchaseNonRenewing`) to initiate the order via `store.order()`.
+*   **What:** Replace the placeholder `window.purchaseNonRenewing` function to call `offer.order()` for the App Store platform.
 *   **Why:** Starts the App Store purchase process for the non-renewing product.
 
-Create this function in `www/js/index.js`:
-
+{% code title="www/js/index.js (purchaseNonRenewing)" %}
 ```javascript
-// In js/index.js
-
-// Make globally accessible for button onclick
+// Replace the placeholder purchaseNonRenewing function
 window.purchaseNonRenewing = function() {
-    const productId = 'non_renewing_sub_1_month'; // <<< YOUR Non-Renewing Product ID
+    const productId = 'non_renewing_1_month'; // Use the SAME product ID you registered
     console.log(`Purchase button clicked for non-renewing: ${productId}`);
     const { store, Platform } = CdvPurchase;
 
@@ -23,195 +20,138 @@ window.purchaseNonRenewing = function() {
 
     if (offer) {
         console.log(`Initiating order for non-renewing offer: ${offer.id}`);
-        // Optional: Update UI to show processing
-        // setState({ isPurchasing: true });
+        setStatus('Initiating purchase...');
 
-        store.order(offer)
+        offer.order()
             .then(result => {
-                if (result && result.code === store.ErrorCode.PAYMENT_CANCELLED) {
-                    console.log("User cancelled the purchase.");
-                    // setState({ isPurchasing: false });
-                } else if (result && result.isError) {
-                    console.error("Order initiation failed: " + result.message);
-                    // setState({ isPurchasing: false, error: result.message });
+                if (result && result.isError) {
+                    setStatus(`Order failed: ${result.message}`);
                 } else {
-                    console.log("Order initiated. Waiting for approval...");
+                    // Purchase flow started... status updated by listeners.
                 }
+                refreshUI();
             })
             .catch(err => {
                  console.error("Unexpected error during non-renewing order:", err);
-                 // setState({ isPurchasing: false, error: 'Unexpected error' });
+                 setStatus('Unexpected error during purchase.');
+                 refreshUI();
             });
     } else {
         console.error(`Cannot purchase: Product (${productId}) or offer not found.`);
-        alert('Unable to purchase. Product details might still be loading.');
+        setStatus('Error: Unable to purchase. Product details missing.');
     }
 }
 ```
+{% endcode %}
 
-**Step 2: Handle the "Approved" State -> Verify (Optional but Recommended)**
+**Step 2: Handle Purchase Events (`.approved`, `.verified`, `.finished`)**
 
-*   **What:** Add an `.approved()` listener. Verification is not strictly mandatory for *functionality* like consumables, but highly recommended for non-renewing subs to get an accurate `purchaseDate` from Apple's servers, which is crucial for calculating the expiry.
-*   **Why:** An accurate start date ensures the user gets the correct access duration.
+*   **What:** Add the purchase lifecycle event listeners within the `store.when()` chain in `initializeStoreAndSetupListeners`.
+*   **Why:** These listeners handle the purchase approval, optional verification (useful for getting an accurate `purchaseDate`), and mandatory acknowledgment.
 
-Add this within the `store.when()` chain in `initializeStore`:
+Add these handlers inside the existing `store.when()` call:
 
+{% code title="www/js/index.js (listeners within store.when)" %}
 ```javascript
-// Inside initializeStore() -> store.when() chain
-
-    .approved(transaction => {
-        console.log(`Transaction ${transaction.transactionId} approved for ${transaction.products[0]?.id}.`);
-
-        // Verify to get accurate purchaseDate, though not strictly required for unlock
-        if (store.validator) {
-            console.log('Verification pending for ' + transaction.transactionId);
-            // setState({ isVerifying: true });
-            transaction.verify();
-        } else {
-             console.warn("Receipt validator not configured. Using local date for expiry calculation.");
-             // Proceed without verification, using potentially less accurate local date
-             grantAccessAndFinish(transaction);
-        }
-    })
-    // Add .verified() and .finished() next
+  .approved(transaction => {
+    console.log(`Transaction ${transaction.transactionId} approved for ${transaction.products[0]?.id}.`);
+    setStatus('Purchase approved. Verifying...');
+    // Verify if a validator is configured (optional but recommended for purchaseDate)
+    if (store.validator) {
+      transaction.verify();
+    } else {
+      console.warn("Receipt validator not configured. Using local date for expiry calculation.");
+      grantAccessAndFinish(transaction); // Proceed without validation
+    }
+  })
+  .verified(receipt => {
+    console.log(`Receipt verified for transaction ${receipt.transactions[0]?.transactionId}`);
+    setStatus('Purchase verified. Finishing...');
+    const verifiedTransaction = receipt.transactions.find(t => t.products[0]?.id === MY_NON_RENEWING_ID);
+    if (verifiedTransaction) {
+      grantAccessAndFinish(verifiedTransaction); // Use verified transaction data
+    } else {
+      console.error("Verified receipt didn't contain the expected transaction?");
+      receipt.finish(); // Finish anyway
+    }
+  })
+  .finished(transaction => {
+    console.log(`Transaction ${transaction.transactionId} finished for ${transaction.products[0]?.id}.`);
+    setStatus('Purchase complete! Access updated.');
+    refreshUI(); // Refresh expiry display
+  })
+  .cancelled(transaction => {
+    console.log('Purchase Cancelled:', transaction.transactionId);
+    setStatus('Purchase cancelled.');
+    refreshUI();
+  });
 ```
+{% endcode %}
 
-**Step 3: Handle the "Verified" State (Recommended)**
+**Step 3: Implement Access Granting, Expiry Calculation, and Finishing (`grantAccessAndFinish`)**
 
-*   **What:** Add a `.verified()` listener. Runs after successful validation.
-*   **Why:** This provides the most reliable `purchaseDate`. Use this point to calculate expiry, grant access, and finish the transaction.
+*   **What:** Replace the placeholder `grantAccessAndFinish` function. This calculates the expiry date based on the product's duration and the transaction's `purchaseDate`, stores this expiry date persistently (**use SecureStorage in production!**), updates the UI, and calls `transaction.finish()`.
+*   **Why:** Your app manages the entitlement period. `finish()` is **mandatory** for iOS to acknowledge the transaction and remove it from the payment queue.
 
-Add this within the `store.when()` chain:
+Replace the placeholder `grantAccessAndFinish` function in `www/js/index.js`:
 
+{% code title="www/js/index.js (grantAccessAndFinish)" %}
 ```javascript
-// Inside initializeStore() -> store.when() chain
-
-    .verified(receipt => {
-        console.log(`Receipt verified for transaction ${receipt.transactions[0]?.transactionId}`);
-        // setState({ isVerifying: false });
-
-        // Find the relevant transaction from the product ID
-        const verifiedTransaction = receipt.transactions
-            .find(t => t.products[0]?.id === 'non_renewing_sub_1_month'); // <<< YOUR Non-Renewing Product ID
-
-        if (verifiedTransaction) {
-            grantAccessAndFinish(verifiedTransaction);
-        } else {
-            console.error("Verified receipt didn't contain the expected non-renewing transaction?");
-            receipt.finish(); // Finish anyway to clear queue if possible
-        }
-    })
-    // Add .finished() next
-```
-
-**Step 4: Handle the "Finished" State**
-
-*   **What:** Add a `.finished()` listener. Fires after `transaction.finish()` completes.
-*   **Why:** Confirms acknowledgment with the App Store.
-
-Add this within the `store.when()` chain:
-
-```javascript
-// Inside initializeStore() -> store.when() chain
-
-    .finished(transaction => {
-        console.log(`Transaction ${transaction.transactionId} finished for ${transaction.products[0]?.id}.`);
-        // Access should already be granted. Update UI if needed.
-        // setState({ isPurchasing: false, isVerifying: false });
-        refreshAccessUI(); // You'll need a function to display access expiry
-    });
-
-// --- Final Initialization Call ---
-store.initialize(...).then(...);
-```
-
-**Step 5: Implement Access Granting, Expiry Calculation, and Finishing**
-
-*   **What:** Create the `grantAccessAndFinish` function. This calculates the expiry date based on the product's duration and the transaction's `purchaseDate`, stores this expiry date persistently, updates the UI, and calls `transaction.finish()`.
-*   **Why:** This is the core logic for non-renewing subscriptions. Your app manages the entitlement period. `finish()` acknowledges the transaction with Apple.
-
-Add this new function to `www/js/index.js`:
-
-```javascript
-// In js/index.js
-
-// Key for storing expiry date
-const ACCESS_EXPIRY_KEY = 'myServiceAccessExpiry';
-
+// Replace the placeholder grantAccessAndFinish function
 function grantAccessAndFinish(transaction) {
     const productId = transaction.products[0]?.id;
+    if (productId !== MY_NON_RENEWING_ID) return; // Ensure correct product
+
     console.log(`Granting access for non-renewing subscription ${productId}, transaction ${transaction.transactionId}...`);
 
-    // 1. Determine duration based on productId (e.g., from a config map)
+    // 1. Determine duration based on productId (e.g., from product metadata or a config map)
     let durationMonths = 0;
-    if (productId === 'non_renewing_sub_1_month') { // <<< YOUR Non-Renewing Product ID
+    if (productId === 'non_renewing_1_month') { // <<< YOUR Non-Renewing Product ID
         durationMonths = 1;
-    } else if (productId === 'non_renewing_sub_1_year') {
-        durationMonths = 12;
-    } // Add other durations as needed
+    } // Add else if for other durations
 
     if (durationMonths === 0) {
         console.error(`Unknown duration for product ${productId}. Cannot grant access.`);
-        transaction.finish(); // Finish anyway to clear the queue
+        if (transaction.state !== TransactionState.FINISHED) transaction.finish(); // Finish anyway
         return;
     }
 
-    // 2. Get purchase date (use verified date if available, else fallback)
-    // The purchaseDate from a VERIFIED transaction is more reliable.
-    const purchaseDate = transaction.purchaseDate || new Date(); // Fallback to current time if date missing
+    // 2. Get purchase date (verified date is preferred, fallback to transaction date or now)
+    const purchaseDate = transaction.purchaseDate || new Date();
 
-    // 3. Calculate new expiry date
-    // Check existing expiry first if extending access is allowed
-    const currentExpiryStr = window.localStorage.getItem(ACCESS_EXPIRY_KEY);
-    let currentExpiry = currentExpiryStr ? new Date(currentExpiryStr) : new Date(0);
-    // Start new duration from now or from the end of current access, whichever is later
-    const startDate = Math.max(Date.now(), currentExpiry.getTime());
-    const newExpiryDate = new Date(startDate);
+    // 3. Calculate new expiry date (handle extending existing access)
+    const currentExpiry = getAccessExpiryDate(); // Function from generic init
+    const startDateMs = Math.max(Date.now(), currentExpiry ? currentExpiry.getTime() : 0);
+    const newExpiryDate = new Date(startDateMs);
     newExpiryDate.setMonth(newExpiryDate.getMonth() + durationMonths);
 
     console.log(`Purchase Date: ${purchaseDate.toISOString()}`);
-    console.log(`Current Expiry: ${currentExpiry.toISOString()}`);
+    console.log(`Current Expiry: ${currentExpiry?.toISOString() ?? 'None'}`);
     console.log(`Calculated New Expiry: ${newExpiryDate.toISOString()} (Duration: ${durationMonths} months)`);
 
-    // 4. Store the new expiry date persistently
-    window.localStorage.setItem(ACCESS_EXPIRY_KEY, newExpiryDate.toISOString());
+    // 4. Store the new expiry date persistently (Use SecureStorage in production!)
+    try {
+        window.localStorage.setItem(ACCESS_EXPIRY_KEY, newExpiryDate.toISOString());
+        console.log('Expiry date saved to localStorage.');
+    } catch (e) {
+        console.error('Error saving expiry to localStorage:', e);
+    }
 
-    // 5. Refresh UI to show updated access period
-    refreshAccessUI(); // Implement this function
-    alert(`Access granted/extended until ${newExpiryDate.toLocaleDateString()}!`);
+    // 5. Refresh UI immediately (optional, .finished listener also calls refreshUI)
+    // refreshUI();
+    // alert(`Access granted/extended until ${newExpiryDate.toLocaleDateString()}!`);
 
     // 6. Finish the transaction with the App Store
-    console.log(`Finishing transaction ${transaction.transactionId}...`);
-    transaction.finish();
-}
-
-// --- UI Refresh for Access ---
-// You need a function to display the expiry date
-function refreshAccessUI() {
-    const expiryString = window.localStorage.getItem(ACCESS_EXPIRY_KEY);
-    const accessStatusEl = document.getElementById('access-status'); // Add this element to your HTML
-    if (accessStatusEl) {
-        if (expiryString) {
-            const expiryDate = new Date(expiryString);
-            if (expiryDate > new Date()) {
-                accessStatusEl.textContent = `Access valid until: ${expiryDate.toLocaleDateString()}`;
-            } else {
-                accessStatusEl.textContent = 'Access expired.';
-            }
-        } else {
-            accessStatusEl.textContent = 'No access.';
-        }
+    // This acknowledges the purchase and removes it from the payment queue.
+    if (transaction.state !== TransactionState.FINISHED) {
+        console.log(`Finishing transaction ${transaction.transactionId}...`);
+        transaction.finish();
+    } else {
+        console.log(`Transaction ${transaction.transactionId} already finished.`);
     }
-     // Also refresh product button states
-    const product = CdvPurchase.store.get('non_renewing_sub_1_month'); // Use your product ID
-    if (product) refreshProductUI(product); // Assuming refreshProductUI exists
 }
-
-// Call refreshAccessUI on startup too
-document.addEventListener('deviceready', refreshAccessUI);
 ```
-
-*   **Important:** You need to add an element with `id="access-status"` to your HTML to display the expiry information. The `refreshProductUI` function (from the generic section) should also be adapted if you want the purchase button label to change (e.g., "Extend Access" instead of "Subscribe").
+{% endcode %}
 
 ---
 
@@ -223,14 +163,15 @@ Follow the standard iOS testing procedure:
 2.  **Sandbox Tester:** Ensure device is signed out of App Store, use Sandbox account when prompted by the app.
 3.  **Run:** Launch from Xcode on a physical device.
 4.  **Test Purchase:**
-    *   Tap the "Subscribe" (or "Extend Access") button.
+    *   Verify initial UI (access status, product details, button).
+    *   Tap "Buy Access" / "Extend Access".
     *   Sign in with Sandbox Tester.
     *   Confirm purchase.
     *   Observe logs: `approved`, `verified` (if validator set), `Granting access...`, `Calculated New Expiry...`, `Finishing transaction...`, `finished`.
-    *   Verify the UI updates to show the calculated expiry date in the `#access-status` element.
-    *   **Restart the app:** Confirm the expiry date persists.
-    *   **Test Extension:** If applicable, purchase the same item again and verify the expiry date is correctly extended from the *previous* expiry date or *now*, whichever is later.
+    *   Verify the UI updates with the correct expiry date.
+    *   **Restart app:** Ensure expiry persists in your storage.
+    *   **Test Extension:** Purchase again and verify the expiry date extends correctly based on your logic in `grantAccessAndFinish`.
 
 ---
 
-This flow handles non-renewing subscriptions on iOS/App Store by relying on your application to manage the entitlement period after acknowledging the purchase with Apple via `transaction.finish()`.
+This handles the non-renewing subscription flow on iOS/App Store, ensuring the purchase is acknowledged via `transaction.finish()` while your application manages the entitlement period based on the calculated expiry date.

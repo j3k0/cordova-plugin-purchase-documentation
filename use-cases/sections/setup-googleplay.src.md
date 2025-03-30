@@ -1,9 +1,11 @@
 ## Setup for Google Play
 
+This guide details the necessary steps to configure your development environment, Google Play Console, and application settings before implementing In-App Purchases for Android using `cordova-plugin-purchase` v13+.
+
 {% hint style="warning" icon="warning" %}
 **Platform Interfaces Change Frequently!**
 
-The Google Play Console interface and Google's requirements change often. This guide provides a general overview but may become outdated.
+The Google Play Console interface and Google's requirements (like API access or testing procedures) can change. This guide provides a general overview based on common practices but may become outdated.
 
 **Always refer to the official Google documentation as the primary source:**
 *   [Google Play Billing Overview](https://developer.android.com/google/play/billing/billing_overview)
@@ -14,68 +16,97 @@ The Google Play Console interface and Google's requirements change often. This g
 *   [Setting up Google Play Developer API Access](https://developers.google.com/android-publisher/getting_started) (Needed for Server-Side Validation)
 {% endhint %}
 
-This section covers the essential steps for setting up your Android app for In-App Purchases with the Cordova plugin.
-
 ### 1. Install Dependencies
+
+Ensure you have the basic development tools installed (Node.js, Cordova CLI, Android SDK/Studio).
 
 !INCLUDE "./install-dependencies.md"
 
-### 2. Create Cordova Project
+### 2. Create or Prepare Cordova Project
+
+Set up your Cordova project and add the Android platform.
 
 !INCLUDE "./setup-android-2-create-cordova-project.md"
+*   **Important:** Ensure the `<widget id="...">` in your `config.xml` **exactly matches** the **Package Name** (Application ID) you will use in the Google Play Console.
 
-### 3. Setup Google Play Application & Billing
+### 3. Setup Google Play Console Application & Billing
 
-*   **Google Play Developer Account:** Ensure you have an active developer account ([Play Console](https://play.google.com/console/)).
-*   **Create Application:** Create your application entry in the Google Play Console if it doesn't exist yet. You don't need to publish it publicly, but the app record must be created.
-*   **Billing Setup:** Link a Google Merchant Account if you haven't already. This is usually done under "Setup" -> "Payments profile" in the Play Console. Ensure it's active.
-*   **License Testing:** Add Google accounts (full Gmail addresses) you'll use for testing under "Setup" -> "License testing" in the Play Console. These accounts can make test purchases without being charged real money.
+Configure your app record and billing settings in the Google Play Console.
+
+*   **Google Play Developer Account:** You need an active Google Play Developer account ([Play Console](https://play.google.com/console/)).
+*   **Create Application:** Create your application entry in the Play Console if it doesn't exist yet. Use the same Package Name as in your `config.xml`.
+*   **Billing Setup:** Ensure you have set up a Payments Profile linked to your developer account (usually under "Setup" -> "Payments profile"). It must be active to test or publish IAPs.
+*   **License Testing:** Add the Google account(s) (full Gmail addresses) you will use for testing under "Setup" -> "License testing". These accounts can make test purchases without being charged.
 
 !INCLUDE "./setup-android-3-google-play.md"
+*(Review included content for consistency)*
 
 ### 4. Install Plugin and Configure Project
 
-Install the plugin:
-```bash
-cordova plugin add cordova-plugin-purchase
-```
+Install the purchase plugin. The necessary AndroidManifest permission is added automatically.
 
-The plugin automatically adds the necessary `com.android.vending.BILLING` permission to your `AndroidManifest.xml`. You can verify this in `platforms/android/app/src/main/AndroidManifest.xml` after preparing the platform.
+1.  **Install Plugin:**
+    ```bash
+    cordova plugin add cordova-plugin-purchase
+    ```
+2.  **Verify `config.xml` ID:** Double-check that the `<widget id="...">` matches your Google Play Package Name.
+3.  **Verify `AndroidManifest.xml`:** After running `cordova prepare android`, you can optionally check `platforms/android/app/src/main/AndroidManifest.xml` to ensure the following permission is present (the plugin adds it):
+    ```xml
+    <uses-permission android:name="com.android.vending.BILLING" />
+    ```
 
-**Important:** Ensure your `config.xml`'s `<widget id="...">` attribute exactly matches the **Package Name** (Application ID) you configured in the Google Play Console.
-```xml
-<!-- config.xml -->
-<widget id="com.yourcompany.yourapp" version="1.0.0" ...>
-    <!-- ... other settings ... -->
-    <platform name="android">
-        <!-- Plugin adds permission automatically, but verify if needed -->
-        <!-- <config-file target="AndroidManifest.xml" parent="/*">
-            <uses-permission android:name="com.android.vending.BILLING" />
-        </config-file> -->
-    </platform>
-</widget>
-```
+!INCLUDE "./setup-android-4-install-cordova-plugin.md"
+*(Review included content for consistency)*
 
 ### 5. Create In-App Products in Google Play Console
 
-Define each virtual item under your app in the Play Console -> "Monetize" section -> "Products" (for one-time purchases like consumables/non-consumables) or "Subscriptions".
+Define the specific items (consumables, non-consumables, subscriptions) you want to sell.
+
+*   Navigate to your app in the Play Console.
+*   Go to the "Monetize" section -> "Products" or "Subscriptions".
+*   Click "Create product" or "Create subscription".
+*   Fill in all required details: **Product ID** (unique, used in `store.register`), Name, Description, Price.
+*   **Activate** the product/subscription.
 
 !INCLUDE "./setup-android-7-google-play-products.md"
+*(Review included content for consistency)*
+*   **Product IDs:** Note down the exact Product IDs.
 
-### 6. Upload Signed Build for Testing
+### 6. Build and Upload a Signed Build for Testing
 
-**Crucial Step:** Google Play Billing requires Google to know the signature of your app to allow purchases, even for testing.
+**CRITICAL STEP:** Google Play Billing requires a **release-signed build** to be uploaded to a testing track before IAPs (even test purchases) will work correctly. Debug builds **will not work**.
 
-1.  **Generate a release signing key** if you don't have one ([Official Guide](https://developer.android.com/studio/publish/app-signing#generate-key)). Keep this key file (`.keystore` or `.jks`) and its passwords extremely safe!
-2.  **Build a signed release APK or AAB** using this key. Debug builds **will not work** for testing IAPs.
-3.  **Upload this build** to a testing track in the Google Play Console (e.g., "Internal testing" is recommended). You don't need to publish publicly.
-4.  Ensure your **test account** (from step 3) is added as a tester for that track and has accepted the testing invitation (usually via a Play Store link).
-5.  Install this signed version (or a *subsequent* version signed with the *same key*) onto your test device, ensuring the test account is the primary Google account on the device. Installation *must* typically come via the Play Store's testing mechanism, not `adb install`.
+1.  **Generate Release Key:** If you don't have one, create a Java Keystore (`.keystore` or `.jks`) using `keytool`. **Back up this file and its passwords securely!** You need it for all future updates.
+    ```bash
+    keytool -genkey -v -keystore my-release-key.keystore -alias mykeyalias -keyalg RSA -keysize 2048 -validity 10000
+    ```
+2.  **Build Signed APK/AAB:** Use the Cordova CLI with build configuration or Android Studio, ensuring you sign with your release key. A helper script can simplify this:
+    !INCLUDE "./setup-android-5-android-release-apk.md" *(Review included script/steps)*
+3.  **Upload to Play Console:**
+    *   Go to **Release -> Testing -> Internal testing** (recommended) or Closed testing.
+    *   Create a new release and **upload the signed APK or AAB**.
+    *   Add your **License Tester** email addresses (from Step 3) to the tester list for this track.
+    *   Save and **roll out** the release. It may take time (minutes to hours) to become available to testers.
 
 !INCLUDE "./setup-android-6-upload-to-google-play.md"
+*(Review included content for consistency)*
 
-### 7. (Recommended) Setup Receipt Validation Service
+### 7. Configure Test Device
+
+*   Use a **physical Android device**.
+*   Log into the device **only** with a Google account that is listed as a **License Tester** and is part of the **testing track** you uploaded the build to.
+*   Install the app **from the Google Play Store** using the testing link/invitation provided by the Play Console. **Do not** install manually via `adb` if possible, as this can cause issues.
+
+!INCLUDE "./setup-android-8-test-accounts.md"
+*(Review included content for consistency)*
+
+### 8. (Recommended) Setup Receipt Validation Service
 
 Server-side validation is essential for security and reliable subscription management.
 
-!INCLUDE "./setup-subscription-android-7-validation-server.md"
+!INCLUDE "./setup-subscription-android-9-validation-server.md"
+*   **Remember:** You'll need **Google Play Developer API access** (via a Service Account JSON key) configured on your validation server.
+
+---
+
+After completing these steps, your Google Play Console, application build, and test device should be configured to support In-App Purchases using `cordova-plugin-purchase`. You can now proceed to implement the purchase logic in your application code as shown in the specific [Use Cases](..).

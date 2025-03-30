@@ -6,129 +6,166 @@ This section describes the minimal code required to implement a non-consumable p
 
 First, we set up the basic HTML structure and the initial JavaScript to load the plugin.
 
-
 #### index.html
 
-Assuming you're starting from a blank project, we'll add the minimal amount of HTML for the purpose of this tutorial. Let's replace the `<body>` from the `www/index.html` file with the below.
+Assuming you're starting from a blank Cordova project, let's set up the minimal HTML needed for the tutorials.
 
-```markup
+**Step 1: Modify `www/index.html`**
+
+Replace the default `<body>` content with the following structure:
+
+```html
 <body>
-  <div id="app"></div>
+  <div class="app">
+    <h1>In-App Purchase Demo</h1>
+    <!-- Area for status messages and errors -->
+    <div id="messages" style="font-style: italic; color: #555; margin-bottom: 10px;">Loading...</div>
+    <hr>
+    <!-- Area to display product details -->
+    <div id="product-details"></div>
+    <hr>
+    <!-- Area for other UI elements (like balance, feature status) -->
+    <div id="user-status"></div>
+     <hr>
+    <!-- Area for management buttons -->
+    <div id="management-buttons"></div>
+  </div>
+
+  <!-- Cordova script -->
   <script type="text/javascript" src="cordova.js"></script>
+  <!-- Your application script -->
   <script type="text/javascript" src="js/index.js"></script>
 </body>
 ```
+*   **Explanation:** We create a main container (`#app`) and add specific `div` elements (`#messages`, `#product-details`, `#user-status`, `#management-buttons`) that subsequent code examples will use to display information dynamically.
 
-Let's also make sure to comment out Cordova template project's CSS.
+**Step 2: Adjust Content Security Policy (CSP)**
 
-You also need to enable the `'unsafe-inline'` `Content-Security-Policy` by adding it to the `default-src` section:
+In the `<head>` of your `www/index.html`, find the `<meta http-equiv="Content-Security-Policy" ...>` tag. You need to modify the `connect-src` directive to allow connections to your receipt validation server. Also, ensure `'unsafe-inline'` is present in `script-src` or `default-src` if your examples use inline `onclick` handlers (though using `addEventListener` in JavaScript is generally preferred).
 
-```markup
+```html
 <meta http-equiv="Content-Security-Policy"
-      content="default-src 'self' 'unsafe-inline' [...]" />
+      content="default-src 'self' data: gap: https://ssl.gstatic.com 'unsafe-eval';
+               style-src 'self' 'unsafe-inline';
+               media-src *;
+               img-src 'self' data: content:;
+               connect-src 'self' https://your-validator-server.com;">
+               <!-- Add other necessary sources -->
 ```
+*   **Explanation:**
+    *   Replace `https://your-validator-server.com` with the actual URL of your receipt validation service (e.g., `https://validator.iaptic.com`). If you don't use a validator initially, you might omit this, but you'll need it later for secure implementations.
+    *   The example keeps other default Cordova CSP directives. Adjust them based on your app's needs.
 
-You can download the [full index.html file here](https://gist.github.com/j3k0/80c69837e5bacf83c4fc2320ba2e5dc2).
-#### javascript
+**Step 3: (Optional) Clean Up Default CSS**
 
+You might want to comment out or remove the default CSS (`www/css/index.css`) from the Cordova template project to avoid style conflicts with the simple examples.
 
-We will now create a new JavaScript file and load it from the HTML. The code below will initialize the plugin.
+#### JavaScript (`www/js/index.js`)
 
-{% code lineNumbers="true" %}
+This section provides the minimal JavaScript foundation needed to start using the `cordova-plugin-purchase` plugin in your `www/js/index.js` file (or equivalent).
+
+{% code title="www/js/index.js" lineNumbers="true" %}
 ```javascript
-// Wait for Cordova to be ready
+// Wait for Cordova's deviceready event
 document.addEventListener('deviceready', onDeviceReady, false);
 
 function onDeviceReady() {
   console.log('Device is ready.');
+  setStatus('Device ready.'); // Update UI status
 
-  // Check if the CdvPurchase plugin is available
+  // --- Essential Plugin Check ---
+  // Verify that the CdvPurchase namespace and store object are available.
   if (!window.CdvPurchase || !window.CdvPurchase.store) {
-      console.error('CdvPurchase plugin is not available. Ensure it is installed and loaded correctly.');
-      document.getElementById('app').innerHTML = 'Error: Purchase plugin not found.';
-      return;
+    const msg = 'CdvPurchase plugin is not available. Ensure it is installed and loaded correctly.';
+    console.error(msg);
+    setStatus('ERROR: ' + msg);
+    // Stop further initialization if the plugin isn't found.
+    return;
   }
 
-  // Alias the store object for easier access
+  // --- Basic Setup (Before Initialization) ---
   const { store, LogLevel, ErrorCode } = CdvPurchase;
-  console.log('CdvPurchase.store object found, version ' + store.version);
+  console.log('CdvPurchase.store available. Version ' + store.version);
 
-  // Optional: Set the verbosity level for debugging
-  // LogLevel.DEBUG provides the most detailed logs
+  // Set the desired verbosity level for the plugin's logger.
+  // LogLevel.DEBUG provides the most detailed logs, useful for development.
+  // Use LogLevel.INFO or LogLevel.WARNING for production.
   store.verbosity = LogLevel.DEBUG;
 
-  // Setup a global error handler for the store
-  store.error(function(error) {
-      console.error('STORE ERROR: Code=' + error.code + ' Message=' + error.message);
-      // Display the error to the user in a dedicated element
-      const errorEl = document.getElementById('error-display'); // Ensure this element exists in your HTML
-      if (errorEl) {
-          errorEl.textContent = 'Error: ' + error.message;
-          // Optionally clear the error after a few seconds
-          setTimeout(() => { if (errorEl.textContent === 'Error: ' + error.message) errorEl.textContent = ''; }, 8000);
-      }
+  // Register a global error handler for the store.
+  // This catches general plugin errors (initialization, setup, etc.).
+  // Purchase-specific errors are typically handled via promises/callbacks.
+  store.error(error => {
+    console.error('STORE ERROR: Code=' + error.code + ' Message=' + error.message);
+    setStatus('ERROR: ' + error.message);
   });
 
-  // Setup a listener for when the store is ready
-  // This guarantees that initialize() has completed successfully
-  store.ready(function() {
-    console.log("CdvPurchase store is ready.");
-    // Initial UI refresh after the store is ready
-    refreshUI();
-  });
+  // --- Defer Specific Initialization ---
+  // Call the main initialization function for your specific use case.
+  // This function (defined elsewhere in your code or the tutorial)
+  // will handle product registration, validator setup, event listeners,
+  // and calling store.initialize().
+  initializeStoreAndSetupListeners();
 
-  // Initialize the store and related components
-  initializeStore();
-
-  // Perform an initial UI refresh (might show loading states)
+  // Initial UI refresh (might show loading states until products load)
   refreshUI();
 }
 
-function initializeStore() {
-  console.log('Calling initializeStore()...');
-  const { store } = CdvPurchase; // Get store instance again
+// --- Helper Functions (Example) ---
 
-  // TODO: Register products using store.register([...])
-  console.log('Registering products...');
-  // store.register([...]); // Add your product registrations here
-
-  // TODO: Set the validator URL or function
-  console.log('Setting validator...');
-  // store.validator = "YOUR_VALIDATOR_URL";
-
-  // TODO: Setup event listeners using store.when()...
-  console.log('Setting up event listeners...');
-  // store.when()...
-
-  // TODO: Call store.initialize([...platforms])
-  console.log('Calling store.initialize()...');
-  // store.initialize([...]);
-}
-
-function refreshUI() {
-  console.log('Calling refreshUI()...');
-  // TODO: Implement UI updates based on product/purchase status
-  // This function will be called by event listeners and after initialization.
-  const appEl = document.getElementById('app');
-  if (appEl) {
-      // Example: Display loading state or initial content
-      // appEl.innerHTML = '<p>Store is initializing...</p>';
-  } else {
-      console.error('App element not found for UI refresh.');
+// Function to update a status message element in the HTML
+function setStatus(message) {
+  console.log('[Status] ' + message);
+  const statusEl = document.getElementById('messages'); // Assumes an element with id="messages" exists
+  if (statusEl) {
+    statusEl.textContent = message;
   }
 }
+
+// --- Placeholder Functions (to be implemented by specific use-case guides) ---
+
+// This function will be implemented in specific guides to register products,
+// set the validator, setup 'when' listeners, and call store.initialize().
+function initializeStoreAndSetupListeners() {
+  console.log('Placeholder: initializeStoreAndSetupListeners() called.');
+  // Example structure (implement in specific guides):
+  // const { store, Platform, ProductType } = CdvPurchase;
+  // store.register([...]);
+  // store.validator = '...';
+  // store.when()...
+  // store.initialize([...]).then(...);
+  setStatus('Store setup needs implementation.');
+}
+
+// This function will be implemented in specific guides to update the UI
+// based on product data, ownership status, etc.
+function refreshUI() {
+  console.log('Placeholder: refreshUI() called.');
+  // Example structure (implement in specific guides):
+  // const product = CdvPurchase.store.get(...);
+  // Update HTML elements based on product.title, product.pricing, product.owned, etc.
+}
+
+// Make purchase function global if called directly from HTML onclick
+// window.myPurchaseFunction = function() { ... }
+
 ```
 {% endcode %}
 
-Here's a little explanation:
+**Explanation:**
 
-**Line 1**, it's important to wait for the "deviceready" event before using cordova plugins.
+1.  **Wait for `deviceready` (Line 2):** Essential first step for any Cordova plugin interaction.
+2.  **Plugin Check (Lines 8-14):** Verifies that `CdvPurchase.store` is available before proceeding.
+3.  **Basic Setup (Lines 17-29):**
+    *   Aliases common plugin members (`store`, `LogLevel`, etc.) for convenience.
+    *   Sets `store.verbosity` to `DEBUG` for detailed logging during development.
+    *   Sets up a global `store.error` handler to catch and log general plugin errors.
+4.  **Deferred Initialization (Line 35):** Calls `initializeStoreAndSetupListeners()`. This function is intentionally left as a placeholder here. Specific use-case guides (like setting up subscriptions or consumables) will provide the implementation for this function, which will include `store.register()`, `store.validator = ...`, `store.when()...`, and `store.initialize()`.
+5.  **Initial UI Refresh (Line 38):** Calls `refreshUI()`, another placeholder function that specific guides will implement to display product information and purchase status.
+6.  **Helper Functions (Lines 43-51):** Includes a basic `setStatus` function as an example for updating the UI.
+7.  **Placeholders (Lines 54-72):** Empty definitions for `initializeStoreAndSetupListeners` and `refreshUI` emphasize that their specific logic depends on the use case and will be provided in subsequent steps of the tutorials.
 
-**Lines 5-8**, we check if the plugin was correctly loaded.
-
-**Lines 11-13**, we setup an error handler. It just logs errors to the console.
-
-> Whatever your setup is, you should make sure this runs as soon as the javascript application starts. You have to be ready to handle IAP events as soon as possible.
+This minimal base ensures the plugin is loaded and basic logging/error handling is in place before diving into platform-specific or product-type-specific configurations in the main use-case guides.
 
 ### Initialization & Presentation
 
@@ -138,184 +175,208 @@ Next, we initialize the plugin, register our non-consumable product, and set up 
 *   Showing a "Buy" or "Unlock" button only when the product `canPurchase`.
 *   Checking the `product.owned` status to reflect whether the feature is unlocked in the UI.
 
-### Initialization
+This section covers the initial setup and UI display for a **non-consumable** product (like unlocking a premium feature or removing ads) using the `cordova-plugin-purchase` plugin (v13+). It focuses on registering the product and displaying its information based on ownership status, deferring the actual purchase logic to platform-specific guides.
 
-Let's set up the basic HTML and JavaScript structure.
+**Assumptions:**
 
-**HTML (`index.html` body):**
+*   You have completed the [basic JavaScript setup](code-initial-javascript.md).
+*   You have created a non-consumable product in your target platform's developer console.
 
-```html
-<body>
-  <div class="app">
-    <!-- Status messages will go here -->
-    <div id="messages">Loading...</div>
-    <!-- Product details and purchase button -->
-    <div id="product-details">Please wait...</div>
-  </div>
-  <script type="text/javascript" src="cordova.js"></script>
-  <script type="text/javascript" src="js/index.js"></script>
-</body>
-```
+**Step 1: Implement `initializeStoreAndSetupListeners`**
 
-**JavaScript (`index.js` or equivalent):**
+Replace the placeholder `initializeStoreAndSetupListeners` function with the following code. This registers your non-consumable product, sets up essential event listeners for UI updates, configures the (highly recommended) validator, and initializes the store.
 
+{% code title="www/js/index.js (initializeStoreAndSetupListeners)" lineNumbers="true" %}
 ```javascript
-document.addEventListener('deviceready', initStore, false);
+// This function should be called by onDeviceReady after basic setup
+function initializeStoreAndSetupListeners() {
+  console.log('Setting up store for Non-Consumables...');
+  setStatus('Initializing Store for Non-Consumables...');
 
-// Placeholder Product ID - REPLACE THIS with your actual Product ID
-const MY_PRODUCT_ID = 'nonconsumable1';
+  const { store, ProductType, Platform, LogLevel } = CdvPurchase;
 
-function initStore() {
+  // --- Product Definition ---
+  // Define the non-consumable product ID you configured in the App/Play Store.
+  const MY_NON_CONSUMABLE_ID = 'unlock_premium_feature'; // Replace with your actual ID
+  // Key used to store ownership status (use SecureStorage in production!)
+  const FEATURE_KEY = 'isPremiumFeatureUnlocked';
 
-    const { store, ProductType, Platform, ErrorCode } = CdvPurchase;
+  // --- Register Product ---
+  store.register({
+    id: MY_NON_CONSUMABLE_ID,
+    type: ProductType.NON_CONSUMABLE,
+    platform: store.defaultPlatform() // Or specify Platform.GOOGLE_PLAY, Platform.APPLE_APPSTORE
+  });
 
-    if (!store) { // Ensure the store object is available
-        log('Store not available');
-        return;
-    }
+  // --- Setup Receipt Validator (Highly Recommended) ---
+  // Essential for security and restoring purchases reliably.
+  // store.validator = "https://your-validator.com/validate";
+  // store.validator = new CdvPurchase.Iaptic({...}).validator;
 
-    // Log all errors
-    store.error(error => {
-        log('ERROR ' + error.code + ': ' + error.message);
-        updateMessages('Error: ' + error.message);
+  // --- Setup Event Listeners ---
+  store.when()
+    .productUpdated(product => {
+      console.log('Product updated: ' + product.id);
+      if (product.id === MY_NON_CONSUMABLE_ID) {
+        // myProductReference = product; // Store if needed globally
+      }
+      refreshUI(); // Update the UI with product details & ownership status
+    })
+    .receiptUpdated(receipt => {
+      // Local receipt changes might affect 'owned' status if no validator is used.
+      // Refresh UI to reflect potential changes.
+      console.log('Local receipt updated.');
+      refreshUI();
+    })
+    .verified(receipt => {
+      // Verified receipt is the source of truth for ownership.
+      console.log('Receipt verified.');
+      refreshUI(); // Refresh UI based on verified data
+    })
+    // Purchase flow listeners (.approved, .finished, .cancelled)
+    // will be added in the platform-specific purchase flow sections.
+    ; // End of store.when() chain
+
+  // --- Initialize the Store ---
+  store.initialize([store.defaultPlatform()])
+    .then(() => {
+      console.log('Store initialized successfully.');
+      setStatus('Store ready.');
+      refreshUI(); // Render the UI with initial data
+    })
+    .catch(err => {
+      console.error('Store initialization failed:', err);
+      setStatus('Store failed to initialize.');
     });
-
-    // Register the non-consumable product
-    store.register({
-        id: MY_PRODUCT_ID,
-        type: ProductType.NON_CONSUMABLE,
-        platform: store.defaultPlatform() // Or specify Platform.APPLE_APPSTORE, Platform.GOOGLE_PLAY
-    });
-
-    // Setup the validator (RECOMMENDED)
-    // store.validator = "YOUR_VALIDATOR_URL";
-    // store.validator = new CdvPurchase.Iaptic({...}).validator;
-
-    // Setup event listeners
-    store.when()
-      .productUpdated(renderProduct) // Render the product UI when its data is available/updated
-      .approved(transaction => {
-          log('Approved: ' + transaction.products[0].id);
-          // If using validation:
-          if (store.validator) {
-              updateMessages('Purchase approved. Verifying...');
-              transaction.verify();
-          } else {
-              // WARNING: No validation - insecure for non-consumables
-              log('WARNING: Skipping receipt validation.');
-              updateMessages('Purchase approved. Finishing...');
-              grantEntitlement(transaction.products[0].id);
-              transaction.finish();
-          }
-      })
-      .verified(receipt => {
-          log('Verified: ' + receipt.id);
-          updateMessages('Purchase verified. Finishing...');
-          // Grant entitlement based on the verified purchase
-          receipt.collection.forEach(purchase => grantEntitlement(purchase.id));
-          receipt.finish(); // IMPORTANT: Finish the transaction
-      })
-      .unverified(unverifiedReceipt => {
-          log('Purchase not verified.');
-          updateMessages('Purchase failed verification.');
-          // Decide how to handle failed verification (e.g., deny entitlement, retry?)
-      })
-      .finished(transaction => {
-          log('Finished: ' + transaction.transactionId);
-          updateMessages('Purchase complete!');
-          renderUI(); // Ensure UI reflects the final owned state
-      });
-
-    // Initialize the store
-    updateMessages('Initializing Store...');
-    store.initialize([store.defaultPlatform()])
-      .then(() => {
-          log('Store initialized');
-          updateMessages('Store ready.');
-          renderUI();
-      });
 }
 
-// --- Placeholder Functions (Implement in your main use-case file) ---
+// --- UI Rendering ---
 
-function renderProduct(product) {
-    // Find the element to update
-    const el = document.getElementById('product-details');
-    if (!el) return;
+// Function to check if the feature is unlocked (reads from storage)
+function isFeatureUnlocked() {
+  // WARNING: localStorage is INSECURE. Use SecureStorage plugin or server check.
+  try {
+    return window.localStorage.getItem(FEATURE_KEY) === 'YES';
+  } catch (e) {
+    console.error('Error reading from localStorage:', e);
+    return false;
+  }
+}
 
-    // Basic rendering - customize this in your use-case file
-    log('Rendering product: ' + product.id);
-    let html = `<h3>${product.title}</h3><p>${product.description}</p>`;
+// This function updates the UI based on product data and ownership status
+function refreshUI() {
+  console.log('Refreshing UI...');
+  const { store, Platform } = CdvPurchase;
+
+  const product = store.get(MY_NON_CONSUMABLE_ID);
+  const productEl = document.getElementById('product-details');
+  const statusEl = document.getElementById('user-status'); // Target the status display area
+
+  // Determine ownership status
+  // Use store.owned() which checks verified receipts first, then local if no validator.
+  // Fallback to insecure localStorage check if store isn't ready or owned is false.
+  const owned = store.owned(MY_NON_CONSUMABLE_ID) || isFeatureUnlocked();
+
+  if (statusEl) {
+    statusEl.innerHTML = `<b>Premium Feature: ${owned ? 'Unlocked! 🎉' : 'Locked'}</b>`;
+    // In a real app, you would show/hide UI elements based on 'owned' status.
+  }
+
+  if (productEl) {
+    if (!product) {
+      productEl.innerHTML = '<p>Loading product details...</p>';
+      return;
+    }
+
+    // Product loaded, display its details
+    let productHtml = `
+      <h3>${product.title}</h3>
+      <p>${product.description}</p>
+    `;
     const offer = product.getOffer();
     if (offer) {
-        html += `<p>Price: ${offer.pricingPhases[0].price}</p>`;
-        if (offer.canPurchase) {
-            html += `<button onclick="requestPurchase('${product.platform}', '${product.id}', '${offer.id}')">Buy</button>`;
-        } else if (product.owned) {
-            html += `<p>(Already Owned)</p>`;
-        } else {
-            html += `<p>(Cannot Purchase)</p>`;
-        }
+      productHtml += `<p>Price: ${offer.pricing?.price ?? 'N/A'}</p>`;
+      // Show buy button only if the product is not already owned and can be purchased
+      if (!owned && offer.canPurchase) {
+        // The purchaseFeature function will be implemented in platform-specific guides
+        productHtml += `<button id="buy-button" onclick="purchaseFeature()">Unlock Now!</button>`;
+      } else if (owned) {
+        productHtml += `<p><em>(Already Purchased)</em></p>`;
+      } else {
+        productHtml += `<p>(Cannot purchase at this time)</p>`;
+      }
     } else {
-        html += `<p>Loading price...</p>`;
+      productHtml += `<p>Pricing information not available.</p>`;
     }
-    el.innerHTML = html;
+    productEl.innerHTML = productHtml;
+  }
 }
 
-function renderUI() {
-    // This function should update the overall UI based on ownership state.
-    // Implement the specific logic in your main use-case file.
-    log('Rendering main UI...');
-    // Example: Check ownership and update a status message or unlock UI elements
-    const owned = CdvPurchase.store.owned(MY_PRODUCT_ID);
-    updateMessages(owned ? 'Product Owned' : 'Product Not Owned');
-}
+// --- Placeholder for Purchase Action ---
+// This will be implemented in the platform-specific guides (non-consumable-*.md)
+window.purchaseFeature = function() {
+  console.log('Placeholder: purchaseFeature() called.');
+  alert('Purchase logic needs to be implemented for the specific platform.');
+};
 
+// --- Placeholder for Granting Entitlement ---
+// This will be implemented in the platform-specific guides
 function grantEntitlement(productId) {
-    // This function grants access to the purchased content/feature.
-    // Implement the specific logic in your main use-case file.
-    log('Granting entitlement for: ' + productId);
-    // Example: Set a flag in secure storage, update user profile on backend, etc.
-}
-
-function requestPurchase(platform, productId, offerId) {
-    // This function initiates the purchase flow.
-    log(`Requesting purchase: ${platform}, ${productId}, ${offerId}`);
-    const offer = CdvPurchase.store.get(productId, platform)?.getOffer(offerId);
-    if (offer) {
-        updateMessages('Initiating purchase...');
-        offer.order().then(error => {
-            if (error) {
-                if (error.code === CdvPurchase.ErrorCode.PAYMENT_CANCELLED) {
-                    updateMessages('Purchase cancelled.');
-                } else {
-                    updateMessages(`Purchase failed: ${error.message}`);
-                }
-            } else {
-                // Purchase flow initiated, waiting for 'approved' or 'cancelled'/'failed'
-                updateMessages('Purchase flow started...');
-            }
-        });
-    } else {
-        updateMessages('Offer not found for purchase.');
+  if (productId === MY_NON_CONSUMABLE_ID) {
+    console.log(`Placeholder: Granting entitlement for ${productId}.`);
+    // Persist ownership securely!
+    try {
+      window.localStorage.setItem(FEATURE_KEY, 'YES'); // INSECURE EXAMPLE
+      console.log('Ownership flag set in localStorage.');
+    } catch (e) {
+      console.error('Error saving ownership to localStorage:', e);
     }
-}
-
-function updateMessages(text) {
-    // Helper to show status messages
-    const el = document.getElementById('messages');
-    if (el) el.textContent = text;
-}
-
-// Simple log function for the example
-function log(msg) {
-    console.log('[Store Init] ' + msg);
+    refreshUI(); // Update UI immediately
+  }
 }
 
 // Initial UI update on device ready
-document.addEventListener('deviceready', renderUI, false);
+document.addEventListener('deviceready', () => {
+  // Ensure the initial call to initializeStoreAndSetupListeners happens
+  if (typeof initializeStoreAndSetupListeners === 'function') {
+     // Already called by onDeviceReady in the initial script
+  } else {
+     initializeStoreAndSetupListeners = initializeStore;
+     initializeStoreAndSetupListeners();
+  }
+  // Initial render based on potentially stored state
+  refreshUI();
+}, false);
+
+// Ensure setStatus is defined
+if (typeof setStatus !== 'function') {
+  setStatus = (message) => console.log('[Status] ' + message);
+}
 
 ```
+{% endcode %}
+
+**Explanation:**
+
+1.  **Product Definition (Lines 9-11):** Define the `id` of your non-consumable product and a key (`FEATURE_KEY`) to track its ownership status locally.
+2.  **Register Product (Lines 14-18):** Call `store.register()` with the `id`, `type` set to `ProductType.NON_CONSUMABLE`, and the correct `platform`.
+3.  **Validator Setup (Lines 21-24):** Configure `store.validator`. This is **highly recommended** for non-consumables to securely verify purchases and enable reliable restoration across devices.
+4.  **Event Listeners (Lines 27-44):**
+    *   `productUpdated`: Refreshes the UI when product details load.
+    *   `receiptUpdated`: Refreshes the UI when local receipt data changes (might affect `owned` status if no validator is used).
+    *   `verified`: Refreshes the UI when a receipt is validated (this provides the most reliable ownership status).
+    *   Purchase flow listeners (`approved`, `finished`, etc.) are deferred.
+5.  **Initialize Store (Lines 47-56):** Call `store.initialize()` to activate the platform.
+6.  **UI Rendering (Lines 60-106):**
+    *   The `refreshUI` function now focuses on displaying the product and the *ownership status* of the feature.
+    *   It uses `store.owned(MY_NON_CONSUMABLE_ID)` as the primary way to check ownership. This method intelligently uses verified receipt data if available (and a validator is configured), falling back to less reliable local data otherwise.
+    *   It includes a fallback check to `isFeatureUnlocked()` (which reads from `localStorage` in this example) to handle cases where the store might not be fully ready or if validation isn't used. **Warning:** `localStorage` is insecure; use the [SecureStorage-adapter](https://github.com/mibrito707/cordova-plugin-securestorage-adapter) plugin or a server backend for production.
+    *   The "Buy" button is only shown if the feature is *not* owned (`!owned`) and the offer `canPurchase`. If owned, it displays "(Already Purchased)".
+7.  **Placeholders (Lines 109-125):** Empty functions `purchaseFeature` and `grantEntitlement` are defined for later implementation in platform-specific guides. `grantEntitlement` includes an *insecure* example of setting the `localStorage` flag.
+8.  **Initial Load (Lines 128-138):** Ensures initialization runs and the UI reflects any previously stored ownership status on startup.
+
+This setup prepares your app to display the non-consumable product and its current ownership state. The next steps involve implementing the platform-specific purchase flow (Android or iOS) to handle buying the product and securely granting/persisting the entitlement.
+
 *Initial HTML modification suggestion for `./use-cases/sections/non-consumable-generic-initialization.md`: Adapt the example to reflect unlocking a feature. Instead of `window.localStorage.goldCoins`, use something like `window.localStorage.featureUnlocked = "YES"` and update the UI based on this flag.*
 
 ### Purchase Flow
@@ -328,238 +389,209 @@ Finally, we handle the purchase events. For non-consumables on Google Play, the 
 
 ### Purchase Flow (Android/Google Play Non-Consumable)
 
-With the store initialized and product details displayed, we now implement the purchase logic specific to Google Play for non-consumable items. The key difference on Android is the need to **acknowledge** the purchase within 3 days to prevent automatic refunds.
+This section details the purchase logic specific to **Android/Google Play** for **non-consumable** items (like unlocking a feature permanently), assuming you have completed the [generic non-consumable initialization](non-consumable-generic-initialization.md). The key step on Android is **acknowledging** the purchase within 3 days using `transaction.finish()` to prevent automatic refunds.
 
-**Step 1: Implement the Purchase Action**
+**Step 1: Implement the Purchase Action (`purchaseFeature`)**
 
-*   **What:** Fill in the `window.purchaseFeature` function stub (created in the generic section) to call `store.order()` for the Google Play platform.
+*   **What:** Replace the placeholder `window.purchaseFeature` function (from the generic initialization) to call `offer.order()` specifically for the Google Play platform.
 *   **Why:** This triggers the Google Play purchase dialog when the user clicks the "Unlock Now!" button.
 
-Replace the placeholder `window.purchaseFeature` function in `www/js/index.js` with this implementation:
+Replace the placeholder `window.purchaseFeature` function in `www/js/index.js`:
 
 ```javascript
 // In js/index.js
 
 // Make this function globally accessible for the button's onclick
 window.purchaseFeature = function() {
-    const productId = 'nonconsumable1'; // Use the SAME product ID you registered
-    console.log(`Purchase button clicked for ${productId}`);
-    const { store, Platform } = CdvPurchase; // Get Platform enum
+    const productId = 'unlock_premium_feature'; // Use the SAME product ID you registered
+    console.log(`Purchase button clicked for non-consumable: ${productId}`);
+    const { store, Platform } = CdvPurchase;
 
-    // Ensure we target the correct platform product
-    const product = store.get(productId, Platform.GOOGLE_PLAY); // Explicitly get Google Play version
+    // Get the product specifically for Google Play
+    const product = store.get(productId, Platform.GOOGLE_PLAY);
     const offer = product?.getOffer(); // Get the default offer
 
     if (offer) {
-        console.log(`Initiating order for offer: ${offer.id} on platform ${offer.platform}`);
-        // Optional: Update UI to show a loading/processing state
-        // setState({ isPurchasing: true });
+        console.log(`Initiating order for non-consumable offer: ${offer.id} on platform ${offer.platform}`);
+        setStatus('Initiating purchase...');
 
-        store.order(offer)
+        // Optional: Add obfuscated account/profile IDs for fraud prevention
+        // const additionalData = { googlePlay: { accountId: 'hashed_user_id' } };
+        // offer.order(additionalData)
+        offer.order()
             .then(result => {
-                // Order initiation successful or user cancelled.
-                // Completion is handled by event listeners.
-                if (result && result.code === store.ErrorCode.PAYMENT_CANCELLED) {
-                    console.log("User cancelled the purchase via Google Play.");
-                    // Optionally update UI, e.g., setState({ isPurchasing: false });
-                } else if (result && result.isError) {
-                    console.error("Order initiation failed: " + result.message);
-                    // Optionally update UI, e.g., setState({ isPurchasing: false, error: result.message });
+                // Promise resolves when the Google Play UI is dismissed.
+                // Outcome is handled by listeners.
+                if (result && result.isError) {
+                    setStatus(`Order failed: ${result.message}`);
                 } else {
-                    console.log("Order initiated with Google Play. Waiting for approval...");
-                    // UI state like 'isPurchasing' might remain true
+                    // Purchase flow started... status updated by listeners.
                 }
+                refreshUI(); // Refresh UI in case button state needs update
             })
             .catch(err => {
-                 console.error("Unexpected error during order initiation:", err);
-                 // Optionally update UI, e.g., setState({ isPurchasing: false, error: 'Unexpected error' });
+                 console.error("Unexpected error during non-consumable order:", err);
+                 setStatus('Unexpected error during purchase.');
+                 refreshUI();
             });
 
     } else {
-        console.error(`Cannot purchase feature: Product (${productId}) or its offer not found or not loaded yet.`);
-        alert('Unable to purchase. Product details might still be loading or the product ID is incorrect.');
+        console.error(`Cannot purchase feature: Product (${productId}) or offer not found.`);
+        setStatus('Error: Unable to purchase. Product details missing.');
     }
 }
 ```
 
-**Step 2: Handle the "Approved" State**
+**Step 2: Handle Purchase Events (`.approved`, `.verified`, `.finished`)**
 
-*   **What:** Add an `.approved()` listener. This fires when the Google Play Billing library indicates the payment has been processed successfully on Google's side, but before your app has acknowledged it.
-*   **Why:** This is the signal to verify the purchase (if using a validator) or proceed directly to acknowledging it.
+*   **What:** Add the purchase lifecycle event listeners within the `store.when()` chain in your `initializeStoreAndSetupListeners` function (created during generic initialization).
+*   **Why:** These listeners handle the progression of the purchase: approval by Google Play, optional verification, and mandatory acknowledgment.
 
-Add the `.approved()` handler within the `store.when()` chain in your `initializeStore` function:
+Add these handlers inside the existing `store.when()` call:
 
 ```javascript
-// Inside initializeStore() -> store.when() chain
+// Inside initializeStoreAndSetupListeners() -> store.when() chain
 
     .approved(transaction => {
         console.log(`Transaction ${transaction.transactionId} approved for ${transaction.products[0]?.id}.`);
+        setStatus('Purchase approved. Verifying...');
 
-        // Verification is recommended for security.
+        // Verification is highly recommended for non-consumables to prevent fraud.
         if (store.validator) {
-            console.log('Verification pending for ' + transaction.transactionId);
-            // Optional: Update UI to indicate verification
-            // setState({ isVerifying: true });
             transaction.verify();
         } else {
-             console.warn("Receipt validator not configured. Finishing purchase without server verification.");
-             // Acknowledge directly if no validator
+             console.warn("Receipt validator not configured. Granting entitlement and acknowledging purchase without server verification (INSECURE).");
+             // Grant entitlement and acknowledge directly if no validator.
              acknowledgeFeatureAndFinish(transaction);
         }
     })
-    // Add .verified() and .finished() next
-```
-
-**Step 3: Handle the "Verified" State (Recommended)**
-
-*   **What:** Add a `.verified()` listener. This is called after successful validation via `transaction.verify()`.
-*   **Why:** Confirms the purchase is legitimate according to your server. This is the ideal point to grant entitlement and acknowledge the purchase to Google.
-
-Add the `.verified()` handler within the `store.when()` chain:
-
-```javascript
-// Inside initializeStore() -> store.when() chain
-
     .verified(receipt => {
         console.log(`Receipt verified for transaction ${receipt.transactions[0]?.transactionId}`);
-        // Optional: Update UI
-        // setState({ isVerifying: false });
+        setStatus('Purchase verified. Finishing...');
 
-        // Find the relevant transaction
+        // Find the relevant transaction within the verified receipt
         const verifiedTransaction = receipt.transactions
-            .find(t => t.products[0]?.id === 'nonconsumable1'); // Use your product ID
+            .find(t => t.products[0]?.id === MY_NON_CONSUMABLE_ID); // Use your product ID
 
         if (verifiedTransaction) {
+            // Grant entitlement (if not already done based on verified data)
+            // and ACKNOWLEDGE the transaction
             acknowledgeFeatureAndFinish(verifiedTransaction);
         } else {
-            console.error("Verified receipt didn't contain the expected transaction?");
+            console.error("Verified receipt didn't contain the expected non-consumable transaction?");
+            // Finish anyway to clear the queue if possible
+            receipt.finish();
         }
     })
-    // Add .finished() next
-```
-
-**Step 4: Handle the "Finished" State**
-
-*   **What:** Add a `.finished()` listener. This fires after `transaction.finish()` successfully acknowledges the purchase with Google Play.
-*   **Why:** Indicates the transaction is fully complete in the Google Play system. Useful for final UI updates or logging.
-
-Add the `.finished()` handler within the `store.when()` chain:
-
-```javascript
-// Inside initializeStore() -> store.when() chain
-
     .finished(transaction => {
+        // This confirms the acknowledgement call was successful.
         console.log(`Transaction ${transaction.transactionId} finished (acknowledged) for ${transaction.products[0]?.id}.`);
+        setStatus('Purchase complete! Feature unlocked.');
         // Feature should already be unlocked. Refresh UI to be sure.
-        refreshFeatureUI();
+        refreshUI();
+    })
+    .cancelled(transaction => {
+        console.log('Purchase Cancelled:', transaction.transactionId);
+        setStatus('Purchase cancelled.');
+        refreshUI();
     });
+    // Ensure the .productUpdated, .receiptUpdated listeners from the generic setup are still present
 ```
 
-**Step 5: Implement Feature Unlock and Acknowledge Logic**
+**Step 3: Implement Feature Unlock and Acknowledge Logic (`acknowledgeFeatureAndFinish`)**
 
-*   **What:** Create the `acknowledgeFeatureAndFinish` function. This function updates your app's state (`localStorage`) to unlock the feature and calls `transaction.finish()` to acknowledge the purchase with Google Play.
-*   **Why:** You **must** acknowledge non-consumable purchases on Google Play within 3 days, otherwise Google will automatically refund the user. Calling `transaction.finish()` performs this acknowledgment. **Do not consume non-consumables.**
+*   **What:** Replace the placeholder `grantEntitlement` function with `acknowledgeFeatureAndFinish`. This function updates your app's state (e.g., `localStorage` - **use secure storage in production!**) to unlock the feature and then calls `transaction.finish()` to **acknowledge** the purchase with Google Play.
+*   **Why:** You **must** acknowledge non-consumable purchases on Google Play within 3 days, otherwise Google will automatically refund the user and revoke the entitlement. Calling `transaction.finish()` performs this acknowledgment. **Do not consume non-consumables.**
 
-Add this new function to `www/js/index.js`:
+Replace the placeholder `grantEntitlement` function in `www/js/index.js` with this:
 
 ```javascript
 // In js/index.js
 
+// Replace the placeholder grantEntitlement function
 function acknowledgeFeatureAndFinish(transaction) {
+    const productId = transaction.products[0]?.id;
+    if (productId !== MY_NON_CONSUMABLE_ID) return; // Ensure it's the correct product
+
     // Grant the entitlement if not already granted
-    const isUnlocked = window.localStorage.getItem(FEATURE_KEY) === 'YES';
+    // Check your persistent storage method here
+    const isUnlocked = isFeatureUnlocked(); // Assumes function from generic init exists
+
     if (isUnlocked) {
         console.log(`Feature already unlocked, acknowledging transaction ${transaction.transactionId} again just in case.`);
     } else {
         console.log(`Unlocking feature for transaction ${transaction.transactionId}...`);
-        // Persist the unlock status
-        window.localStorage.setItem(FEATURE_KEY, 'YES');
-        // Refresh the UI immediately
-        refreshFeatureUI();
-        alert('Feature Unlocked! Thank you.');
+        // Persist the unlock status SECURELY
+        try {
+            window.localStorage.setItem(FEATURE_KEY, 'YES'); // INSECURE EXAMPLE - Use SecureStorage
+            console.log('Ownership flag set in localStorage.');
+        } catch (e) {
+            console.error('Error saving ownership to localStorage:', e);
+        }
+        // Refresh the UI immediately to show the unlocked state
+        refreshUI();
+        // Optionally show a confirmation message
+        // alert('Feature Unlocked! Thank you.');
     }
 
     // Acknowledge the purchase with Google Play.
-    // This is CRUCIAL for non-consumables on Android.
-    console.log(`Acknowledging (finishing) transaction ${transaction.transactionId}...`);
-    transaction.finish();
+    // This is CRUCIAL for non-consumables on Android to prevent refunds.
+    // It tells Google you have successfully processed the purchase.
+    if (!transaction.isAcknowledged) {
+        console.log(`Acknowledging (finishing) transaction ${transaction.transactionId}...`);
+        transaction.finish();
+    } else {
+        console.log(`Transaction ${transaction.transactionId} already acknowledged.`);
+    }
 }
 ```
 
 ---
 
-**Build and Test (Android/Google Play)**
+**Build and Test (Android/Google Play Non-Consumable)**
 
 Testing Google Play In-App Purchases requires specific steps:
 
-**1. Create a Release Build:**
+1.  **Create a Release Build:**
+    *   Google Play Billing generally requires **release-signed APKs/AABs** for testing. Debug builds often fail.
+    *   Generate a Java Keystore if you don't have one (`keytool ...`). **Back it up securely!**
+    *   Build the signed release APK/AAB using your release key (e.g., via `cordova build android --release -- --keystore=... --alias=...` or a build script).
 
-*   Google Play Billing often only works correctly with **release-signed APKs/AABs**. Debug builds usually fail.
-*   You need a Java Keystore to sign your release build. If you don't have one, create it:
-    ```bash
-    keytool -genkey -v -keystore my-release-key.keystore -alias mykeyalias -keyalg RSA -keysize 2048 -validity 10000
-    ```
-    Remember the alias and passwords you set. **Back up this keystore file securely!**
-*   Build the signed release APK. You can use Cordova CLI with a `build.json` or Android Studio. A helper script like `android-release.sh` (mentioned in setup section [setup-android-5-android-release-apk.md](!UNRESOLVED-LINK:./sections/setup-android-5-android-release-apk.md)) simplifies this:
-    ```bash
-    # Set environment variables or the script will prompt you
-    export KEYSTORE_PATH=/path/to/my-release-key.keystore
-    export KEYSTORE_ALIAS=mykeyalias
-    # export KEYSTORE_PASSWORD=your_store_password # Optional, script prompts if not set
-    # export KEY_PASSWORD=your_key_password       # Optional, script prompts if not set
+2.  **Upload to Google Play Console:**
+    *   Navigate to your app in the Play Console.
+    *   Go to **Release -> Testing -> Internal testing** (or Closed/Open testing).
+    *   Create a new release and **upload the signed release build**.
+    *   Add your tester Google account email addresses to the tester list for that track.
+    *   **Save and roll out** the release. Wait for it to become available (can take minutes to hours).
 
-    ./android-release.sh # Assuming you have the script from the setup guide
-    ```
-    This produces an APK like `android-release-YYYYMMDD-HHMM.apk`.
+3.  **Prepare Test Device:**
+    *   Use a **physical Android device**. Emulators can be unreliable.
+    *   Log into the device **only** with a Google account listed as a tester for your app's track. Remove other Google accounts temporarily if needed.
+    *   Ensure the Google Play Store app is up-to-date.
 
-**2. Upload to Google Play:**
+4.  **Install and Run:**
+    *   Testers must **accept the testing invitation** (usually via a Play Store link).
+    *   Install the app **from the Google Play Store** using the testing link. Installing manually via `adb` often bypasses necessary Play Store setup.
+    *   Open the app.
+    *   Monitor logs using `adb logcat CordovaPurchase:V CordovaLog:V chromium:D *:S`.
 
-*   Go to the Google Play Console.
-*   Navigate to your app.
-*   Go to **Release -> Testing -> Internal testing** (or Closed testing).
-*   Create a new release and **upload the signed release APK** you just built.
-*   Add testers' Google account email addresses to the tester list for that track.
-*   **Save and roll out** the release to your testers. It might take some time (minutes to hours) for the release to become available.
-
-**3. Prepare Test Device:**
-
-*   Use a **physical Android device**. Emulators are often unreliable for IAP testing.
-*   Log into the device with a Google account that is listed as a **tester** in the Play Console for your internal/closed track. **Ensure this is the *only* Google account active on the device**, or the primary one, to avoid conflicts.
-*   Make sure the Google Play Store app is up-to-date.
-
-**4. Install and Run:**
-
-*   Testers need to **accept the testing invitation** (usually via a link provided by the Play Console).
-*   Install the app **from the Google Play Store** using the testing link, **not** by manually installing the APK via `adb install` (this often bypasses required Play Store initialization).
-*   Alternatively, if you built an APK (not AAB), you can install the *release signed* APK directly for quick tests *after* having uploaded at least one version to Play Console:
-    ```bash
-    adb install -r path/to/android-release-....apk
-    ```
-*   Open the app.
-*   Use `adb logcat` to monitor logs:
-    ```bash
-    adb logcat CordovaPurchase:D CordovaLog:D chromium:D *:S
-    ```
-
-**5. Test the Purchase:**
-
-*   Navigate to the feature/product in your app.
-*   Observe the logs and UI:
-    *   Store initialization messages should appear.
-    *   Feature status should be "Locked".
-    *   Product details (title, price) should load, and the "Unlock Now!" button should appear.
-*   Tap **"Unlock Now!"**.
-*   The Google Play purchase sheet should appear. It might mention "Test card, always approves".
-*   Confirm the purchase.
-*   Observe Logcat and the app UI:
-    *   `Transaction ... approved...` log.
-    *   `(If validator set) Verification pending...` / `Receipt verified...` logs.
-    *   `Unlocking feature...` log.
-    *   `Acknowledging (finishing) transaction...` log.
-    *   `Transaction ... finished...` log.
-*   The UI should update to "Feature Status: UNLOCKED! 🎉", and the button should change to "_(Already Purchased)_".
-*   **Restart the app:** Verify the unlocked status persists.
+5.  **Test the Purchase:**
+    *   Navigate to where the non-consumable product is offered.
+    *   **Verify Initial State:** Logs should show store initialization. UI should show the feature as "Locked" and the product details (title, price) with the "Unlock Now!" button should be visible.
+    *   **Tap "Unlock Now!"**.
+    *   The Google Play purchase sheet should appear, likely mentioning "Test card, always approves".
+    *   **Confirm** the purchase.
+    *   **Observe Logs and UI:**
+        *   `approved` event log.
+        *   `(If validator set)` `verified` event log.
+        *   `Unlocking feature...` log from `acknowledgeFeatureAndFinish`.
+        *   `Acknowledging (finishing) transaction...` log.
+        *   `finished` event log.
+    *   The UI should update to show "Premium Feature: Unlocked! 🎉".
+    *   The "Unlock Now!" button should be replaced with "(Already Purchased)".
+    *   **Restart the app:** Verify the unlocked status persists (reads from your storage mechanism) and the purchase button remains disabled.
+    *   **Attempt Repurchase:** Tapping where the button was should do nothing, or trying to trigger the purchase again should ideally fail or be blocked by your UI logic based on the `owned` status.
 
 ---
 
-This completes the non-consumable purchase flow for Android. The key takeaway is the necessity of **acknowledging** the purchase using `transaction.finish()`.
+This completes the non-consumable purchase flow for Android. The key takeaway is the necessity of **acknowledging** the purchase using `transaction.finish()` to prevent automatic refunds by Google Play.

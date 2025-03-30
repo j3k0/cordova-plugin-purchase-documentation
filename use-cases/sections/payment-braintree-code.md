@@ -1,171 +1,212 @@
+This section details the code implementation steps for processing a custom payment using the Braintree platform via `cordova-plugin-purchase` and its Braintree extension.
 
-### Base framework
+### 1. Base Framework
 
+First, ensure you have the basic HTML structure and initial JavaScript setup as outlined in the [Code Framework section](code-framework.md). This includes waiting for `deviceready` and basic plugin checks.
 
 #### index.html
 
-Assuming you're starting from a blank project, we'll add the minimal amount of HTML for the purpose of this tutorial. Let's replace the `<body>` from the `www/index.html` file with the below.
+Assuming you're starting from a blank Cordova project, let's set up the minimal HTML needed for the tutorials.
 
-```markup
+**Step 1: Modify `www/index.html`**
+
+Replace the default `<body>` content with the following structure:
+
+```html
 <body>
-  <div id="app"></div>
+  <div class="app">
+    <h1>In-App Purchase Demo</h1>
+    <!-- Area for status messages and errors -->
+    <div id="messages" style="font-style: italic; color: #555; margin-bottom: 10px;">Loading...</div>
+    <hr>
+    <!-- Area to display product details -->
+    <div id="product-details"></div>
+    <hr>
+    <!-- Area for other UI elements (like balance, feature status) -->
+    <div id="user-status"></div>
+     <hr>
+    <!-- Area for management buttons -->
+    <div id="management-buttons"></div>
+  </div>
+
+  <!-- Cordova script -->
   <script type="text/javascript" src="cordova.js"></script>
+  <!-- Your application script -->
   <script type="text/javascript" src="js/index.js"></script>
 </body>
 ```
+*   **Explanation:** We create a main container (`#app`) and add specific `div` elements (`#messages`, `#product-details`, `#user-status`, `#management-buttons`) that subsequent code examples will use to display information dynamically.
 
-Let's also make sure to comment out Cordova template project's CSS.
+**Step 2: Adjust Content Security Policy (CSP)**
 
-You also need to enable the `'unsafe-inline'` `Content-Security-Policy` by adding it to the `default-src` section:
+In the `<head>` of your `www/index.html`, find the `<meta http-equiv="Content-Security-Policy" ...>` tag. You need to modify the `connect-src` directive to allow connections to your receipt validation server. Also, ensure `'unsafe-inline'` is present in `script-src` or `default-src` if your examples use inline `onclick` handlers (though using `addEventListener` in JavaScript is generally preferred).
 
-```markup
+```html
 <meta http-equiv="Content-Security-Policy"
-      content="default-src 'self' 'unsafe-inline' [...]" />
+      content="default-src 'self' data: gap: https://ssl.gstatic.com 'unsafe-eval';
+               style-src 'self' 'unsafe-inline';
+               media-src *;
+               img-src 'self' data: content:;
+               connect-src 'self' https://your-validator-server.com;">
+               <!-- Add other necessary sources -->
 ```
+*   **Explanation:**
+    *   Replace `https://your-validator-server.com` with the actual URL of your receipt validation service (e.g., `https://validator.iaptic.com`). If you don't use a validator initially, you might omit this, but you'll need it later for secure implementations.
+    *   The example keeps other default Cordova CSP directives. Adjust them based on your app's needs.
 
-You can download the [full index.html file here](https://gist.github.com/j3k0/80c69837e5bacf83c4fc2320ba2e5dc2).
-#### javascript
+**Step 3: (Optional) Clean Up Default CSS**
 
+You might want to comment out or remove the default CSS (`www/css/index.css`) from the Cordova template project to avoid style conflicts with the simple examples.
 
-We will now create a new JavaScript file and load it from the HTML. The code below will initialize the plugin.
+#### JavaScript (`www/js/index.js`)
 
-{% code lineNumbers="true" %}
+This section provides the minimal JavaScript foundation needed to start using the `cordova-plugin-purchase` plugin in your `www/js/index.js` file (or equivalent).
+
+{% code title="www/js/index.js" lineNumbers="true" %}
 ```javascript
-// Wait for Cordova to be ready
+// Wait for Cordova's deviceready event
 document.addEventListener('deviceready', onDeviceReady, false);
 
 function onDeviceReady() {
   console.log('Device is ready.');
+  setStatus('Device ready.'); // Update UI status
 
-  // Check if the CdvPurchase plugin is available
+  // --- Essential Plugin Check ---
+  // Verify that the CdvPurchase namespace and store object are available.
   if (!window.CdvPurchase || !window.CdvPurchase.store) {
-      console.error('CdvPurchase plugin is not available. Ensure it is installed and loaded correctly.');
-      document.getElementById('app').innerHTML = 'Error: Purchase plugin not found.';
-      return;
+    const msg = 'CdvPurchase plugin is not available. Ensure it is installed and loaded correctly.';
+    console.error(msg);
+    setStatus('ERROR: ' + msg);
+    // Stop further initialization if the plugin isn't found.
+    return;
   }
 
-  // Alias the store object for easier access
+  // --- Basic Setup (Before Initialization) ---
   const { store, LogLevel, ErrorCode } = CdvPurchase;
-  console.log('CdvPurchase.store object found, version ' + store.version);
+  console.log('CdvPurchase.store available. Version ' + store.version);
 
-  // Optional: Set the verbosity level for debugging
-  // LogLevel.DEBUG provides the most detailed logs
+  // Set the desired verbosity level for the plugin's logger.
+  // LogLevel.DEBUG provides the most detailed logs, useful for development.
+  // Use LogLevel.INFO or LogLevel.WARNING for production.
   store.verbosity = LogLevel.DEBUG;
 
-  // Setup a global error handler for the store
-  store.error(function(error) {
-      console.error('STORE ERROR: Code=' + error.code + ' Message=' + error.message);
-      // Display the error to the user in a dedicated element
-      const errorEl = document.getElementById('error-display'); // Ensure this element exists in your HTML
-      if (errorEl) {
-          errorEl.textContent = 'Error: ' + error.message;
-          // Optionally clear the error after a few seconds
-          setTimeout(() => { if (errorEl.textContent === 'Error: ' + error.message) errorEl.textContent = ''; }, 8000);
-      }
+  // Register a global error handler for the store.
+  // This catches general plugin errors (initialization, setup, etc.).
+  // Purchase-specific errors are typically handled via promises/callbacks.
+  store.error(error => {
+    console.error('STORE ERROR: Code=' + error.code + ' Message=' + error.message);
+    setStatus('ERROR: ' + error.message);
   });
 
-  // Setup a listener for when the store is ready
-  // This guarantees that initialize() has completed successfully
-  store.ready(function() {
-    console.log("CdvPurchase store is ready.");
-    // Initial UI refresh after the store is ready
-    refreshUI();
-  });
+  // --- Defer Specific Initialization ---
+  // Call the main initialization function for your specific use case.
+  // This function (defined elsewhere in your code or the tutorial)
+  // will handle product registration, validator setup, event listeners,
+  // and calling store.initialize().
+  initializeStoreAndSetupListeners();
 
-  // Initialize the store and related components
-  initializeStore();
-
-  // Perform an initial UI refresh (might show loading states)
+  // Initial UI refresh (might show loading states until products load)
   refreshUI();
 }
 
-function initializeStore() {
-  console.log('Calling initializeStore()...');
-  const { store } = CdvPurchase; // Get store instance again
+// --- Helper Functions (Example) ---
 
-  // TODO: Register products using store.register([...])
-  console.log('Registering products...');
-  // store.register([...]); // Add your product registrations here
-
-  // TODO: Set the validator URL or function
-  console.log('Setting validator...');
-  // store.validator = "YOUR_VALIDATOR_URL";
-
-  // TODO: Setup event listeners using store.when()...
-  console.log('Setting up event listeners...');
-  // store.when()...
-
-  // TODO: Call store.initialize([...platforms])
-  console.log('Calling store.initialize()...');
-  // store.initialize([...]);
-}
-
-function refreshUI() {
-  console.log('Calling refreshUI()...');
-  // TODO: Implement UI updates based on product/purchase status
-  // This function will be called by event listeners and after initialization.
-  const appEl = document.getElementById('app');
-  if (appEl) {
-      // Example: Display loading state or initial content
-      // appEl.innerHTML = '<p>Store is initializing...</p>';
-  } else {
-      console.error('App element not found for UI refresh.');
+// Function to update a status message element in the HTML
+function setStatus(message) {
+  console.log('[Status] ' + message);
+  const statusEl = document.getElementById('messages'); // Assumes an element with id="messages" exists
+  if (statusEl) {
+    statusEl.textContent = message;
   }
 }
+
+// --- Placeholder Functions (to be implemented by specific use-case guides) ---
+
+// This function will be implemented in specific guides to register products,
+// set the validator, setup 'when' listeners, and call store.initialize().
+function initializeStoreAndSetupListeners() {
+  console.log('Placeholder: initializeStoreAndSetupListeners() called.');
+  // Example structure (implement in specific guides):
+  // const { store, Platform, ProductType } = CdvPurchase;
+  // store.register([...]);
+  // store.validator = '...';
+  // store.when()...
+  // store.initialize([...]).then(...);
+  setStatus('Store setup needs implementation.');
+}
+
+// This function will be implemented in specific guides to update the UI
+// based on product data, ownership status, etc.
+function refreshUI() {
+  console.log('Placeholder: refreshUI() called.');
+  // Example structure (implement in specific guides):
+  // const product = CdvPurchase.store.get(...);
+  // Update HTML elements based on product.title, product.pricing, product.owned, etc.
+}
+
+// Make purchase function global if called directly from HTML onclick
+// window.myPurchaseFunction = function() { ... }
+
 ```
 {% endcode %}
 
-Here's a little explanation:
+**Explanation:**
 
-**Line 1**, it's important to wait for the "deviceready" event before using cordova plugins.
+1.  **Wait for `deviceready` (Line 2):** Essential first step for any Cordova plugin interaction.
+2.  **Plugin Check (Lines 8-14):** Verifies that `CdvPurchase.store` is available before proceeding.
+3.  **Basic Setup (Lines 17-29):**
+    *   Aliases common plugin members (`store`, `LogLevel`, etc.) for convenience.
+    *   Sets `store.verbosity` to `DEBUG` for detailed logging during development.
+    *   Sets up a global `store.error` handler to catch and log general plugin errors.
+4.  **Deferred Initialization (Line 35):** Calls `initializeStoreAndSetupListeners()`. This function is intentionally left as a placeholder here. Specific use-case guides (like setting up subscriptions or consumables) will provide the implementation for this function, which will include `store.register()`, `store.validator = ...`, `store.when()...`, and `store.initialize()`.
+5.  **Initial UI Refresh (Line 38):** Calls `refreshUI()`, another placeholder function that specific guides will implement to display product information and purchase status.
+6.  **Helper Functions (Lines 43-51):** Includes a basic `setStatus` function as an example for updating the UI.
+7.  **Placeholders (Lines 54-72):** Empty definitions for `initializeStoreAndSetupListeners` and `refreshUI` emphasize that their specific logic depends on the use case and will be provided in subsequent steps of the tutorials.
 
-**Lines 5-8**, we check if the plugin was correctly loaded.
+This minimal base ensures the plugin is loaded and basic logging/error handling is in place before diving into platform-specific or product-type-specific configurations in the main use-case guides.
 
-**Lines 11-13**, we setup an error handler. It just logs errors to the console.
+### 2. Initialization (`initializeStoreAndSetupListeners`)
 
-> Whatever your setup is, you should make sure this runs as soon as the javascript application starts. You have to be ready to handle IAP events as soon as possible.
+Next, implement the `initializeStoreAndSetupListeners` function. This involves:
+*   Configuring Braintree options, crucially providing a `clientTokenProvider` (recommended) or a `tokenizationKey` (for testing).
+*   Setting up the **mandatory** `store.validator`. Your validator endpoint *must* be capable of receiving a Braintree payment method nonce and using the Braintree Server SDK to create a `transaction.sale`.
+*   Setting up `store.when()` listeners to handle the `approved` (nonce received), `verified` (server processed nonce successfully), and `finished` (acknowledged) states.
+*   Calling `store.initialize()` with the Braintree platform and options.
 
-### Initialization
-
-As mentioned earlier, we'll use iaptic for the server side integration with Braintree.
-
-We'll instantiate the [iaptic component](https://github.com/j3k0/cordova-plugin-purchase/blob/v13/api/classes/CdvPurchase.Iaptic.md), and use the provided `braintreeClientTokenProvider` and `validator` to handle the server-side part of the purchase process.
-
-{% code lineNumbers="true" %}
+{% code title="www/js/index.js (initializeStoreAndSetupListeners)" lineNumbers="true" %}
 ```javascript
-function initializeStore() {
+// This function should be called by onDeviceReady after basic setup
+function initializeStoreAndSetupListeners() {
+  console.log('Setting up store for Braintree...');
+  setStatus('Initializing Braintree...');
+
   // Ensure CdvPurchase and its members are available
   if (!window.CdvPurchase) {
-    console.error('CdvPurchase is not defined. Ensure plugin is loaded.');
+    console.error('CdvPurchase is not defined.');
+    setStatus('Error: Payment plugin not loaded.');
     return;
   }
-  const { store, Platform, ErrorCode, Iaptic } = CdvPurchase;
+  const { store, Platform, ErrorCode, LogLevel, Iaptic } = CdvPurchase;
 
   // --- Configuration ---
-  // Replace with your actual Iaptic App Name and Public API Key
+  // Replace with your actual Iaptic App Name and Public API Key (if using Iaptic)
   const IAPTIC_APP_NAME = 'YOUR_IAPTIC_APP_NAME';
   const IAPTIC_API_KEY = 'YOUR_IAPTIC_PUBLIC_KEY';
-  // Replace with your actual Braintree Sandbox Tokenization Key (for testing only)
-  // const BRAINTREE_TOKENIZATION_KEY = 'YOUR_SANDBOX_TOKENIZATION_KEY';
-  // URL to your backend endpoint that generates Braintree Client Tokens (Recommended for Production)
-  const BRAINTREE_CLIENT_TOKEN_URL = 'https://your-server.com/api/braintree/client-token';
+  // URL to your backend endpoint that generates Braintree Client Tokens
+  const BRAINTREE_CLIENT_TOKEN_URL = 'https://your-server.com/api/braintree/client-token'; // Replace
+  // URL to your backend endpoint that processes Braintree nonces
+  const BRAINTREE_VALIDATOR_URL = 'https://your-server.com/api/braintree/validate'; // Replace
 
-  // --- Iaptic Setup (Optional but recommended for validation/token generation) ---
-  const iaptic = new Iaptic({
-    apiKey: IAPTIC_API_KEY,
-    appName: IAPTIC_APP_NAME,
-  });
-
-  // Set the validator URL (points to Iaptic or your own server)
-  // This validator endpoint needs to be able to process Braintree nonces.
-  store.validator = iaptic.validator;
+  // --- Optional: Iaptic Setup (Helper for token generation and validation) ---
+  // const iaptic = new Iaptic({ apiKey: IAPTIC_API_KEY, appName: IAPTIC_APP_NAME });
 
   // --- Braintree Options ---
   const braintreeOptions = {
     // Option 1: Client Token Provider (Recommended)
-    // Fetches a short-lived token from your server each time it's needed.
     clientTokenProvider: (callback) => {
       console.log('Requesting Braintree Client Token from server...');
+      setStatus('Requesting client token...');
+      // Replace with your actual fetch call to your server endpoint
       fetch(BRAINTREE_CLIENT_TOKEN_URL, { method: 'POST' /* Add auth headers if needed */ })
         .then(response => {
           if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -177,64 +218,70 @@ function initializeStore() {
             callback(data.clientToken); // Success
           } else {
             console.error('Server did not provide clientToken:', data);
-            callback({ // Error object
-              code: ErrorCode.COMMUNICATION,
-              message: 'Failed to fetch Braintree client token from server.',
-              isError: true, platform: Platform.BRAINTREE, productId: null
-            });
+            const err = { code: ErrorCode.COMMUNICATION, message: 'Failed to fetch Braintree client token from server.', isError: true, platform: Platform.BRAINTREE, productId: null };
+            callback(err);
+            setStatus('Error: Could not get client token.');
           }
         })
         .catch(error => {
           console.error('Error fetching Braintree client token:', error);
-          callback({ // Error object
-            code: ErrorCode.COMMUNICATION,
-            message: 'Network error fetching Braintree client token: ' + error.message,
-            isError: true, platform: Platform.BRAINTREE, productId: null
-          });
+          const err = { code: ErrorCode.COMMUNICATION, message: 'Network error fetching Braintree client token: ' + error.message, isError: true, platform: Platform.BRAINTREE, productId: null };
+          callback(err);
+          setStatus('Error: Network error getting client token.');
         });
     },
 
     // Option 2: Tokenization Key (Simpler for testing, less secure for production)
-    // tokenizationKey: BRAINTREE_TOKENIZATION_KEY,
+    // tokenizationKey: 'YOUR_SANDBOX_TOKENIZATION_KEY', // Replace if using this method
 
-    // Optional: Configure Apple Pay (iOS only)
+    // Optional configurations (uncomment and configure as needed)
     // applePay: { companyName: 'My Awesome Company' },
-
-    // Optional: Configure Google Pay (Android only)
-    // googlePay: { countryCode: 'US', googleMerchantName: 'My Awesome Company' },
-
-    // Optional: Configure 3D Secure
+    // googlePay: { countryCode: 'US', googleMerchantName: 'My Awesome Company', environment: 'TEST' },
     // threeDSecure: { exemptionRequested: true }
   };
 
-  // --- Purchase Event Handlers ---
+  // --- Setup Receipt Validator (MANDATORY for Braintree) ---
+  // Your validator MUST process the payment nonce received from Braintree.
+  // It needs to call the Braintree server SDK's transaction.sale() method.
+  store.validator = BRAINTREE_VALIDATOR_URL; // Replace with your endpoint
+  // store.validator = iaptic.validator; // Or use Iaptic's validator
+
+  // --- Setup Event Handlers ---
   store.when()
     .approved(transaction => {
-      console.log(`Braintree payment approved (Nonce received): ${transaction.transactionId}`);
-      // Crucially, the nonce (transaction.transactionId for Braintree)
-      // MUST be sent to your server here to create the actual charge.
-      // Using verify() assumes your validator endpoint handles this.
-      if (store.validator) {
-        console.log('Verifying Braintree nonce with validator...');
-        transaction.verify();
-      } else {
-        console.error('VALIDATOR REQUIRED for Braintree payments to process the nonce!');
-        // Cannot proceed securely without server-side processing.
-      }
+      // Nonce received from Braintree SDK (stored in transaction.transactionId)
+      console.log(`Payment approved by Braintree SDK (Nonce: ${transaction.transactionId}). Verifying...`);
+      setStatus('Payment approved. Verifying with server...');
+      // Send the nonce to your server for processing via the validator.
+      transaction.verify();
     })
     .verified(receipt => {
       // This means your validator successfully processed the nonce
       // with the Braintree gateway (e.g., created a transaction sale).
       console.log('Braintree payment verified and processed server-side.');
+      setStatus('Payment Successful!');
       // Now acknowledge the transaction with the plugin
       receipt.finish();
       // Fulfill the order (grant access, ship item, etc.)
-      setAppState('PAYMENT_FINISHED'); // Update UI state
+      // Update UI state (e.g., show success message)
+      setAppState('PAYMENT_FINISHED', 'Payment Successful!');
+    })
+    .unverified(unverified => {
+        console.error('Payment verification failed:', unverified.payload);
+        setStatus(`Verification Failed: ${unverified.payload.message}`);
+        setAppState('BASKET', `Verification Failed: ${unverified.payload.message}`);
     })
     .finished(transaction => {
       console.log(`Braintree transaction finished: ${transaction.transactionId}`);
       // Final cleanup if needed
+    })
+    .cancelled(transaction => {
+        // Note: Braintree flow cancellation is handled by the requestPayment promise .cancelled()
+        console.log('Transaction cancelled (might be from DropIn UI):', transaction.transactionId);
+        setStatus('Payment cancelled.');
+        setAppState('BASKET', 'Payment cancelled.');
     });
+    // No need for productUpdated/receiptUpdated unless mixing with store products
 
   // --- Initialize the Plugin ---
   console.log('Initializing store with Braintree platform...');
@@ -242,40 +289,53 @@ function initializeStore() {
       platform: Platform.BRAINTREE,
       options: braintreeOptions
   }])
-  .then(() => {
-      console.log('Braintree platform initialized.');
-      // Enable payment buttons in the UI
-      const payButton = document.getElementById('pay-button'); // Ensure this exists
-      if (payButton) payButton.disabled = false;
-      setAppState('BASKET', 'Ready to pay.'); // Update UI state
-  })
-  .catch(err => {
-      console.error('Braintree initialization failed:', err);
-      setAppState('BASKET', 'Error initializing payment.'); // Update UI state
+  .then((errors) => {
+      if (errors && errors.length > 0) {
+          console.error('Braintree initialization failed:', errors[0]);
+          setStatus(`Error initializing Braintree: ${errors[0].message}`);
+          setAppState('BASKET', 'Error initializing payment.');
+      } else {
+          console.log('Braintree platform initialized.');
+          setStatus('Ready to pay.');
+          setAppState('BASKET', 'Ready to pay.'); // Update UI state
+      }
   });
 }
 
-// Make sure setAppState is defined globally or accessible
-// let appState = 'LOADING';
-// let appMessage = 'Initializing...';
-// function setAppState(state, message) { ... refreshUI(); } // From braintree-refreshUI.js
+// Ensure setStatus and setAppState are defined (should be in initial script or refreshUI script)
+if (typeof setStatus !== 'function') { setStatus = (message) => console.log('[Status] ' + message); }
+if (typeof setAppState !== 'function') { setAppState = (state, message) => { console.log(`[State] ![{state}: ](<html>
+<head><title>405 Not Allowed</title></head>
+<body bgcolor="white">
+<center><h1>405 Not Allowed</h1></center>
+</body>
+</html> "{state}: ")
+{message}`); refreshUI(); }; } // Link to refreshUI
+
 ```
 {% endcode %}
 
-We add the standard purchase events handlers for when the transaction is `approved` and the receipt `verified`, with the [`store.when()`](https://github.com/j3k0/cordova-plugin-purchase/blob/v13/api/classes/CdvPurchase.Store.md#when) block.
+**Explanation:**
+*   **Lines 11-15:** Define configuration constants (replace placeholders!).
+*   **Lines 21-25:** (Optional) Instantiate Iaptic helper if using it for token/validation.
+*   **Lines 28-60:** Define `braintreeOptions`. The `clientTokenProvider` (Lines 30-57) is the recommended way to authorize the client SDK. It fetches a short-lived token from your server. Alternatively, uncomment and use `tokenizationKey` (Line 59) for sandbox testing. Optional Apple Pay/Google Pay/3DS settings can be added here.
+*   **Lines 63-66:** **Crucially**, set `store.validator` to your backend endpoint that processes Braintree nonces. Without this, payments cannot be completed.
+*   **Lines 69-91:** Set up `store.when()` listeners.
+    *   `.approved()`: Triggered when the Braintree SDK successfully generates a nonce. **You must call `transaction.verify()` here** to send the nonce to your validator.
+    *   `.verified()`: Triggered after your validator successfully processes the nonce (calls Braintree's `transaction.sale`) and returns a success response. Call `receipt.finish()` here and fulfill the order.
+    *   `.unverified()`: Handles validation failures reported by your server.
+    *   `.finished()`: Confirms the transaction is fully acknowledged by the plugin.
+    *   `.cancelled()`: Handles cancellations from the Drop-in UI (though the `requestPayment` promise `.cancelled()` is often more direct).
+*   **Lines 94-110:** Call `store.initialize()` to activate the Braintree adapter. Update UI state based on success or failure.
 
-In our call to [`store.initialize()`](https://github.com/j3k0/cordova-plugin-purchase/blob/v13/api/classes/CdvPurchase.Store.md#initialize), we add in the Braintree platform with its configuration.
+### 3. User Interface (`refreshUI`)
 
-In particular, it requires a [Client Token](https://developer.paypal.com/braintree/docs/guides/authorization/client-token) provider. For this example, we'll use the implementation provided by iaptic.
+Implement the `refreshUI` function to display the payment details and update the UI based on the payment state (`LOADING`, `BASKET`, `IN_PROGRESS`, `PAYMENT_INITIATED`, `PAYMENT_APPROVED`, `PAYMENT_FINISHED`).
 
-### User interface
-
-You are responsible for creating a user interface that presents the detail concerning the upcoming payment. Let's create a very simple interface.
-
-{% code lineNumbers="true" %}
+{% code title="www/js/index.js (refreshUI and state helpers)" lineNumbers="true" %}
 ```javascript
 // Global state variables (consider a more robust state management approach for larger apps)
-let appState = 'LOADING'; // Initial state
+let appState = 'LOADING'; // Initial state: LOADING, BASKET, IN_PROGRESS, PAYMENT_INITIATED, PAYMENT_APPROVED, PAYMENT_FINISHED
 let appMessage = 'Initializing Payment...';
 
 // Function to update the application's UI based on the current state
@@ -286,9 +346,17 @@ function refreshUI() {
   const payButtonEl = document.getElementById('pay-button'); // The pay button
 
   if (!appEl || !messagesEl || !paymentSectionEl || !payButtonEl) {
-    console.error('Required UI elements not found in index.html!');
-    return;
+    console.error('Required UI elements not found in index.html for refreshUI!');
+    // Attempt to create elements if missing (basic fallback for snippets)
+    if (!messagesEl && appEl) appEl.insertAdjacentHTML('afterbegin', '<div id="messages"></div>');
+    if (!paymentSectionEl && appEl) appEl.insertAdjacentHTML('beforeend', '<div id="payment-section"><button id="pay-button">Pay</button></div>');
+    // Re-query after potential creation
+    messagesEl = document.getElementById('messages');
+    paymentSectionEl = document.getElementById('payment-section');
+    payButtonEl = document.getElementById('pay-button');
+    if (!messagesEl || !paymentSectionEl || !payButtonEl) return; // Still missing, give up
   }
+
 
   console.log(`Refreshing UI - State: ![{appState}, Message: ](<html>
 <head><title>405 Not Allowed</title></head>
@@ -298,14 +366,16 @@ function refreshUI() {
 </html> "{appState}, Message: ")
 {appMessage}`);
 
-  // Update status message
+  // Update status message display
   messagesEl.textContent = appMessage;
+  messagesEl.style.color = appState.startsWith('Error') || appState.includes('Failed') ? 'red' : '#555';
 
   // Show/hide/update elements based on state
   switch (appState) {
     case 'LOADING':
       paymentSectionEl.style.display = 'none'; // Hide payment section while loading
       payButtonEl.disabled = true;
+      payButtonEl.textContent = 'Loading...';
       break;
 
     case 'BASKET':
@@ -314,9 +384,9 @@ function refreshUI() {
       payButtonEl.textContent = 'Pay Now';
       break;
 
-    case 'IN_PROGRESS':
-    case 'PAYMENT_INITIATED':
-    case 'PAYMENT_APPROVED':
+    case 'IN_PROGRESS': // General processing state
+    case 'PAYMENT_INITIATED': // Drop-in UI shown
+    case 'PAYMENT_APPROVED': // Nonce received, verifying server-side
       paymentSectionEl.style.display = 'block';
       payButtonEl.disabled = true; // Disable button during processing
       payButtonEl.textContent = 'Processing...';
@@ -326,14 +396,13 @@ function refreshUI() {
       paymentSectionEl.style.display = 'block';
       payButtonEl.disabled = true; // Payment complete, disable button
       payButtonEl.textContent = 'Payment Complete!';
-      // Optionally hide the payment section or show a success message elsewhere
+      // Optionally hide the payment section or show a different success message
       // paymentSectionEl.innerHTML = '<p>Thank you for your purchase!</p>';
       break;
 
-    default:
-      // Handle unknown states or errors shown in messagesEl
+    default: // Includes error states if message indicates error
       paymentSectionEl.style.display = 'block';
-      payButtonEl.disabled = true;
+      payButtonEl.disabled = true; // Keep disabled on error until resolved
       payButtonEl.textContent = 'Pay Now';
       break;
   }
@@ -347,40 +416,41 @@ function setAppState(newState, message) {
   refreshUI(); // Update the UI immediately after state change
 }
 
-// Initial UI state setup on load (called after initializeStore potentially)
-// Ensure this is called appropriately, e.g., after deviceready and potentially after initializeStore resolves/fails
+// Initial UI state setup on load
 document.addEventListener('deviceready', () => {
     // Set initial state before store initialization might finish
     setAppState('LOADING', 'Initializing Payment...');
 }, false);
+
+// Ensure refreshUI is called initially if needed elsewhere
+// refreshUI(); // Call if needed outside of setAppState
 ```
 {% endcode %}
 
-This is a primitive state machine that displays the basket, then the progress of the payment flow. While in the basket, the "Proceed to Payment" button calls the `pay()` function.
+**Explanation:**
+*   This function manages showing/hiding elements and enabling/disabling the "Pay Now" button based on the `appState` variable.
+*   The `setAppState` helper updates the state and calls `refreshUI`.
 
-Let's implement that function.
+### 4. Payment Request (`requestBraintreePayment`)
 
-### Payment request
+Implement the function triggered by your "Pay Now" button. This function uses `store.requestPayment()` to initiate the Braintree flow.
 
-{% code lineNumbers="true" %}
+{% code title="www/js/index.js (requestBraintreePayment)" lineNumbers="true" %}
 ```javascript
-function pay() {
+// Make this function globally accessible if called from HTML onclick
+window.requestBraintreePayment = function() {
   // Ensure CdvPurchase and its members are available
-  if (!window.CdvPurchase) {
+  if (!window.CdvPurchase || !window.CdvPurchase.store) {
     console.error('CdvPurchase is not defined.');
     setAppState('BASKET', 'Error: Payment plugin not loaded.');
     return;
   }
   const { store, Platform, ErrorCode } = CdvPurchase;
 
-  // --- Payment Details ---
-  const GADGET_ID = 'REAL_GOOD'; // Example item ID
-  const GADGET_TITLE = '1x Real Good';
-  const GADGET_PRICE_MICROS = 5990000; // $5.99
-  const DELIVERY_ID = 'DELIVERY_STD';
-  const DELIVERY_TITLE = 'Standard Delivery';
-  const DELIVERY_PRICE_MICROS = 4000000; // $4.00
-  const TOTAL_AMOUNT_MICROS = GADGET_PRICE_MICROS + DELIVERY_PRICE_MICROS; // $9.99
+  // --- Payment Details (Example) ---
+  const GADGET_ID = 'awesome_gadget_01';
+  const GADGET_TITLE = 'Awesome Gadget';
+  const GADGET_PRICE_MICROS = 19990000; // $19.99
   const CURRENCY = 'USD';
 
   // --- Optional User/Billing Info ---
@@ -393,31 +463,29 @@ function pay() {
     postalCode: '60654',
     countryCode: 'US', // 2-letter ISO code
     // phoneNumber: '15551234567', // Optional
-    // email: 'john.doe@example.com' // Optional, can also be passed at top level
   };
   const userEmail = 'john.doe@example.com'; // Optional
 
-  // --- UI Update ---
-  setAppState('IN_PROGRESS', 'Processing payment...'); // Update UI state
+  // --- Update UI ---
+  setAppState('IN_PROGRESS', 'Initiating payment...'); // Update UI state
 
-  // --- Create Payment Request ---
+  // --- Create and Execute Payment Request ---
   store.requestPayment({
     // Required fields
     platform: Platform.BRAINTREE,
     items: [{
       id: GADGET_ID,
       title: GADGET_TITLE,
-      pricing: { priceMicros: GADGET_PRICE_MICROS } // Currency inferred from top level
-    }, {
-      id: DELIVERY_ID,
-      title: DELIVERY_TITLE,
-      pricing: { priceMicros: DELIVERY_PRICE_MICROS }
+      pricing: {
+        priceMicros: GADGET_PRICE_MICROS,
+        // Currency can be inferred from top level if items don't specify
+      }
     }],
-    amountMicros: TOTAL_AMOUNT_MICROS, // Total amount
+    amountMicros: GADGET_PRICE_MICROS, // Total amount for the request
     currency: CURRENCY,
 
     // Optional fields
-    description: GADGET_TITLE, // Description shown in some payment flows
+    description: `Payment for ${GADGET_TITLE}`, // Shown in some payment flows
     billingAddress: billingInfo,
     email: userEmail,
 
@@ -427,34 +495,49 @@ function pay() {
     setAppState('BASKET', 'Payment cancelled.');
   })
   .failed(error => {
-    console.error('Braintree payment failed:', error);
+    console.error('Braintree payment request failed:', error);
     setAppState('BASKET', `Payment failed: ${error.message}`);
   })
   .initiated(transaction => {
-    // Braintree Drop-In UI is likely presented now
-    console.log(`Transaction initiated (Drop-In shown): ${transaction.transactionId}`);
+    // Braintree Drop-In UI is likely presented now, or payment flow started.
+    console.log(`Transaction initiated (UI shown?): ${transaction.transactionId}`);
     setAppState('PAYMENT_INITIATED', 'Please complete payment...');
   })
   .approved(transaction => {
-    // Nonce received from Braintree SDK, needs server processing
-    console.log(`Payment approved by Braintree SDK (Nonce: ${transaction.transactionId}). Verifying...`);
+    // Nonce received from Braintree SDK, needs server processing.
+    // The 'initializeStoreAndSetupListeners' function should have registered
+    // a store.when().approved() listener that calls transaction.verify().
+    // This promise chain primarily handles UI flow and initiation errors.
+    console.log(`Payment approved by Braintree SDK (Nonce: ${transaction.transactionId}). Verification should be in progress...`);
     setAppState('PAYMENT_APPROVED', 'Payment approved. Verifying with server...');
-    // The initializeStore setup should handle calling transaction.verify() here
   })
   .finished(transaction => {
-    // This is called AFTER successful verification AND finish()
-    console.log(`Payment finished and acknowledged: ${transaction.transactionId}`);
-    // Fulfillment should have happened based on the 'verified' state.
-    // setAppState is likely already 'PAYMENT_FINISHED' from the verify handler.
+    // This is called AFTER successful verification AND finish() in the event listener.
+    // The UI state should already be 'PAYMENT_FINISHED' set by the .verified listener.
+    console.log(`Payment finished and acknowledged (from promise): ${transaction.transactionId}`);
   });
 }
 
-// Make sure setAppState is defined globally or accessible
-// let appState = 'LOADING';
-// let appMessage = 'Initializing...';
-// function setAppState(state, message) { ... refreshUI(); } // From braintree-refreshUI.js
-
+// Ensure setAppState is defined globally or accessible
+if (typeof setAppState !== 'function') { setAppState = (state, message) => { console.log(`[State] ![{state}: ](<html>
+<head><title>405 Not Allowed</title></head>
+<body bgcolor="white">
+<center><h1>405 Not Allowed</h1></center>
+</body>
+</html> "{state}: ")
+{message}`); refreshUI(); }; }
 ```
 {% endcode %}
 
-Let's build and test that!
+**Explanation:**
+*   **Lines 10-29:** Define payment details (items, total amount, currency) and optional billing/user info.
+*   **Line 32:** Update UI state to show processing.
+*   **Lines 35-54:** Call `store.requestPayment()` with `platform: Platform.BRAINTREE` and the payment details.
+*   **Lines 55-end:** Chain promise handlers to manage the UI state during the payment flow:
+    *   `.cancelled()`: User closed the Drop-in UI.
+    *   `.failed()`: An error occurred *initiating* the payment request.
+    *   `.initiated()`: The Braintree Drop-in UI has likely been presented.
+    *   `.approved()`: The Braintree SDK returned a nonce; verification is now happening via the `store.when().approved()` listener setup earlier.
+    *   `.finished()`: Called after the entire flow (including verification and `finish()`) is complete.
+
+With these pieces in place, your app can initialize Braintree, display payment options, request a payment, and handle the nonce processing via your backend validator.

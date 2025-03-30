@@ -1,103 +1,32 @@
 # Consumable on Google Play
 
-This use case explains how to implement a consumable product (like virtual currency or extra lives) on Android using Google Play.
+This use case explains how to implement a **consumable** product (like virtual currency or extra lives) on Android using the Google Play platform and `cordova-plugin-purchase` v13+.
+
+## 1. Platform Setup
+
+First, ensure your Google Play Console, application build, and test environment are correctly configured for Google Play Billing.
 
 !INCLUDE "../sections/setup-googleplay.md"
 
-## Initialization
+## 2. Initialization & UI
 
-We use the generic initialization structure and provide specific implementations for rendering the UI and granting the consumable item (e.g., coins).
+Next, set up the basic JavaScript to initialize the plugin, register your consumable product, and display its information and the user's balance.
 
 !INCLUDE "../sections/consumable-generic-initialization.md"
+*   **Note:** Replace the placeholder product ID (`'consumable1'`) in the code with your actual Google Play Product ID. Adapt the `grantCoins` function and UI rendering (`refreshUI`) to match your specific consumable item. Remember to use secure storage instead of `localStorage` for balances in production. Also, update the `store.register` call within the included code to specify `Platform.GOOGLE_PLAY`.
 
-```javascript
-// --- Specific Implementations for Consumable Coins ---
+## 3. Purchase Flow
 
-// Example: Store balance in localStorage (INSECURE - use SecureStorage or backend!)
-let userCoinBalance = 0;
-const COIN_BALANCE_KEY = 'userCoinBalance';
-const COINS_PER_PURCHASE = 100; // Amount granted by MY_CONSUMABLE_ID
-
-function loadBalance() {
-    try {
-        userCoinBalance = parseInt(window.localStorage.getItem(COIN_BALANCE_KEY) || '0');
-    } catch (e) {
-        log('Error loading balance: ' + e);
-        userCoinBalance = 0;
-    }
-}
-function saveBalance() {
-    try {
-        window.localStorage.setItem(COIN_BALANCE_KEY, userCoinBalance.toString());
-    } catch (e) {
-        log('Error saving balance: ' + e);
-    }
-}
-
-// This function updates the UI based on the coin balance
-function renderUI() {
-    const messagesEl = document.getElementById('messages');
-    if (messagesEl) messagesEl.textContent = 'Store ready.'; // Clear status message
-
-    const balanceEl = document.getElementById('balance');
-    if (balanceEl) {
-        balanceEl.textContent = 'Coins: ' + userCoinBalance;
-    }
-
-    // Re-render product display
-    const product = CdvPurchase.store.get('consumable1_gp'); // Use your actual Google Play Product ID
-    if (product) renderProduct(product);
-}
-
-// Function to grant the consumable item (coins)
-function grantCoins(amount) {
-    log(`Granting ${amount} coins.`);
-    userCoinBalance += amount;
-    saveBalance(); // Persist the new balance
-    renderUI(); // Update the displayed balance
-}
-
-// function renderProduct(product) { ... }
-// function requestPurchase(platform, productId, offerId) { ... }
-// function updateMessages(text) { ... }
-// function log(msg) { ... }
-
-// --- Final Setup ---
-
-// Re-register product with correct platform
-function initStore() {
-    const { store, ProductType, Platform } = CdvPurchase;
-    // ... other init steps from included file, excluding the generic registration...
-
-    store.register({
-        id: 'consumable1_gp', // Use your actual Google Play Product ID
-        type: ProductType.CONSUMABLE,
-        platform: Platform.GOOGLE_PLAY
-    });
-
-    // *** Setup Validator (Recommended) ***
-    // store.validator = "YOUR_VALIDATOR_URL";
-
-    // ... rest of initStore from included file (event listeners, initialize call) ...
-}
-
-// Load initial balance and render UI on device ready
-document.addEventListener('deviceready', () => {
-    loadBalance();
-    renderUI();
-}, false);
-```
-
-## Purchase Flow
-
-The core purchase flow logic (`approved`, `verified`, `finished`) is in the included generic section. For Google Play consumables:
-
-1.  **Granting the Item:** The `grantCoins` function (called after `approved` without validation, or after `verified` with validation) adds the coins to the user's balance and saves it.
-2.  **Finishing/Consuming:** The `transaction.finish()` or `receipt.finish()` call consumes the purchase on Google Play via the Billing Library's `consumeAsync`, allowing it to be purchased again.
-
-!INCLUDE "../sections/receipt-validation-reminder.md"
-*(Note: Validation adds a layer of security against replay attacks or fraudulent claims, even for consumables, especially if the balance is important or synced server-side).*
-
-## Android Specific Notes
+Implement the logic to handle the purchase process when the user taps the "Buy" button. This involves initiating the order and handling the `approved`, `verified` (optional but recommended), and `finished` events to grant the item and **consume** the purchase using `transaction.finish()`.
 
 !INCLUDE "../sections/consumable-android.md"
+
+## 4. Receipt Validation (Recommended)
+
+Validating receipts server-side prevents fraud and ensures purchases are legitimate before granting items, even for consumables.
+
+!INCLUDE "../sections/receipt-validation-reminder.md"
+
+## 5. Testing
+
+Follow the specific testing procedures for Google Play (signed release build, testing tracks, license tester accounts) outlined in the platform-specific purchase flow section above.

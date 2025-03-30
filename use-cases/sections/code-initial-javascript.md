@@ -1,98 +1,104 @@
+This section provides the minimal JavaScript foundation needed to start using the `cordova-plugin-purchase` plugin in your `www/js/index.js` file (or equivalent).
 
-We will now create a new JavaScript file and load it from the HTML. The code below will initialize the plugin.
-
-{% code lineNumbers="true" %}
+{% code title="www/js/index.js" lineNumbers="true" %}
 ```javascript
-// Wait for Cordova to be ready
+// Wait for Cordova's deviceready event
 document.addEventListener('deviceready', onDeviceReady, false);
 
 function onDeviceReady() {
   console.log('Device is ready.');
+  setStatus('Device ready.'); // Update UI status
 
-  // Check if the CdvPurchase plugin is available
+  // --- Essential Plugin Check ---
+  // Verify that the CdvPurchase namespace and store object are available.
   if (!window.CdvPurchase || !window.CdvPurchase.store) {
-      console.error('CdvPurchase plugin is not available. Ensure it is installed and loaded correctly.');
-      document.getElementById('app').innerHTML = 'Error: Purchase plugin not found.';
-      return;
+    const msg = 'CdvPurchase plugin is not available. Ensure it is installed and loaded correctly.';
+    console.error(msg);
+    setStatus('ERROR: ' + msg);
+    // Stop further initialization if the plugin isn't found.
+    return;
   }
 
-  // Alias the store object for easier access
+  // --- Basic Setup (Before Initialization) ---
   const { store, LogLevel, ErrorCode } = CdvPurchase;
-  console.log('CdvPurchase.store object found, version ' + store.version);
+  console.log('CdvPurchase.store available. Version ' + store.version);
 
-  // Optional: Set the verbosity level for debugging
-  // LogLevel.DEBUG provides the most detailed logs
+  // Set the desired verbosity level for the plugin's logger.
+  // LogLevel.DEBUG provides the most detailed logs, useful for development.
+  // Use LogLevel.INFO or LogLevel.WARNING for production.
   store.verbosity = LogLevel.DEBUG;
 
-  // Setup a global error handler for the store
-  store.error(function(error) {
-      console.error('STORE ERROR: Code=' + error.code + ' Message=' + error.message);
-      // Display the error to the user in a dedicated element
-      const errorEl = document.getElementById('error-display'); // Ensure this element exists in your HTML
-      if (errorEl) {
-          errorEl.textContent = 'Error: ' + error.message;
-          // Optionally clear the error after a few seconds
-          setTimeout(() => { if (errorEl.textContent === 'Error: ' + error.message) errorEl.textContent = ''; }, 8000);
-      }
+  // Register a global error handler for the store.
+  // This catches general plugin errors (initialization, setup, etc.).
+  // Purchase-specific errors are typically handled via promises/callbacks.
+  store.error(error => {
+    console.error('STORE ERROR: Code=' + error.code + ' Message=' + error.message);
+    setStatus('ERROR: ' + error.message);
   });
 
-  // Setup a listener for when the store is ready
-  // This guarantees that initialize() has completed successfully
-  store.ready(function() {
-    console.log("CdvPurchase store is ready.");
-    // Initial UI refresh after the store is ready
-    refreshUI();
-  });
+  // --- Defer Specific Initialization ---
+  // Call the main initialization function for your specific use case.
+  // This function (defined elsewhere in your code or the tutorial)
+  // will handle product registration, validator setup, event listeners,
+  // and calling store.initialize().
+  initializeStoreAndSetupListeners();
 
-  // Initialize the store and related components
-  initializeStore();
-
-  // Perform an initial UI refresh (might show loading states)
+  // Initial UI refresh (might show loading states until products load)
   refreshUI();
 }
 
-function initializeStore() {
-  console.log('Calling initializeStore()...');
-  const { store } = CdvPurchase; // Get store instance again
+// --- Helper Functions (Example) ---
 
-  // TODO: Register products using store.register([...])
-  console.log('Registering products...');
-  // store.register([...]); // Add your product registrations here
-
-  // TODO: Set the validator URL or function
-  console.log('Setting validator...');
-  // store.validator = "YOUR_VALIDATOR_URL";
-
-  // TODO: Setup event listeners using store.when()...
-  console.log('Setting up event listeners...');
-  // store.when()...
-
-  // TODO: Call store.initialize([...platforms])
-  console.log('Calling store.initialize()...');
-  // store.initialize([...]);
-}
-
-function refreshUI() {
-  console.log('Calling refreshUI()...');
-  // TODO: Implement UI updates based on product/purchase status
-  // This function will be called by event listeners and after initialization.
-  const appEl = document.getElementById('app');
-  if (appEl) {
-      // Example: Display loading state or initial content
-      // appEl.innerHTML = '<p>Store is initializing...</p>';
-  } else {
-      console.error('App element not found for UI refresh.');
+// Function to update a status message element in the HTML
+function setStatus(message) {
+  console.log('[Status] ' + message);
+  const statusEl = document.getElementById('messages'); // Assumes an element with id="messages" exists
+  if (statusEl) {
+    statusEl.textContent = message;
   }
 }
+
+// --- Placeholder Functions (to be implemented by specific use-case guides) ---
+
+// This function will be implemented in specific guides to register products,
+// set the validator, setup 'when' listeners, and call store.initialize().
+function initializeStoreAndSetupListeners() {
+  console.log('Placeholder: initializeStoreAndSetupListeners() called.');
+  // Example structure (implement in specific guides):
+  // const { store, Platform, ProductType } = CdvPurchase;
+  // store.register([...]);
+  // store.validator = '...';
+  // store.when()...
+  // store.initialize([...]).then(...);
+  setStatus('Store setup needs implementation.');
+}
+
+// This function will be implemented in specific guides to update the UI
+// based on product data, ownership status, etc.
+function refreshUI() {
+  console.log('Placeholder: refreshUI() called.');
+  // Example structure (implement in specific guides):
+  // const product = CdvPurchase.store.get(...);
+  // Update HTML elements based on product.title, product.pricing, product.owned, etc.
+}
+
+// Make purchase function global if called directly from HTML onclick
+// window.myPurchaseFunction = function() { ... }
+
 ```
 {% endcode %}
 
-Here's a little explanation:
+**Explanation:**
 
-**Line 1**, it's important to wait for the "deviceready" event before using cordova plugins.
+1.  **Wait for `deviceready` (Line 2):** Essential first step for any Cordova plugin interaction.
+2.  **Plugin Check (Lines 8-14):** Verifies that `CdvPurchase.store` is available before proceeding.
+3.  **Basic Setup (Lines 17-29):**
+    *   Aliases common plugin members (`store`, `LogLevel`, etc.) for convenience.
+    *   Sets `store.verbosity` to `DEBUG` for detailed logging during development.
+    *   Sets up a global `store.error` handler to catch and log general plugin errors.
+4.  **Deferred Initialization (Line 35):** Calls `initializeStoreAndSetupListeners()`. This function is intentionally left as a placeholder here. Specific use-case guides (like setting up subscriptions or consumables) will provide the implementation for this function, which will include `store.register()`, `store.validator = ...`, `store.when()...`, and `store.initialize()`.
+5.  **Initial UI Refresh (Line 38):** Calls `refreshUI()`, another placeholder function that specific guides will implement to display product information and purchase status.
+6.  **Helper Functions (Lines 43-51):** Includes a basic `setStatus` function as an example for updating the UI.
+7.  **Placeholders (Lines 54-72):** Empty definitions for `initializeStoreAndSetupListeners` and `refreshUI` emphasize that their specific logic depends on the use case and will be provided in subsequent steps of the tutorials.
 
-**Lines 5-8**, we check if the plugin was correctly loaded.
-
-**Lines 11-13**, we setup an error handler. It just logs errors to the console.
-
-> Whatever your setup is, you should make sure this runs as soon as the javascript application starts. You have to be ready to handle IAP events as soon as possible.
+This minimal base ensures the plugin is loaded and basic logging/error handling is in place before diving into platform-specific or product-type-specific configurations in the main use-case guides.

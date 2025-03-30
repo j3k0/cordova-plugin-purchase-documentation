@@ -1,11 +1,11 @@
 ### Purchase Flow (Android/Google Play Subscription)
 
-This section details the purchase logic for auto-renewing subscriptions on Android using Google Play. Handling subscriptions reliably requires verification and acknowledgment.
+This section details the purchase logic for **auto-renewing subscriptions** on **Android using Google Play**, assuming you have completed the [generic subscription initialization](subscription-generic-initialization.md). Handling subscriptions reliably requires verification and **acknowledgment** via `transaction.finish()`.
 
-**Step 1: Implement the Subscription Purchase Action**
+**Step 1: Implement the Subscription Purchase Action (`subscribe`)**
 
-*   **What:** Fill in the `window.subscribe` function (defined as a stub previously) to call `store.order()` with the selected offer and platform.
-*   **Why:** This initiates the subscription purchase or upgrade/downgrade flow via the Google Play Billing library when the user clicks the "Subscribe" or "Switch Plan" button.
+*   **What:** Replace the placeholder `window.subscribe` function (from the generic initialization) to call `offer.order()` specifically for the Google Play platform. Include logic for handling potential subscription upgrades or downgrades using `additionalData`.
+*   **Why:** This initiates the subscription purchase or change flow via the Google Play Billing library when the user clicks the "Subscribe" or "Switch Plan" button.
 
 Replace the placeholder `window.subscribe` function in `www/js/index.js`:
 
@@ -15,7 +15,7 @@ Replace the placeholder `window.subscribe` function in `www/js/index.js`:
 // Make this function globally accessible for the button's onclick
 window.subscribe = function(productId, platform, offerId) {
     console.log(`Subscribe button clicked for ${productId}, offer ${offerId} on ${platform}`);
-    const { store, Platform, ProductType } = CdvPurchase; // Get necessary enums
+    const { store, Platform, ProductType, GooglePlay } = CdvPurchase; // Get necessary enums
 
     // Ensure we're acting on the correct platform
     if (platform !== Platform.GOOGLE_PLAY) {
@@ -28,139 +28,156 @@ window.subscribe = function(productId, platform, offerId) {
 
     if (offer) {
         console.log(`Initiating order for offer: ${offer.id} on platform ${offer.platform}`);
-        // Optional: Update UI to indicate processing
-        // setState({ isPurchasing: true });
+        setStatus('Initiating subscription...');
 
-        // Prepare additional data for Google Play, especially for upgrades/downgrades
+        // --- Prepare Additional Data for Google Play ---
+        // This is crucial for upgrades/downgrades within the same group.
         const additionalData = {
             googlePlay: {
-                // accountId: store.getApplicationUsername() ? Utils.md5(store.getApplicationUsername()) : undefined
-                // Optional: Let the plugin find the old purchase token if products are grouped
-                // Or specify manually if needed:
-                // oldPurchaseToken: 'EXISTING_PURCHASE_TOKEN_IF_UPGRADING',
-                // replacementMode: store.GooglePlay.ReplacementMode.CHARGE_PRORATED_PRICE // Example mode
+                // Optional: Provide obfuscated user identifiers for fraud prevention
+                // accountId: store.getApplicationUsername() ? Utils.md5(store.getApplicationUsername()) : undefined,
+                // profileId: '...' // If using multiple profiles per account
+
+                // --- Subscription Update Parameters ---
+                // The plugin attempts to find the 'oldPurchaseToken' automatically
+                // if the new product is in the same 'group' as an owned one.
+                // You can override or provide it manually if needed.
+                // oldPurchaseToken: 'EXISTING_PURCHASE_TOKEN_TO_REPLACE',
+
+                // Specify how the subscription change should occur.
+                // Default is typically IMMEDIATE_WITH_TIME_PRORATION if oldPurchaseToken is set.
+                // replacementMode: GooglePlay.ReplacementMode.DEFERRED, // Example: Change takes effect at next renewal
             }
         };
 
-        store.order(offer, additionalData)
+        // Automatically find old token if applicable (common use case)
+        const oldToken = store.findOldPurchaseToken(productId, product?.group);
+        if (oldToken && !additionalData.googlePlay.oldPurchaseToken) {
+            console.log(`Found existing subscription in group '${product?.group}'. Setting oldPurchaseToken for upgrade/downgrade.`);
+            additionalData.googlePlay.oldPurchaseToken = oldToken;
+            // You might set a default replacementMode here if desired, e.g.:
+            // additionalData.googlePlay.replacementMode = GooglePlay.ReplacementMode.WITH_TIME_PRORATION;
+        }
+
+        offer.order(additionalData)
             .then(result => {
-                if (result && result.code === store.ErrorCode.PAYMENT_CANCELLED) {
-                    console.log("User cancelled the Google Play subscription flow.");
-                    // setState({ isPurchasing: false });
-                } else if (result && result.isError) {
-                    console.error("Subscription order initiation failed: " + result.message);
-                    // setState({ isPurchasing: false, error: result.message });
+                // Promise resolves when the Google Play UI is dismissed.
+                if (result && result.isError) {
+                    setStatus(`Subscription failed: ${result.message}`);
                 } else {
-                    console.log("Google Play order initiated. Waiting for approval...");
+                    // Purchase flow started... status updated by listeners.
                 }
+                refreshUI();
             })
             .catch(err => {
                  console.error("Unexpected error during subscription order:", err);
-                 // setState({ isPurchasing: false, error: 'Unexpected error' });
+                 setStatus('Unexpected error during subscription.');
+                 refreshUI();
             });
 
     } else {
-        console.error(`Cannot subscribe: Product (${productId}) or Offer (${offerId}) not found or not loaded yet.`);
-        alert('Unable to subscribe. Product details might still be loading.');
+        console.error(`Cannot subscribe: Product (${productId}) or Offer (${offerId}) not found.`);
+        setStatus('Error: Unable to subscribe. Product details missing.');
     }
 }
+
+// Helper function (ensure this exists or add it)
+CdvPurchase.Store.prototype.findOldPurchaseToken = function(newProductId, group) {
+    if (!group) return undefined;
+    const potentialOldPurchase = this.verifiedPurchases.find(p => {
+        const pProduct = this.get(p.id, p.platform);
+        // Find an active, verified subscription in the same group, but not the one being purchased.
+        return p.platform === Platform.GOOGLE_PLAY
+            && pProduct?.type === ProductType.PAID_SUBSCRIPTION
+            && pProduct?.group === group
+            && p.id !== newProductId
+            && !p.isExpired;
+    });
+    return potentialOldPurchase?.purchaseId; // purchaseId holds the purchaseToken on Google Play
+}
 ```
-*   **Note:** The `additionalData` object is shown with placeholders. For subscription upgrades/downgrades on Google Play, you might need to set `oldPurchaseToken` and `replacementMode`. If your products share the same `group`, the plugin attempts to find the `oldPurchaseToken` automatically.
+*   **Explanation:**
+    *   We retrieve the specific `offer` to purchase.
+    *   We prepare `additionalData.googlePlay`. The `oldPurchaseToken` is needed when changing subscriptions within the same group. The plugin includes a helper `findOldPurchaseToken` to find the relevant token automatically if products are correctly grouped during registration.
+    *   `replacementMode` controls how the subscription change takes effect (immediately with proration, at next renewal, etc.). See [Google Play Replacement Modes](https://developer.android.com/google/play/billing/subscriptions#replacement-modes).
+    *   `offer.order(additionalData)` initiates the flow.
 
-**Step 2: Handle the "Approved" State -> Verify**
+**Step 2: Handle Purchase Events (`.approved`, `.verified`, `.finished`)**
 
-*   **What:** Add or modify the `.approved()` listener in `initializeStore` to call `transaction.verify()`.
-*   **Why:** Google Play indicates payment success, but you **must** verify the transaction with your validator (connected to the Google Play Developer API) to get the authoritative subscription status and expiry date.
+*   **What:** Add the subscription purchase lifecycle event listeners within the `store.when()` chain in your `initializeStoreAndSetupListeners` function.
+*   **Why:** These listeners handle the progression: approval by Google Play, mandatory verification via your validator (which communicates with the Google Play Developer API), and mandatory acknowledgment via `finish()`.
 
-Add/modify the `.approved()` handler within the `store.when()` chain in `initializeStore`:
+Add these handlers inside the existing `store.when()` call:
 
 ```javascript
-// Inside initializeStore() -> store.when() chain
+// Inside initializeStoreAndSetupListeners() -> store.when() chain
 
     .approved(transaction => {
         console.log(`Transaction ${transaction.transactionId} approved for ${transaction.products[0]?.id}.`);
+        setStatus('Purchase approved. Verifying...');
 
-        // Verification is REQUIRED for subscriptions on Android.
+        // Verification is REQUIRED for subscriptions on Android to get accurate status.
         if (store.validator) {
-            console.log('Verification required for subscription transaction: ' + transaction.transactionId);
-            // Optional: Update UI to indicate verification
-            // setState({ isVerifying: true });
             transaction.verify(); // Initiate verification
         } else {
              console.error("VALIDATOR REQUIRED: Cannot reliably manage subscriptions without receipt validation.");
-             alert("Error: Subscription cannot be processed without validation configuration.");
-             // Do NOT finish the transaction here.
+             setStatus("ERROR: Validator not configured.");
+             // Do NOT finish the transaction here without validation.
         }
     })
-    // Continue with .verified() and .finished()
-```
-
-**Step 3: Handle the "Verified" State -> Finish (Acknowledge)**
-
-*   **What:** Add or modify the `.verified()` listener. This runs after successful validation.
-*   **Why:** The `VerifiedReceipt` contains the true subscription status from Google's servers. Now you update your app state and **acknowledge** the purchase by calling `receipt.finish()` (or `transaction.finish()`). Acknowledgment is mandatory within 3 days for Google Play.
-
-Add/modify the `.verified()` handler within the `store.when()` chain:
-
-```javascript
-// Inside initializeStore() -> store.when() chain
-
     .verified(receipt => {
         console.log(`Receipt verified, contains ${receipt.collection.length} verified purchases.`);
-        // Optional: Update UI
-        // setState({ isVerifying: false });
+        setStatus('Purchase verified. Finishing...');
 
-        // Update UI based on verified data
-        renderUI(); // Ensure UI reflects the latest verified status
+        // The verified receipt contains the authoritative status from Google Play Developer API.
+        // The refreshUI() function (called below) should use store.verifiedPurchases or store.owned()
+        // to update the UI based on this validated data.
 
         // Finish (acknowledge) the transaction(s) in the receipt with Google Play.
+        // This is MANDATORY within 3 days for subscriptions.
         console.log(`Finishing verified receipt's source transaction(s): ${receipt.sourceReceipt.transactions.map(t=>t.transactionId).join(', ')}`);
         receipt.finish();
     })
-    // Continue with .finished()
-```
-
-**Step 4: Handle the "Finished" State**
-
-*   **What:** Add or modify the `.finished()` listener. Fires after successful acknowledgment via `finish()`.
-*   **Why:** Confirms Google Play has processed the acknowledgment. Useful for final UI updates or logging.
-
-Add/modify the `.finished()` handler within the `store.when()` chain:
-
-```javascript
-// Inside initializeStore() -> store.when() chain
-
     .finished(transaction => {
+        // This confirms the acknowledgement call was successful.
         console.log(`Transaction ${transaction.transactionId} finished (acknowledged) for ${transaction.products[0]?.id}.`);
-        // Subscription state should reflect verified data. Maybe clear any final loading states.
-        // setState({ isPurchasing: false, isVerifying: false });
-        renderUI(); // Refresh UI one last time if needed
+        setStatus('Subscription active!');
+        // Subscription state should reflect verified data. Refresh UI to be sure.
+        refreshUI();
+    })
+    .cancelled(transaction => {
+        console.log('Purchase Cancelled:', transaction.transactionId);
+        setStatus('Purchase cancelled.');
+        refreshUI();
     });
-
-// --- Final Initialization Call ---
-// Ensure this is still present at the end of initializeStore()
-store.initialize(...).then(...);
+    // Ensure the .productUpdated, .receiptUpdated listeners from the generic setup are still present
 ```
+*   **Explanation:**
+    *   `.approved()`: Triggers `transaction.verify()`. Validation is essential.
+    *   `.verified()`: The receipt is validated. The UI should be updated based on this (`refreshUI()` is called). Crucially, `receipt.finish()` is called to acknowledge the purchase with Google Play.
+    *   `.finished()`: Confirms acknowledgment. Update UI.
 
 ---
 
 **Build and Test (Android/Google Play Subscription)**
 
-Testing subscriptions on Google Play requires using the testing tracks and specific procedures:
+Testing subscriptions on Google Play requires using testing tracks and specific procedures:
 
-1.  **Create Release Build:** Sign your APK/AAB with your release keystore (`android-release.sh` or similar).
-2.  **Upload to Play Console:** Upload the build to **Internal testing** or **Closed testing**. Ensure your validator is configured and connected to the Google Play Developer API (see [Setup Step 9](!UNRESOLVED-LINK:./sections/setup-subscription-android-9-validation-server.md)). Add testers. Roll out.
-3.  **Prepare Test Device:** Use a physical device logged in *only* with a tester Google account. Install the app *from the Play Store* via the test link.
-4.  **Run & Monitor:** Launch the app, monitor with `adb logcat`.
-5.  **Test Subscription:**
-    *   Verify UI shows "Not Subscribed" initially, product details load.
+1.  **Create Release Build:** Sign your APK/AAB with your **release keystore**.
+2.  **Upload to Play Console:** Upload the build to **Internal testing** or **Closed testing**.
+3.  **Validator Setup:** Ensure your `store.validator` is configured and your validation server is connected to the **Google Play Developer API** using a Service Account key. This is mandatory for getting correct subscription status. See [Setup Guide - Step 9](sections/setup-subscription-android-9-validation-server.md).
+4.  **Add Testers:** Add your tester Google accounts to the License Testing list and the specific testing track in the Play Console.
+5.  **Prepare Test Device:** Use a physical device logged in **only** with a tester Google account. Install the app **from the Google Play Store** via the test link/invitation.
+6.  **Run & Monitor:** Launch the app, monitor logs with `adb logcat CordovaPurchase:V CordovaLog:V chromium:D *:S`.
+7.  **Test Subscription Purchase:**
+    *   Verify UI shows "Subscription: Inactive" initially, product details load.
     *   Tap "Subscribe".
-    *   The Google Play purchase sheet appears. It will mention test purchase behavior (e.g., quick renewals/expiries). Confirm the purchase.
+    *   The Google Play purchase sheet appears, mentioning test purchase behavior (e.g., short renewal cycles like 5 minutes). Confirm the purchase.
     *   Observe logs: `approved`, `Verification required...`, `Receipt verified...`, `Finishing...`, `finished`.
-    *   The UI (`renderUI`) should update based on the `verified` event data, showing "Subscribed" with the correct expiry date from the validator.
-    *   **Test Renewals:** Depending on the subscription duration set for testing in Play Console (e.g., 5 minutes), keep the app open or reopen it around the renewal time. You should observe new `approved` -> `verified` -> `finished` cycles as the subscription auto-renews in the test environment.
-    *   **Test Management:** Use `store.manageSubscriptions()` to open the Google Play subscription center and test cancellations or plan changes (if applicable). Changes should reflect after subsequent validation (`store.update()` or automatic checks).
+    *   The UI (`refreshUI`) should update based on the `verified` event data, showing "Subscription: ACTIVE" with the correct expiry date from the validator.
+8.  **Test Renewals:** Keep the app running or reopen it around the renewal time (e.g., after 5 minutes for test subscriptions). Observe new `approved` -> `verified` -> `finished` cycles in the logs as the subscription auto-renews in the test environment. The expiry date in the UI should update.
+9.  **Test Management:** Use `store.manageSubscriptions()` to open the Google Play subscription center. Test cancelling the subscription. After cancellation, `store.update()` or the next renewal attempt should reflect the change (e.g., `renewalIntent` becomes `LAPSE` in the `VerifiedPurchase` data from the validator).
 
 ---
 
-This covers the Android subscription flow. Key points are the necessity of a **validator connected to the Google Play Developer API** and **acknowledging** purchases via `finish()`.
+This covers the Android subscription flow. Key points are the necessity of a **validator connected to the Google Play Developer API** and **acknowledging** purchases via `transaction.finish()`.

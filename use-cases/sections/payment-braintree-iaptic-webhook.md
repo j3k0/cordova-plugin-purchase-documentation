@@ -1,6 +1,12 @@
-When an identifier user makes a purchase, iaptic sends a notification to your server with the details of the transaction.
+When using a validation service like Iaptic to process the Braintree payment nonce, the service typically handles the communication with the Braintree gateway (e.g., calling `transaction.sale`). After a successful transaction on Braintree's side, Iaptic (or your custom validator) will notify *your* application backend via a server-to-server webhook.
 
-Here's an example body content.
+This webhook informs your server that a specific payment (often linked to your internal user ID if provided during validation) has been successfully completed. Your server should then:
+
+1.  Verify the webhook's authenticity (e.g., check a secret signature provided by Iaptic).
+2.  Update the user's account status in your database (e.g., mark order as paid, grant access, credit virtual currency).
+3.  Respond to the webhook request with a success status (e.g., HTTP 200 OK) so the service knows it was received.
+
+Here's an **example** structure of what a webhook payload *might* look like (actual format depends on your validator service):
 
 ```js
 {
@@ -25,6 +31,4 @@ Here's an example body content.
 }
 ```
 
-You can process with enabling the feature for your user depending on this purchase status (in particular, check for a potential `cancelationReason` which would mean the purchase has been cancelled).
-
-Iaptic documentation related to server-to-server webhook contains all the appropriate details, which fall outside the scope of this guide.
+Handling this webhook correctly on your server is crucial for reliable order fulfillment after a Braintree payment processed via a validator. Consult your chosen validation service's documentation for specific details on their webhook format and security recommendations.

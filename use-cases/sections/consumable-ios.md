@@ -1,19 +1,19 @@
 ### Purchase Flow (iOS/App Store Consumable)
 
-This section details how to handle the purchase of a consumable item (like virtual currency or extra lives) on iOS/App Store after the initial setup.
+This section details how to handle the purchase of a consumable item (like virtual currency or extra lives) on iOS/App Store, assuming you have completed the [generic consumable initialization](consumable-generic-initialization.md). The process is very similar to Android, with `transaction.finish()` also serving to consume the item.
 
-**Step 1: Implement the Purchase Action**
+**Step 1: Implement the Purchase Action (`buyConsumable`)**
 
-*   **What:** Implement the `purchaseConsumable1` function (called by the "Buy Now!" button created in the generic section) to initiate the order using `store.order()`.
-*   **Why:** This triggers the App Store purchase process when the user clicks the button.
+*   **What:** Replace the placeholder `window.buyConsumable` function to call `offer.order()` for the App Store platform.
+*   **Why:** This triggers the App Store purchase process when the user clicks the "Buy Coins" button.
 
-Add this function to `www/js/index.js` (or replace the stub if you created one):
+Replace the placeholder `window.buyConsumable` function in `www/js/index.js`:
 
 ```javascript
 // In js/index.js
 
 // Make this function globally accessible for the button's onclick
-window.purchaseConsumable1 = function() {
+window.buyConsumable = function() {
     const productId = 'consumable1'; // Use the SAME product ID you registered
     console.log(`Purchase button clicked for consumable: ${productId}`);
     const { store, Platform } = CdvPurchase;
@@ -23,50 +23,47 @@ window.purchaseConsumable1 = function() {
 
     if (offer) {
         console.log(`Initiating order for consumable offer: ${offer.id}`);
-        // Optional: Update UI to show processing/loading state
-        // setState({ isPurchasing: true });
+        setStatus('Initiating purchase...');
 
-        store.order(offer)
+        offer.order()
             .then(result => {
-                if (result && result.code === store.ErrorCode.PAYMENT_CANCELLED) {
-                    console.log("User cancelled the purchase.");
-                    // setState({ isPurchasing: false });
-                } else if (result && result.isError) {
-                    console.error("Order initiation failed: " + result.message);
-                    // setState({ isPurchasing: false, error: result.message });
+                // Promise resolves when the App Store sheet is dismissed.
+                // Outcome handled by listeners.
+                if (result && result.isError) {
+                    setStatus(`Order failed: ${result.message}`);
                 } else {
-                    console.log("Order initiated. Waiting for approval...");
+                    // Purchase flow started... status updated by listeners.
                 }
+                refreshUI();
             })
             .catch(err => {
                  console.error("Unexpected error during consumable order:", err);
-                 // setState({ isPurchasing: false, error: 'Unexpected error' });
+                 setStatus('Unexpected error during purchase.');
+                 refreshUI();
             });
     } else {
         console.error(`Cannot purchase: Product (${productId}) or offer not found or not loaded yet.`);
-        alert('Unable to purchase. Product details might still be loading.');
+        setStatus('Error: Unable to purchase. Product details missing.');
     }
 }
 ```
 
-**Step 2: Handle the "Approved" State -> Verify (Recommended)**
+**Step 2: Handle Purchase Events (`.approved`, `.verified`, `.finished`)**
 
-*   **What:** Add an `.approved()` listener using `store.when()` in `initializeStore`. When a purchase is approved by Apple, we should ideally verify it.
-*   **Why:** Verification confirms the purchase's legitimacy with Apple's servers before granting the consumable item.
+*   **What:** Add the purchase lifecycle event listeners within the `store.when()` chain in your `initializeStoreAndSetupListeners` function (created during generic initialization).
+*   **Why:** These listeners handle the progression of the purchase: approval by App Store, optional verification, and finalization (consumption).
 
-Add this within the `store.when()` chain in `initializeStore`:
+Add these handlers inside the existing `store.when()` call:
 
 ```javascript
-// Inside initializeStore() -> store.when() chain
+// Inside initializeStoreAndSetupListeners() -> store.when() chain
 
     .approved(transaction => {
         console.log(`Transaction ${transaction.transactionId} approved for ${transaction.products[0]?.id}.`);
+        setStatus('Purchase approved. Verifying...');
 
         // Verification is recommended.
         if (store.validator) {
-            console.log('Verification pending for ' + transaction.transactionId);
-            // Optional: Update UI
-            // setState({ isVerifying: true });
             transaction.verify();
         } else {
              console.warn("Receipt validator not configured. Granting consumable without server verification.");
@@ -74,88 +71,63 @@ Add this within the `store.when()` chain in `initializeStore`:
              grantConsumableAndFinish(transaction);
         }
     })
-    // Add .verified() and .finished() next
-```
-
-**Step 3: Handle the "Verified" State (Recommended)**
-
-*   **What:** Add a `.verified()` listener. This runs after successful verification.
-*   **Why:** This is the secure point to grant the consumable item(s) to the user and then finish the transaction.
-
-Add this within the `store.when()` chain:
-
-```javascript
-// Inside initializeStore() -> store.when() chain
-
     .verified(receipt => {
         console.log(`Receipt verified for transaction ${receipt.transactions[0]?.transactionId}`);
-        // Optional: Update UI
-        // setState({ isVerifying: false });
+        setStatus('Purchase verified. Finishing...');
 
         // Find the relevant transaction
         const verifiedTransaction = receipt.transactions
-            .find(t => t.products[0]?.id === 'consumable1'); // Use your consumable product ID
+            .find(t => t.products[0]?.id === MY_CONSUMABLE_ID); // Use your consumable product ID
 
         if (verifiedTransaction) {
             // Grant the item and finish the transaction
             grantConsumableAndFinish(verifiedTransaction);
         } else {
             console.error("Verified receipt didn't contain the expected consumable transaction?");
-            // Handle this unexpected case - perhaps finish without granting?
-            // Or log an error. For safety, you might just finish to clear the queue.
+            // Finish anyway to clear the queue if possible
             receipt.finish();
         }
     })
-    // Add .finished() next
-```
-
-**Step 4: Handle the "Finished" State**
-
-*   **What:** Add a `.finished()` listener. This fires after `transaction.finish()` completes successfully.
-*   **Why:** Confirms the transaction is fully processed by the App Store. For consumables on iOS, calling `finish` *is* the consumption step.
-
-Add this within the `store.when()` chain:
-
-```javascript
-// Inside initializeStore() -> store.when() chain
-
     .finished(transaction => {
         console.log(`Transaction ${transaction.transactionId} finished (consumed) for ${transaction.products[0]?.id}.`);
-        // Item should already be granted. Maybe update UI to remove any 'processing' state.
-        // setState({ isPurchasing: false, isVerifying: false });
-        refreshGoldCoinsUI(); // Refresh the coin display
+        setStatus('Purchase complete! Coins granted.');
+        // Item should already be granted. Update UI to allow repurchase.
+        refreshUI(); // Refresh the coin display & product UI
+    })
+    .cancelled(transaction => {
+        console.log('Purchase Cancelled:', transaction.transactionId);
+        setStatus('Purchase cancelled.');
+        refreshUI();
     });
-
-// --- Final Initialization Call ---
-// Ensure this is still present at the end of initializeStore()
-store.initialize(...).then(...);
+    // Ensure the .productUpdated listener from the generic setup is still present
 ```
 
-**Step 5: Implement Consumable Granting and Finishing Logic**
+**Step 3: Implement Granting and Finishing Logic (`grantConsumableAndFinish`)**
 
-*   **What:** Create the `grantConsumableAndFinish` function. This function updates the user's balance (e.g., adds gold coins in `localStorage`) and then calls `transaction.finish()`.
-*   **Why:** This encapsulates the delivery of the virtual item. Calling `transaction.finish()` on iOS for a consumable effectively "consumes" it, removing it from the transaction queue and allowing it to be purchased again.
+*   **What:** Replace the placeholder `grantConsumableAndFinish` function. This function updates the user's balance (e.g., adds gold coins in `localStorage`) and then calls `transaction.finish()`.
+*   **Why:** This encapsulates the delivery of the virtual item. Calling `transaction.finish()` on iOS for a consumable effectively **consumes** it, removing it from the transaction queue and allowing it to be purchased again.
 
-Add this new function to `www/js/index.js`:
+Replace the placeholder `grantConsumableAndFinish` function in `www/js/index.js`:
 
 ```javascript
 // In js/index.js
 
+// Replace the placeholder function
 function grantConsumableAndFinish(transaction) {
     console.log(`Granting consumable for transaction ${transaction.transactionId}...`);
 
-    // Determine the quantity (usually 1 for App Store unless specified differently at order time, though less common for consumables)
-    const quantity = 1; // Assuming 1 unit per purchase for this example
-    const coinsToAdd = 10 * quantity; // Example: Grant 10 coins per purchase
+    // Determine the quantity (always 1 for App Store consumables)
+    const quantity = 1;
+    const coinsToAdd = COINS_GRANTED * quantity; // Use constant defined earlier
 
     // Add the item(s) to the user's inventory/balance
-    const currentCoins = parseInt(window.localStorage.getItem('goldCoins') || '0', 10);
-    window.localStorage.setItem('goldCoins', (currentCoins + coinsToAdd).toString());
+    const currentCoins = parseInt(window.localStorage.getItem(COIN_BALANCE_KEY) || '0', 10);
+    window.localStorage.setItem(COIN_BALANCE_KEY, (currentCoins + coinsToAdd).toString());
 
     console.log(`Added ${coinsToAdd} coins. New balance: ${currentCoins + coinsToAdd}`);
 
-    // Refresh the UI to show the new balance
-    refreshGoldCoinsUI();
+    // Refresh the UI immediately (optional, .finished listener also calls refreshUI)
+    // refreshUI();
 
     // Finish (consume) the transaction with the App Store.
     console.log(`Finishing transaction ${transaction.transactionId}...`);
@@ -167,21 +139,21 @@ function grantConsumableAndFinish(transaction) {
 
 **Build and Test (iOS/App Store Consumable)**
 
-Follow the same build and test procedure as outlined for non-consumables:
+Follow the testing procedure outlined for non-consumables on iOS:
 
 1.  **Prepare:** `cordova prepare ios`
-2.  **Open:** `open platforms/ios/*.xcodeproj`
+2.  **Open:** `open platforms/ios/*.xcodeproj` (or `.xcworkspace`)
 3.  **Configure Xcode:** Set signing, select physical test device.
 4.  **Prepare Sandbox Tester:** Sign out of App Store on device, have Sandbox Tester credentials ready.
 5.  **Run:** Build and run from Xcode (▶).
 6.  **Test:**
-    *   Verify initial UI shows product details and "Buy Now!" button.
-    *   Tap "Buy Now!".
+    *   Verify initial UI shows product details and "Buy Coins" button.
+    *   Tap "Buy Coins".
     *   Sign in with Sandbox Tester when prompted.
     *   Confirm purchase.
     *   Observe logs for `approved`, `verified` (if validator set), `Granting consumable...`, `Finishing transaction...`, `finished` messages.
     *   Verify the gold coin count increases in the UI.
-    *   The "Buy Now!" button should become available again shortly after the transaction finishes, allowing repurchase.
+    *   The "Buy Coins" button should remain available, allowing repurchase.
 
 ---
 

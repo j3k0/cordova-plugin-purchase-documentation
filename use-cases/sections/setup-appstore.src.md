@@ -1,9 +1,11 @@
 ## Setup for iOS AppStore
 
+This guide details the necessary steps to configure your development environment, Apple Developer account, and App Store Connect settings before implementing In-App Purchases for iOS or macOS using `cordova-plugin-purchase` v13+.
+
 {% hint style="warning" icon="warning" %}
 **Platform Interfaces Change Frequently!**
 
-The App Store Connect interface and Apple's requirements change often. This guide provides a general overview but may become outdated.
+The App Store Connect interface and Apple's requirements (like agreements) can change. This guide provides a general overview based on common practices but may become outdated.
 
 **Always refer to the official Apple documentation as the primary source:**
 *   [App Store Connect Help](https://help.apple.com/app-store-connect/)
@@ -12,67 +14,85 @@ The App Store Connect interface and Apple's requirements change often. This guid
 *   [Generating Keys (Shared Secret)](https://developer.apple.com/documentation/appstoreserverapi/creating_api_keys_to_use_with_the_app_store_server_api) (Needed for Receipt Validation)
 {% endhint %}
 
-This section covers the essential steps for setting up your iOS/macOS app for In-App Purchases with the Cordova plugin.
-
 ### 1. Install Dependencies
+
+Ensure you have the basic development tools installed (Node.js, Cordova CLI, Xcode).
 
 !INCLUDE "./install-dependencies.md"
 
-### 2. Create Cordova Project
+### 2. Create or Prepare Cordova Project
+
+Set up your Cordova project and add the iOS platform.
 
 !INCLUDE "setup-ios-2-create-cordova-project.md"
+*   **Important:** Ensure the `<widget id="...">` in your `config.xml` matches the Bundle ID you will use in App Store Connect.
 
-### 3. Setup AppStore Application & Agreements
+### 3. Setup AppStore Connect Application & Agreements
 
-*   **Apple Developer Account:** Ensure you have an active Apple Developer Program membership.
-*   **App Record:** Create an App Record for your application in [App Store Connect](https://appstoreconnect.apple.com). You'll need a unique Bundle ID.
-*   **Agreements, Tax, and Banking:** This is **critical**. Navigate to the "Agreements, Tax, and Banking" section in App Store Connect. Ensure all agreements, especially the "Paid Apps" agreement, are reviewed, accepted, and **Active**. Provide complete banking and tax information. Your app won't be able to process *any* purchases (even free trials or sandbox tests) if this section isn't fully set up and active.
-*   **Bundle ID:** Go to "App Information" for your app record. Verify the Bundle ID listed exactly matches the `id` attribute in your project's `config.xml` widget tag (`<widget id="com.yourcompany.yourapp" ...>`).
+Configure your app record and ensure all necessary legal agreements are active.
+
+*   **Apple Developer Account:** You need an active Apple Developer Program membership.
+*   **App Record:** Create an App Record for your application in [App Store Connect](https://appstoreconnect.apple.com) if you haven't already. Use the same Bundle ID as in your `config.xml`.
+*   **Agreements, Tax, and Banking:** This is **critical**.
+    1.  Go to the "Agreements, Tax, and Banking" section in App Store Connect.
+    2.  Review and accept all required agreements, especially the **"Paid Apps" agreement**.
+    3.  Ensure their status is **Active**.
+    4.  Provide complete banking and tax information as requested.
+    *   **Failure to complete this step will prevent all In-App Purchases (including sandbox tests) from working.**
+*   **App-Specific Shared Secret:** You will need this secret for server-side receipt validation.
+    1.  Go to your App Record in App Store Connect.
+    2.  Navigate to "App Information" -> "App-Specific Shared Secret" (or similar path).
+    3.  Generate or view the secret.
+    4.  **Copy and securely store this secret.** It will be needed for your validation server (e.g., in your Iaptic settings or custom backend).
 
 !INCLUDE "setup-ios-3-create-app-store-application.md"
+*(Review included content for consistency, especially regarding Shared Secret retrieval)*
 
 ### 4. Install Plugin and Configure Xcode Project
 
-Install the plugin:
-```bash
-cordova plugin add cordova-plugin-purchase
-```
+Install the purchase plugin and enable the necessary capability in Xcode.
 
-Then, configure your Xcode project:
-
-1.  Prepare the Cordova iOS platform:
+1.  **Install Plugin:**
+    ```bash
+    cordova plugin add cordova-plugin-purchase
+    ```
+2.  **Prepare iOS Platform:**
     ```bash
     cordova prepare ios
     ```
-2.  Open your project in Xcode (use the `.xcworkspace` file if it exists, otherwise the `.xcodeproj`):
-    ```bash
-    open platforms/ios/*.xcworkspace  # or .xcodeproj if no workspace
-    ```
-3.  Select your project target in the Project Navigator (the left sidebar).
-4.  Go to the **"Signing & Capabilities"** tab.
-5.  Ensure a valid "Team" is selected and signing (Development or Distribution) is configured.
-6.  Click **"+ Capability"** near the top.
-7.  Search for and add **"In-App Purchase"**. It should appear in the capabilities list.
+3.  **Configure Xcode:**
+    *   Open your project's `.xcworkspace` (or `.xcodeproj`) file located in `platforms/ios/`.
+    *   Select your project target in the Project Navigator (left sidebar).
+    *   Go to the **"Signing & Capabilities"** tab.
+    *   Ensure a valid "Team" is selected and signing is configured.
+    *   Click **"+ Capability"**.
+    *   Search for and add **"In-App Purchase"**. Verify it appears in the list.
 
 !INCLUDE "../images/xcode-capability-in-app-purchase.md"
 
-!INCLUDE "setup-ios-4-install-cordova-plugin.md"
-*Note: The included section primarily repeats the capability step, ensure it's consistent.*
-
 ### 5. Create In-App Products in App Store Connect
 
-You need to define each virtual item you want to sell within App Store Connect.
+Define the specific items (consumables, non-consumables, subscriptions) you want to sell.
 
 !INCLUDE "setup-ios-5-create-in-app-products.md"
+*   **Product IDs:** Note down the exact Product IDs you create; you'll need them for `store.register()`.
+*   **Cleared for Sale:** Ensure products are marked "Cleared for Sale".
+*   **Metadata:** Fill in all required metadata, including pricing, localization, and review information (even a placeholder screenshot is often needed for testing).
 
 ### 6. Create Sandbox Test Users
 
-Real purchases cost real money. For testing, you need **Sandbox Apple IDs**.
+Create special Apple IDs for testing purchases without real money.
 
 !INCLUDE "setup-ios-6-test-users.md"
+*   **Important:** Use these accounts *only* when prompted by your app during a purchase flow on a test device/build. Do not sign into the main App Store settings with them.
 
 ### 7. (Recommended) Setup Receipt Validation Service
 
-Server-side validation is essential for security and reliable subscription management.
+For secure and reliable purchase handling, especially for subscriptions and non-consumables, set up server-side validation.
 
-!INCLUDE "sections/setup-subscription-ios-7-validation-server.md"
+!INCLUDE "setup-subscription-ios-7-validation-server.md"
+*   **Remember:** You'll need the **App-Specific Shared Secret** obtained in Step 3 for your validation server.
+
+---
+
+After completing these steps, your Apple Developer account, App Store Connect record, and Xcode project should be configured to support In-App Purchases using `cordova-plugin-purchase`. You can now proceed to implement the purchase logic in your application code as shown in the specific [Use Cases](..).

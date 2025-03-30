@@ -1,123 +1,45 @@
-# Non-Renewing Subscription with Google Play
+# Non-Renewing Subscription on Google Play
 
-This use case explains how to implement a non-renewing subscription on Android using Google Play. Non-renewing subscriptions grant access for a fixed duration and need to be repurchased manually by the user.
+This use case explains how to implement a **non-renewing subscription** product (granting access for a fixed period) on Android using the Google Play platform and `cordova-plugin-purchase` v13+. Your application is responsible for managing the expiry date, and the purchase must be acknowledged.
 
+# Non-Renewing Subscription on Android
 
-## Initialization
+This guide demonstrates how to implement a **non-renewing subscription** product using the Google Play platform for Android applications.
 
-We adapt the generic subscription initialization. The key difference is handling the `ProductType.NON_RENEWING_SUBSCRIPTION` and managing the expiry date, which *might* be available locally on Android but is more reliably tracked via a validation server.
+On Google Play, non-renewing subscriptions are technically treated as **one-time products** (similar to consumables or non-consumables) that grant entitlement for a fixed duration. Unlike auto-renewing subscriptions, Google Play **does not automatically manage renewals or cancellations** for these products.
 
+Key characteristics on Google Play:
 
-```javascript
-// --- Specific Implementations for Non-Renewing Subscription Status ---
+*   Purchased as a one-time product via the standard purchase flow.
+*   Your application is responsible for determining the access duration based on the product purchased (e.g., a product with ID `1_month_access` grants 1 month of entitlement).
+*   Your application must calculate and track the expiry date based on the purchase time. Using a receipt validator is recommended to get an accurate purchase time.
+*   Purchases **must be acknowledged** within 3 days using `transaction.finish()` to prevent automatic refunds by Google.
+*   They **should not be consumed**, as consuming them would remove the entitlement record from Google's perspective (though your app manages the actual expiry).
+*   Users can typically purchase the product again (e.g., buy another month) once access expires, or potentially before expiry to extend access, depending on your app's logic for calculating the new expiry date.
 
-// Placeholder Product ID - REPLACE THIS
-const MY_NON_RENEWING_ID = 'non_renewing_1_month';
+In this guide, we will build a simple application that allows users to purchase a non-renewing subscription granting access for a specific period, managing the expiry date within the app.
 
-// Re-register with the correct type
-function initStore() {
-    const { store, ProductType, Platform } = CdvPurchase;
-    // ... other init steps from included file ...
+## 1. Platform Setup
 
-    store.register({
-        id: MY_NON_RENEWING_ID,
-        type: ProductType.NON_RENEWING_SUBSCRIPTION, // Set correct type
-        platform: Platform.GOOGLE_PLAY
-    });
-
-    // *** Setup Validator (RECOMMENDED for reliable expiry tracking) ***
-    // store.validator = "YOUR_VALIDATOR_URL";
-    // ... rest of initStore ...
-}
-
-// Update UI rendering for non-renewing specifics
-function renderProduct(product) {
-    const el = document.getElementById('product-' + product.id);
-    if (!el) return;
-    log('Rendering product: ' + product.id);
-
-    let html = `<h3>${product.title}</h3><p>${product.description}</p>`;
-    const offer = product.getOffer();
-
-    if (offer) {
-        offer.pricingPhases.forEach(phase => {
-            html += `<p>${phase.price} for ${CdvPurchase.Utils.formatDurationEN(phase.billingPeriod)}</p>`; // Non-renewing format
-        });
-
-        // Non-renewing can typically be purchased if not currently active (or allow stacking)
-        if (offer.canPurchase || !product.owned) { // Check ownership too
-            html += `<button onclick="requestPurchase('${product.platform}', '${product.id}', '${offer.id}')">Buy Access</button>`;
-        } else if (product.owned) {
-            html += `<p>(Currently Active)</p>`;
-            // Optionally show expiry from verified data
-            const purchase = CdvPurchase.store.findInVerifiedReceipts(product);
-            if (purchase?.expiryDate) {
-                 html += `<p>Expires: ${new Date(purchase.expiryDate).toLocaleDateString()}</p>`;
-            }
-             // No 'Manage Subscription' button for non-renewing
-        } else {
-            html += `<p>(Cannot Purchase)</p>`;
-        }
-    } else {
-        html += `<p>Loading offer...</p>`;
-    }
-    el.innerHTML = html;
-}
-
-// Update overall UI based on non-renewing status
-function renderUI() {
-    const statusEl = document.getElementById('subscription-status'); // Reusing ID for simplicity
-    if (!statusEl) return;
-    log('Rendering main UI...');
-
-    // ** Check ownership using store.owned() **
-    // Relies on validator if set, otherwise less reliable local data
-    const isActive = CdvPurchase.store.owned(MY_NON_RENEWING_ID);
-
-    if (isActive) {
-        const purchase = CdvPurchase.store.findInVerifiedReceipts({ id: MY_NON_RENEWING_ID });
-        let statusText = 'Access Active';
-        if (purchase?.expiryDate) {
-            statusText += ` (Expires: ${new Date(purchase.expiryDate).toLocaleDateString()})`;
-        } else {
-             // Try local receipt if no validator or verified data is missing expiry
-             const transaction = CdvPurchase.store.findInLocalReceipts({ id: MY_NON_RENEWING_ID });
-             if (transaction?.expirationDate) {
-                  statusText += ` (Expires: ${transaction.expirationDate.toLocaleDateString()} - Local Data)`;
-             }
-        }
-        statusEl.textContent = statusText;
-        // Unlock features
-    } else {
-        statusEl.textContent = 'Access Inactive';
-        // Lock features
-    }
-
-    // Re-render product display
-    const product = CdvPurchase.store.get(MY_NON_RENEWING_ID);
-    if (product) renderProduct(product);
-}
-
-// --- Ensure required functions are available ---
-// These might be included from the generic section or defined here.
-// function grantEntitlement(productId) { ... } // Often not needed explicitly if UI just checks owned()
-// function requestPurchase(platform, productId, offerId) { ... }
-// function updateMessages(text) { ... }
-// function log(msg) { ... }
-
-// --- Final Setup ---
-document.addEventListener('deviceready', renderUI, false);
-```
-
-## Purchase & Validation Flow
-
-1.  **Order:** User purchases the non-renewing subscription via `offer.order()`.
-2.  **Approval:** `approved` event fires.
-3.  **Verification (Recommended):** `transaction.verify()` sends data to your validator. Your validator calculates the expiry date based on the purchase time and product duration.
-4.  **Verification Response:** `verified` event fires. The `VerifiedPurchase` object from your validator should contain the calculated `expiryDate`.
-5.  **Finish:** `receipt.finish()` acknowledges the purchase (marks as consumed/acknowledged).
-6.  **Entitlement:** The `renderUI` function checks `store.owned(MY_NON_RENEWING_ID)`. The `owned()` method uses the `expiryDate` from the verified receipt (if available and validator is used) to determine if access is currently active.
+First, ensure your Google Play Console (including creating the one-time product used for non-renewing access), application build, and test environment are correctly configured.
 
 
-## Android Specific Notes
+## 2. Initialization & UI
 
+Next, set up the basic JavaScript to initialize the plugin, register your non-renewing product, and display its information based on the access expiry date managed by your app.
+
+*   **Note:** Replace the placeholder product ID (`'non_renewing_1_month'`) and the storage key (`ACCESS_EXPIRY_KEY`) with your actual values. Update the `store.register` call within the included code to specify `Platform.GOOGLE_PLAY`. Use a secure method instead of `localStorage` to store the expiry date in production.
+
+## 3. Purchase Flow
+
+Implement the logic to handle the purchase process. This involves initiating the order, handling `approved` and `verified` (recommended for accurate purchase date), calculating and storing the expiry date, and **acknowledging** the purchase with `transaction.finish()`. Acknowledgment is mandatory within 3 days on Google Play for this type.
+
+
+## 4. Receipt Validation (Recommended)
+
+Validating the receipt provides a secure way to confirm the purchase and obtain a reliable `purchaseDate` for calculating the expiry.
+
+
+## 5. Testing
+
+Follow the specific testing procedures for Google Play (signed release build, testing tracks, license tester accounts) outlined in the platform-specific purchase flow section above. Test purchasing, expiry checks, and potentially extending access by purchasing again.

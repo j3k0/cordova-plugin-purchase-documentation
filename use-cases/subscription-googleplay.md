@@ -1,92 +1,28 @@
 # Subscription on Google Play
 
-This use case explains how to implement an auto-renewing subscription on Android using Google Play.
+This use case explains how to implement an **auto-renewing subscription** on Android using the Google Play platform and `cordova-plugin-purchase` v13+. Reliable subscription management **requires server-side receipt validation** connected to the Google Play Developer API.
+
+## 1. Platform Setup
+
+First, ensure your Google Play Console (including creating subscription products), application build, test environment, and **Google Play Developer API access** (for validation) are correctly configured.
 
 
-## Initialization
+## 2. Initialization & UI
 
-We use the generic subscription initialization structure. Reliable status tracking **requires a server-side validator** communicating with the Google Play Developer API.
+Next, set up the basic JavaScript to initialize the plugin, register your subscription products (including `group` if applicable), configure the **mandatory validator**, and display subscription status based on **verified** receipt data obtained via the Google Play Developer API.
+
+*   **Note:** Replace placeholder product IDs and the group name with your actual values. Update the `store.register` call within the included code to specify `Platform.GOOGLE_PLAY`. Ensure your `store.validator` URL is correctly configured and linked to a backend capable of using the Google Play Developer API.
+
+## 3. Purchase Flow
+
+Implement the logic to handle the subscription purchase or plan change process. This involves initiating the order (potentially with upgrade/downgrade parameters), verifying the transaction via your validator, and **acknowledging** the purchase with `receipt.finish()`.
 
 
-```javascript
-// --- Specific Implementations for Subscription Status ---
+## 4. Receipt Validation (Mandatory)
 
-// Re-register product with correct platform
-function initStore() {
-    const { store, ProductType, Platform } = CdvPurchase;
-    // ... other init steps from included file, excluding the generic registration...
+Server-side validation using the **Google Play Developer API** is **essential** for subscriptions to determine the current status, expiry date, renewal intent, grace periods, and handle renewals and cancellations correctly. Local receipts are insufficient.
 
-    store.register({
-        id: 'subscription1_gp', // Use your actual Google Play Subscription ID
-        type: ProductType.PAID_SUBSCRIPTION,
-        platform: Platform.GOOGLE_PLAY
-    });
 
-    // *** Setup Validator (REQUIRED for subscriptions) ***
-    store.validator = "YOUR_VALIDATOR_URL"; // Or use Iaptic helper
-    // store.validator = new CdvPurchase.Iaptic({...}).validator;
+## 5. Testing
 
-    // ... rest of initStore from included file (event listeners, initialize call) ...
-}
-
-// This function updates the UI based on verified subscription status
-function renderUI() {
-    const messagesEl = document.getElementById('messages');
-    const statusEl = document.getElementById('subscription-status');
-    if (!messagesEl || !statusEl) return;
-
-    messagesEl.textContent = 'Store ready.'; // Clear status
-
-    // ** Check ownership using store.owned() which relies on verified receipts **
-    const isActive = CdvPurchase.store.owned('subscription1_gp'); // Use your Subscription ID
-
-    if (isActive) {
-        const purchase = CdvPurchase.store.findInVerifiedReceipts({ id: 'subscription1_gp' }); // Find the verified purchase details
-        let statusText = 'Subscription: ACTIVE';
-        if (purchase?.expiryDate) {
-            const dateStr = new Date(purchase.expiryDate).toLocaleDateString();
-            statusText += ` (Renews/Expires: ${dateStr})`;
-        }
-        // Check for potential issues flagged by the validator
-        if (purchase?.renewalIntent === CdvPurchase.RenewalIntent.LAPSE) {
-            statusText += ' <span style="color:orange;">[Will Expire]</span>';
-        }
-        if (purchase?.isBillingRetryPeriod) {
-            statusText += ' <span style="color:red;">[Billing Issue!]</span>';
-        }
-        statusEl.innerHTML = statusText;
-        // Unlock premium features
-    } else {
-        statusEl.textContent = 'Subscription: Inactive';
-        // Lock premium features
-    }
-
-    // Re-render product display
-    const product = CdvPurchase.store.get('subscription1_gp');
-    if (product) renderProduct(product); // Assumes renderProduct is defined in the included section
-}
-
-// --- Ensure required functions are available ---
-// These should be defined in the included generic section or here.
-// function renderProduct(product) { ... } // Included & needs Manage button logic
-// function requestPurchase(platform, productId, offerId) { ... } // Included
-// function manageSubscription(platform) { ... } // Included
-// function updateMessages(text) { ... } // Included
-// function log(msg) { ... } // Included
-
-// --- Final Setup ---
-document.addEventListener('deviceready', renderUI, false);
-```
-
-## Purchase & Validation Flow
-
-1.  **Validation is Mandatory:** Set up `store.validator`.
-2.  **Order:** User initiates purchase via `offer.order()`.
-3.  **Approval:** `approved` event fires, call `transaction.verify()`.
-4.  **Verification:** Validator communicates with Google Play Developer API.
-5.  **Verification Response:** `verified` event fires with authoritative status (active, expired, grace period, etc.) and `expiryDate`.
-6.  **Entitlement:** `renderUI` checks `store.owned()` based on verified data.
-7.  **Finish:** `receipt.finish()` acknowledges the purchase to Google Play.
-
-## Android Specific Notes
-
+Follow the specific testing procedures for Google Play (signed release build, testing tracks, license tester accounts, validator connected to Developer API) outlined in the platform-specific purchase flow section above. Test initial purchases, accelerated renewals, cancellations, and plan changes (if applicable).

@@ -1,243 +1,181 @@
 ### Purchase Flow (iOS/App Store Non-Consumable)
 
-Now that the store is initialized and the product is displayed, let's implement the logic to handle the actual purchase when the user clicks the "Unlock Now!" button.
+This section details the purchase logic specific to **iOS/App Store** for **non-consumable** items (like unlocking a feature permanently), assuming you have completed the [generic non-consumable initialization](non-consumable-generic-initialization.md). Similar to Android, the purchase must be finalized using `transaction.finish()` to remove it from the payment queue.
 
-**Step 1: Implement the Purchase Action**
+**Step 1: Implement the Purchase Action (`purchaseFeature`)**
 
-*   **What:** Fill in the `window.purchaseFeature` function (defined as a stub previously) to call `store.order()`.
-*   **Why:** This initiates the purchase process with the App Store when the user clicks the button.
+*   **What:** Replace the placeholder `window.purchaseFeature` function (from the generic initialization) to call `offer.order()` specifically for the App Store platform.
+*   **Why:** This triggers the App Store purchase dialog when the user clicks the "Unlock Now!" button.
 
-Replace the placeholder `window.purchaseFeature` function in `www/js/index.js` with this implementation:
+Replace the placeholder `window.purchaseFeature` function in `www/js/index.js`:
 
 ```javascript
 // In js/index.js
 
 // Make this function globally accessible for the button's onclick
 window.purchaseFeature = function() {
-    const productId = 'nonconsumable1'; // Use the SAME product ID you registered
-    console.log(`Purchase button clicked for ${productId}`);
-    const { store, Platform } = CdvPurchase; // Get Platform enum if needed
+    const productId = 'unlock_premium_feature'; // Use the SAME product ID you registered
+    console.log(`Purchase button clicked for non-consumable: ${productId}`);
+    const { store, Platform } = CdvPurchase;
 
-    // Ensure we target the correct platform product
-    const product = store.get(productId, Platform.APPLE_APPSTORE); // Explicitly get AppStore version
+    // Get the product specifically for AppStore
+    const product = store.get(productId, Platform.APPLE_APPSTORE);
     const offer = product?.getOffer(); // Get the default offer
 
     if (offer) {
-        console.log(`Initiating order for offer: ${offer.id} on platform ${offer.platform}`);
-        // Optional: Update UI to show a loading/processing state
-        // setState({ isPurchasing: true });
+        console.log(`Initiating order for non-consumable offer: ${offer.id} on platform ${offer.platform}`);
+        setStatus('Initiating purchase...');
 
-        store.order(offer)
+        offer.order()
             .then(result => {
-                // Order initiation was successful or user cancelled.
-                // Actual purchase completion is handled by event listeners.
-                // We might clear the loading state here ONLY IF the promise
-                // resolves immediately after user interaction (cancel/confirm).
-                // If it waits for final approval, loading state should be
-                // cleared in the event handlers.
-
-                // Check if the result is specifically a user cancellation error
-                if (result && result.code === store.ErrorCode.PAYMENT_CANCELLED) {
-                    console.log("User cancelled the purchase.");
-                    // Optionally update UI, e.g., setState({ isPurchasing: false });
-                } else if (result && result.isError) {
-                    // Handle other potential initiation errors (rare)
-                    console.error("Order initiation failed: " + result.message);
-                    // Optionally update UI, e.g., setState({ isPurchasing: false, error: result.message });
+                // Promise resolves when the App Store sheet is dismissed.
+                // Outcome is handled by listeners.
+                if (result && result.isError) {
+                    setStatus(`Order failed: ${result.message}`);
                 } else {
-                    console.log("Order initiated. Waiting for approval...");
-                    // UI state like 'isPurchasing' might remain true until approved/failed event
+                    // Purchase flow started... status updated by listeners.
                 }
+                refreshUI(); // Refresh UI in case button state needs update
             })
             .catch(err => {
-                 // This catch might not be strictly necessary if .then handles errors,
-                 // but good for robustness.
-                 console.error("Unexpected error during order initiation:", err);
-                 // Optionally update UI, e.g., setState({ isPurchasing: false, error: 'Unexpected error' });
+                 console.error("Unexpected error during non-consumable order:", err);
+                 setStatus('Unexpected error during purchase.');
+                 refreshUI();
             });
 
     } else {
-        console.error(`Cannot purchase feature: Product (${productId}) or its offer not found or not loaded yet.`);
-        alert('Unable to purchase. Product details might still be loading or the product ID is incorrect.');
+        console.error(`Cannot purchase feature: Product (${productId}) or offer not found.`);
+        setStatus('Error: Unable to purchase. Product details missing.');
     }
 }
 ```
 
-*   **Note:** We explicitly get the product for `Platform.APPLE_APPSTORE` to be precise, though `store.get(productId)` might work if it's the only platform initialized.
+**Step 2: Handle Purchase Events (`.approved`, `.verified`, `.finished`)**
 
-**Step 2: Handle the "Approved" State**
+*   **What:** Add the purchase lifecycle event listeners within the `store.when()` chain in your `initializeStoreAndSetupListeners` function (created during generic initialization).
+*   **Why:** These listeners handle the progression of the purchase: approval by App Store, optional but recommended verification, and mandatory finalization.
 
-*   **What:** Add an `.approved()` listener using `store.when()`. This is triggered when the App Store confirms the user has authorized the payment (e.g., via Face ID, Touch ID, or password).
-*   **Why:** This is the first confirmation that the purchase is likely to succeed. At this point, it's highly recommended (though optional if you skip validation) to verify the transaction's receipt.
-
-Add the `.approved()` handler within the `store.when()` chain in your `initializeStore` function:
+Add these handlers inside the existing `store.when()` call:
 
 ```javascript
-// Inside initializeStore() -> store.when() chain
+// Inside initializeStoreAndSetupListeners() -> store.when() chain
 
     .approved(transaction => {
         console.log(`Transaction ${transaction.transactionId} approved for ${transaction.products[0]?.id}.`);
+        setStatus('Purchase approved. Verifying...');
 
-        // If you have a validator URL configured, verify the purchase.
+        // Verification is highly recommended for non-consumables.
         if (store.validator) {
-            console.log('Verification pending for ' + transaction.transactionId);
-            // Optional: Update UI to indicate verification is in progress
-            // setState({ isVerifying: true });
-            transaction.verify(); // Initiate verification
-        }
-        // If you don't have a validator, you might grant access here
-        // BUT THIS IS NOT RECOMMENDED FOR NON-CONSUMABLES OR SUBSCRIPTIONS.
-        // For this example, we'll assume verification happens or is skipped,
-        // and the final unlock happens in the .verified() or directly
-        // before calling .finish() if verification is skipped.
-        else {
-             console.warn("Receipt validator not configured. Finishing purchase without server verification.");
-             // Directly call the function that grants access and finishes.
+            transaction.verify();
+        } else {
+             console.warn("Receipt validator not configured. Granting entitlement and finishing purchase without server verification (INSECURE).");
+             // Grant entitlement and finish directly if no validator.
              unlockFeatureAndFinish(transaction);
         }
     })
-    // Add .verified() and .finished() next
-```
-
-**Step 3: Handle the "Verified" State (Recommended)**
-
-*   **What:** Add a `.verified()` listener. This is triggered *after* the `transaction.verify()` call completes successfully (meaning your validation server confirmed the receipt with Apple).
-*   **Why:** This is the most secure point to grant the user entitlement. You know the purchase is legitimate and recorded by Apple.
-
-Add the `.verified()` handler within the `store.when()` chain:
-
-```javascript
-// Inside initializeStore() -> store.when() chain
-
     .verified(receipt => {
         console.log(`Receipt verified for transaction ${receipt.transactions[0]?.transactionId}`);
-        // Optional: Update UI to clear any "verifying" state
-        // setState({ isVerifying: false });
+        setStatus('Purchase verified. Finishing...');
 
-        // Find the specific transaction within the receipt that was just verified.
-        // This is important if a receipt contains multiple transactions.
-        // For a simple non-consumable purchase, often the last transaction is the relevant one.
+        // Find the relevant transaction within the verified receipt
         const verifiedTransaction = receipt.transactions
-            .find(t => t.products[0]?.id === 'nonconsumable1'); // Use your product ID
+            .find(t => t.products[0]?.id === MY_NON_CONSUMABLE_ID); // Use your product ID
 
         if (verifiedTransaction) {
-            // Unlock the feature and finish the transaction
+            // Grant entitlement (if not already done based on verified data)
+            // and FINISH the transaction
             unlockFeatureAndFinish(verifiedTransaction);
         } else {
-            console.error("Verified receipt didn't contain the expected transaction?");
+            console.error("Verified receipt didn't contain the expected non-consumable transaction?");
+            // Finish anyway to clear the queue if possible
+            receipt.finish();
         }
     })
-    // Add .finished() next
-```
-
-**Step 4: Handle the "Finished" State**
-
-*   **What:** Add a `.finished()` listener. This is triggered after `transaction.finish()` is called successfully.
-*   **Why:** Confirms that the transaction is fully completed and acknowledged with the App Store. Usually, major UI updates or state changes happen before calling `finish`, but this is a good place for final cleanup or logging if needed.
-
-Add the `.finished()` handler within the `store.when()` chain:
-
-```javascript
-// Inside initializeStore() -> store.when() chain
-
     .finished(transaction => {
+        // This confirms the finish() call was successful.
         console.log(`Transaction ${transaction.transactionId} finished for ${transaction.products[0]?.id}.`);
-        // The feature should already be unlocked.
-        // You might refresh the UI one last time if needed.
-        refreshFeatureUI();
+        setStatus('Purchase complete! Feature unlocked.');
+        // Feature should already be unlocked. Refresh UI to be sure.
+        refreshUI();
+    })
+    .cancelled(transaction => {
+        console.log('Purchase Cancelled:', transaction.transactionId);
+        setStatus('Purchase cancelled.');
+        refreshUI();
     });
+    // Ensure the .productUpdated, .receiptUpdated listeners from the generic setup are still present
 ```
 
-**Step 5: Implement the Feature Unlock and Finish Logic**
+**Step 3: Implement Feature Unlock and Finish Logic (`unlockFeatureAndFinish`)**
 
-*   **What:** Create the `unlockFeatureAndFinish` function called by the `.approved()` (if no validator) or `.verified()` handlers. This function will update your application state (e.g., `localStorage`) to mark the feature as unlocked and then call `transaction.finish()`.
-*   **Why:** This separates the logic for granting the entitlement from the event handling. Crucially, `transaction.finish()` tells the App Store that you have processed the transaction, preventing it from being delivered again.
+*   **What:** Replace the placeholder `grantEntitlement` function with `unlockFeatureAndFinish`. This function updates your app's state (e.g., `localStorage` - **use secure storage in production!**) to unlock the feature and then calls `transaction.finish()`.
+*   **Why:** You **must** call `transaction.finish()` for non-consumable purchases on iOS to remove them from the payment queue. This acknowledges to the App Store that you have processed the transaction.
 
-Add this new function to `www/js/index.js`:
+Replace the placeholder `grantEntitlement` function in `www/js/index.js` with this:
 
 ```javascript
 // In js/index.js
 
+// Replace the placeholder grantEntitlement function
 function unlockFeatureAndFinish(transaction) {
-    // Make sure we haven't already processed this transaction
-    const isUnlocked = window.localStorage.getItem(FEATURE_KEY) === 'YES';
+    const productId = transaction.products[0]?.id;
+    if (productId !== MY_NON_CONSUMABLE_ID) return; // Ensure it's the correct product
+
+    // Grant the entitlement if not already granted
+    // Check your persistent storage method here
+    const isUnlocked = isFeatureUnlocked(); // Assumes function from generic init exists
+
     if (isUnlocked) {
         console.log(`Feature already unlocked, finishing transaction ${transaction.transactionId} again just in case.`);
     } else {
         console.log(`Unlocking feature for transaction ${transaction.transactionId}...`);
-        // Persist the unlock status
-        window.localStorage.setItem(FEATURE_KEY, 'YES');
+        // Persist the unlock status SECURELY
+        try {
+            window.localStorage.setItem(FEATURE_KEY, 'YES'); // INSECURE EXAMPLE - Use SecureStorage
+            console.log('Ownership flag set in localStorage.');
+        } catch (e) {
+            console.error('Error saving ownership to localStorage:', e);
+        }
         // Refresh the UI immediately to show the unlocked state
-        refreshFeatureUI();
-        alert('Feature Unlocked! Thank you for your purchase.');
+        refreshUI();
+        // Optionally show a confirmation message
+        // alert('Feature Unlocked! Thank you.');
     }
 
     // Finish the transaction!
-    // This acknowledges the purchase with the App Store. Required for non-consumables.
-    console.log(`Finishing transaction ${transaction.transactionId}...`);
-    transaction.finish();
+    // This acknowledges the purchase with the App Store and removes it from the queue.
+    // Required for non-consumables and subscriptions on iOS.
+    if (transaction.state !== TransactionState.FINISHED) {
+        console.log(`Finishing transaction ${transaction.transactionId}...`);
+        transaction.finish();
+    } else {
+        console.log(`Transaction ${transaction.transactionId} already finished.`);
+    }
 }
 ```
 
-### Build and Test (iOS/App Store)
+---
 
-Now that the initialization, UI, and purchase flow logic are in place, let's build the app and test it on a real device using a Sandbox Tester account.
+**Build and Test (iOS/App Store Non-Consumable)**
 
-**1. Prepare the Cordova Project:**
+Follow the standard iOS testing procedure:
 
-*   Ensure all your code changes in `www/js/index.js` and `www/index.html` are saved.
-*   From your project's root directory in the terminal, run:
-    ```bash
-    cordova prepare ios
-    ```
-    This command updates the native Xcode project in the `platforms/ios` directory with your latest web assets.
+1.  **Prepare:** `cordova prepare ios`.
+2.  **Open:** `open platforms/ios/*.xcodeproj` (or `.xcworkspace`).
+3.  **Configure Xcode:** Set signing team, select your physical test device. Ensure "In-App Purchase" capability is enabled.
+4.  **Prepare Sandbox Tester:** On your test device, go to `Settings -> App Store`, scroll down, and **Sign Out** of any production Apple ID. Do **not** sign into the Sandbox account here.
+5.  **Run:** Build and run the app from Xcode (▶) onto your device.
+6.  **Test Purchase:**
+    *   Verify initial UI shows the feature as "Locked" and the product details with the "Unlock Now!" button.
+    *   Tap "Unlock Now!".
+    *   The App Store purchase sheet appears. **Sign in** using your **Sandbox Tester** credentials when prompted.
+    *   Confirm the purchase (it will indicate "[Environment: Sandbox]").
+    *   Observe Xcode console logs: `approved`, `verified` (if validator set), `Unlocking feature...`, `Finishing transaction...`, `finished`.
+    *   The UI should update to show "Premium Feature: Unlocked! 🎉".
+    *   The "Unlock Now!" button should be replaced with "(Already Purchased)".
+    *   **Restart the app:** Verify the unlocked status persists and the purchase button remains disabled.
+    *   **Restore Purchases:** Add a "Restore Purchases" button that calls `store.restorePurchases()`. Test that after restoring, the UI correctly reflects the owned status.
 
-**2. Open the Project in Xcode:**
+---
 
-*   Open the generated Xcode project:
-    ```bash
-    open platforms/ios/*.xcodeproj
-    ```
-
-**3. Configure Signing and Device:**
-
-*   In Xcode, select your project in the left sidebar.
-*   Go to the "Signing & Capabilities" tab for your App Target.
-*   Ensure a valid "Team" is selected and that appropriate Signing Certificates (Development) are configured. Xcode might prompt you to fix issues if this is not set up.
-*   Connect your physical iOS test device via USB.
-*   Select your connected device from the device list near the top of the Xcode window (next to the Run/Stop buttons). **Do not use a Simulator**, as they don't fully support In-App Purchases.
-
-**4. Prepare Sandbox Tester:**
-
-*   On your **test device**, go to `Settings` -> `App Store`.
-*   Scroll down to the **Sandbox Account** section.
-*   **Sign Out** of any existing account. **Do not sign in yet.** You will sign in when the app prompts you during the purchase.
-*   Make sure you have created a Sandbox Tester account in App Store Connect (as described in the [Setup Guide](!UNRESOLVED-LINK:./sections/setup-ios-6-test-users.md)).
-
-**5. Run the App:**
-
-*   Click the **Run** button (the ▶ icon) in Xcode. This will build the app and install it on your connected device.
-*   Xcode's console will open at the bottom – keep an eye on this for log messages from both the native plugin and your JavaScript `console.log` statements.
-
-**6. Test the Purchase:**
-
-*   Once the app launches, observe the logs and the UI.
-    *   You should see "Initializing store..." and "Store initialized successfully".
-    *   The feature status should initially show "Locked".
-    *   The product details should load, showing the title, description, and price, along with the "Unlock Now!" button (assuming `canPurchase` becomes true).
-*   Tap the **"Unlock Now!"** button.
-*   An App Store sheet should appear, prompting you to confirm the purchase and **sign in**.
-*   **Enter the email and password for your Sandbox Tester account.**
-*   Confirm the purchase (it will show "[Environment: Sandbox]").
-*   Observe the Xcode console logs. You should see messages corresponding to:
-    *   `Transaction ... approved...`
-    *   `(If validator set) Verification pending...`
-    *   `(If validator set) Receipt verified...`
-    *   `Unlocking feature...`
-    *   `Finishing transaction...`
-    *   `Transaction ... finished...`
-*   The UI should update:
-    *   The "Feature Status" should change to "UNLOCKED! 🎉".
-    *   The "Unlock Now!" button should be replaced with "_(Already Purchased)_".
-*   **Restart the app:** Close it completely (swipe up from the app switcher) and reopen it. Verify that the "Feature Status" still shows "UNLOCKED! 🎉" (confirming persistence in `localStorage`) and the purchase button remains disabled.
-
+This completes the non-consumable purchase flow for iOS/App Store. The key is calling `transaction.finish()` after granting the entitlement to acknowledge the purchase with Apple.

@@ -1,135 +1,208 @@
-## Setup for Braintree
+## Setup for Braintree Payments
+
+This guide details the necessary steps to configure your development environment, Braintree account, and application settings before implementing custom payments using the Braintree platform via `cordova-plugin-purchase` v13+ and its **required Braintree extension**.
 
 {% hint style="warning" icon="warning" %}
 **Platform Interfaces Change Frequently!**
 
-The Braintree control panel interface and requirements change often. This guide provides a general overview but may become outdated.
+The Braintree control panel interface, SDKs, and requirements change often. This guide provides a general overview but may become outdated.
 
 **Always refer to the official Braintree documentation as the primary source:**
 *   [Braintree Get Started](https://developer.paypal.com/braintree/docs/start/overview)
 *   [Client SDK Setup (iOS)](https://developer.paypal.com/braintree/docs/guides/client-sdk/setup/ios/v6)
 *   [Client SDK Setup (Android)](https://developer.paypal.com/braintree/docs/guides/client-sdk/setup/android/v6)
 *   [Tokenization Keys & Client Tokens](https://developer.paypal.com/braintree/docs/guides/authorization)
+*   [Drop-in UI Guide](https://developer.paypal.com/braintree/docs/guides/drop-in/overview)
 {% endhint %}
 
-This section covers the essential steps for setting up Braintree payments with the Cordova Purchase plugin. This requires the **`cordova-plugin-purchase-braintree`** extension plugin.
+### 1. Braintree Account Setup
 
-### 1. Braintree Account
+*   **Sandbox:** Sign up for a [Braintree Sandbox account](https://www.braintreepayments.com/sandbox) for development and testing. This provides test API keys and a simulated environment.
+*   **Production:** When ready to accept real payments, apply for a [Braintree Production account](https://www.braintreepayments.com/signup) and complete the underwriting process.
 
-*   Sign up for a [Braintree Sandbox account](https://www.braintreepayments.com/sandbox) for testing.
-*   Once ready for production, apply for a [Production account](https://www.braintreepayments.com/signup).
+### 2. Retrieve Braintree API Credentials
 
-### 2. Retrieve API Credentials
+Log in to your Braintree Control Panel (Sandbox or Production):
 
-In your Braintree Control Panel (Sandbox or Production):
-*   Navigate to "Settings" -> "API Keys".
-*   You will need your **Merchant ID**, **Public Key**, and **Private Key** for server-side operations (like your receipt validator or backend).
-*   For client-side initialization, you'll typically use a **Tokenization Key** (found in API Keys section) or generate **Client Tokens** on your server using the Merchant ID, Public Key, and Private Key. Client Tokens are more secure and recommended for production.
+*   Navigate to **Settings** (gear icon) -> **API**.
+*   Note down your:
+    *   **Merchant ID**
+    *   **Public Key**
+    *   **Private Key** (Keep this secure! It's used server-side).
+*   You will also find your **Tokenization Key** here. This key can be used directly in the client-side SDK for basic authorization, primarily suitable for testing or simple integrations. **Using Client Tokens generated server-side is recommended for production.**
 
 ### 3. Install Dependencies
 
-Install the core purchase plugin *and* the Braintree extension:
+Install the core purchase plugin **AND** the Braintree extension plugin.
+
 ```bash
+# Install the core plugin
 cordova plugin add cordova-plugin-purchase
+
+# Install the Braintree extension
 cordova plugin add cordova-plugin-purchase-braintree
 ```
 
-Also ensure you have base dependencies:
+Also ensure you have base Cordova/Node development tools installed:
 !INCLUDE "./install-dependencies.md"
 
-### 4. Create Cordova Project
+### 4. Create or Prepare Cordova Project
 
-!INCLUDE "setup-braintree-4-create-cordova-project.md"
+Set up your Cordova project and add the required platforms (iOS and/or Android).
 
-### 5. Configure Android Project
+*   **Create Project:**
+    !INCLUDE "./create-cordova-project.md"
+*   **Add Platforms:**
+    ```bash
+    cordova platform add ios
+    cordova platform add android
+    ```
 
-The `cordova-plugin-purchase-braintree` extension usually handles dependencies automatically via Gradle. Ensure your project syncs correctly. No specific `config.xml` entries are typically needed for basic Braintree setup.
+### 5. Configure Android Project (Gradle/Dependencies)
 
-### 6. Configure iOS Project
+The `cordova-plugin-purchase-braintree` extension uses Gradle to manage the native Braintree Android SDK dependencies.
 
-The `cordova-plugin-purchase-braintree` extension uses Cocoapods to manage iOS dependencies.
+*   Run `cordova prepare android`.
+*   Ensure your project builds successfully (`cordova build android`). Gradle should automatically download the required Braintree libraries.
+*   Check the plugin's `plugin.xml` for specific Android SDK version requirements if you encounter build issues related to dependencies.
 
-*   Ensure Cocoapods is installed (`sudo gem install cocoapods`).
-*   After adding the plugin and the iOS platform, navigate to `platforms/ios/` and run `pod install`.
-*   Open the `.xcworkspace` file (not `.xcodeproj`) in Xcode.
+### 6. Configure iOS Project (Cocoapods)
 
-### 7. Initialize Braintree in your App
+The Braintree extension uses Cocoapods for iOS dependencies.
 
-You need to initialize the Braintree platform adapter with either a Tokenization Key or a Client Token Provider.
+*   **Install Cocoapods:** If you don't have it, run `sudo gem install cocoapods`.
+*   **Navigate and Install:** After adding the iOS platform and the plugin, go to your project's `platforms/ios/` directory in the terminal and run:
+    ```bash
+    pod install --repo-update
+    ```
+*   **Open Workspace:** Always open the `.xcworkspace` file in Xcode, **not** the `.xcodeproj` file, after running `pod install`.
+    ```bash
+    open platforms/ios/*.xcworkspace
+    ```
+*   **Build:** Build the project in Xcode to ensure dependencies are linked correctly.
 
-**Using Tokenization Key (Simpler for testing, less secure):**
+### 7. Initialize Braintree in Your App
+
+In your application's JavaScript (after `deviceready`), you need to initialize the `CdvPurchase.store` including the Braintree platform adapter. This requires providing authorization.
+
+**Option 1: Using Client Token Provider (Recommended for Production)**
+
+This is the most secure method. Your server generates a short-lived Client Token using the Braintree Server SDK (with your Merchant ID, Public Key, and Private Key). Your app requests this token when needed.
 
 ```javascript
-const { store, Platform } = CdvPurchase;
+// In your initialization function (e.g., initializeStoreAndSetupListeners)
+const { store, Platform, ErrorCode } = CdvPurchase;
 
-store.initialize([
-  {
-    platform: Platform.BRAINTREE,
-    options: {
-      tokenizationKey: "YOUR_SANDBOX_TOKENIZATION_KEY" // Replace with your actual key
-    }
-  }
-]);
-```
-
-**Using Client Token Provider (Recommended for Production):**
-
-Your server needs an endpoint that generates a Client Token using the Braintree server SDK.
-
-```javascript
-// In your app's initialization code:
-const { store, Platform } = CdvPurchase;
-import { Braintree } from 'cordova-plugin-purchase/platforms/braintree'; // For types
-
-const braintreeOptions: Braintree.AdapterOptions = {
+const braintreeOptions = {
   clientTokenProvider: (callback) => {
-    // Make an AJAX request to your server endpoint
-    // to fetch a fresh client token.
+    console.log('Requesting Braintree Client Token from server...');
+    // Replace with your actual fetch call to your backend endpoint
     fetch('https://your-server.com/api/braintree/client-token', {
         method: 'POST',
-        // Include user auth if needed: headers: { 'Authorization': 'Bearer ...' }
+        // Include authentication if needed: headers: { 'Authorization': 'Bearer ...' }
     })
-    .then(response => response.json())
+    .then(response => response.ok ? response.json() : Promise.reject(new Error(`HTTP ${response.status}`)))
     .then(data => {
         if (data.clientToken) {
+            console.log('Client Token received.');
             callback(data.clientToken); // Provide the token to the plugin
         } else {
-            callback({ // Report error if token fetching failed
-                code: CdvPurchase.ErrorCode.COMMUNICATION,
-                message: 'Failed to fetch Braintree client token',
-                isError: true,
-                platform: Platform.BRAINTREE,
-                productId: null,
-            });
+            console.error('Server did not provide clientToken:', data);
+            const err = { code: ErrorCode.COMMUNICATION, message: 'Failed to fetch Braintree client token from server.', isError: true, platform: Platform.BRAINTREE, productId: null };
+            callback(err);
         }
     })
     .catch(error => {
-        callback({ // Report network/fetch error
-            code: CdvPurchase.ErrorCode.COMMUNICATION,
-            message: 'Error fetching Braintree client token: ' + error.message,
-            isError: true,
-            platform: Platform.BRAINTREE,
-            productId: null,
-        });
+        console.error('Error fetching Braintree client token:', error);
+        const err = { code: ErrorCode.COMMUNICATION, message: 'Network error fetching Braintree client token: ' + error.message, isError: true, platform: Platform.BRAINTREE, productId: null };
+        callback(err);
     });
   }
+  // Add other options like googlePay, applePay, threeDSecure here if needed
 };
 
-store.initialize([
-  {
-    platform: Platform.BRAINTREE,
-    options: braintreeOptions
-  }
-]);
+store.initialize([{
+  platform: Platform.BRAINTREE,
+  options: braintreeOptions
+}])
+.then(/* ... */);
+```
+*   **Note:** You must implement the `/api/braintree/client-token` endpoint on your server using Braintree's server SDKs.
 
+**Option 2: Using Tokenization Key (Simpler for Testing)**
+
+Use your **Sandbox** Tokenization Key directly. **Do not** use this method with your Production Tokenization Key in a publicly distributed app, as it's less secure than Client Tokens.
+
+```javascript
+// In your initialization function
+const { store, Platform } = CdvPurchase;
+
+const braintreeOptions = {
+  tokenizationKey: "YOUR_SANDBOX_TOKENIZATION_KEY" // Replace with your actual Sandbox key
+  // Add other options like googlePay, applePay, threeDSecure here if needed
+};
+
+store.initialize([{
+  platform: Platform.BRAINTREE,
+  options: braintreeOptions
+}])
+.then(/* ... */);
 ```
 
-*(Server-side implementation for `/api/braintree/client-token` is required using Braintree's server SDKs)*.
+### 8. (Optional) Configure Apple Pay (iOS Only)
 
-### 8. (Optional) Enable Apple Pay
+To enable Apple Pay via Braintree:
 
-!INCLUDE "setup-braintree-8-apple-pay.md"
+1.  **Configure Apple Pay in Braintree:** Follow Braintree's guide to configure Apple Pay in your Braintree control panel (requires Apple Merchant ID setup).
+2.  **Enable Apple Pay Capability:** In Xcode, under "Signing & Capabilities", add the "Apple Pay" capability and configure your Merchant ID.
+3.  **Provide Options:** Add the `applePay` configuration within the `braintreeOptions` during `store.initialize`. At minimum, `companyName` is often needed.
+    ```javascript
+    const braintreeOptions = {
+      clientTokenProvider: /* ... */,
+      applePay: {
+        companyName: 'Your Company Name',
+        // Optional: Add paymentSummaryItems if needed, otherwise plugin uses PaymentRequest data
+        // preparePaymentRequest: (paymentRequest) => { ... return customizedApplePayRequest; }
+      }
+    };
+    ```
 
-### 9. (Optional) Enable Google Pay
+### 9. (Optional) Configure Google Pay (Android Only)
 
-!INCLUDE "setup-braintree-9-google-pay.md"
+To enable Google Pay via Braintree:
+
+1.  **Configure Google Pay in Braintree:** Follow Braintree's guide to enable Google Pay in your Braintree control panel (may require linking a Google Merchant ID).
+2.  **Provide Options:** Add the `googlePay` configuration within the `braintreeOptions` during `store.initialize`.
+    ```javascript
+    const braintreeOptions = {
+      clientTokenProvider: /* ... */,
+      googlePay: {
+        environment: 'TEST', // Or 'PRODUCTION'
+        countryCode: 'US', // Your country code
+        googleMerchantName: 'Your Company Name' // Optional: Displayed in Google Pay sheet
+        // Optional: allowedPaymentMethods, etc.
+      }
+    };
+    ```
+
+### 10. (Optional) Configure 3D Secure
+
+To add an extra layer of security for card payments:
+
+1.  **Enable 3D Secure in Braintree:** Ensure 3D Secure is enabled for your Braintree account.
+2.  **Provide Options:** Add the `threeDSecure` configuration within the `braintreeOptions`. You typically need to provide the amount and potentially billing/shipping details within the `store.requestPayment` call itself, but you can set defaults here.
+    ```javascript
+    const braintreeOptions = {
+      clientTokenProvider: /* ... */,
+      threeDSecure: {
+        // amount is usually set dynamically in requestPayment
+        // email, billingAddress can also be set in requestPayment
+        versionRequested: CdvPurchase.Braintree.ThreeDSecure.Version.V2 // Request 3DS 2 if possible
+        // exemptionRequested: true // If you want to request exemptions
+      }
+    };
+    ```
+
+---
+
+After completing these steps, your Braintree account and application should be configured to process payments using the `cordova-plugin-purchase-braintree` extension and the `store.requestPayment()` method. Remember that the crucial step of processing the payment nonce **must happen on your server**.

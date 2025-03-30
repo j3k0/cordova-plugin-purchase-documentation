@@ -6,9 +6,11 @@ Non-renewing subscriptions grant access to content or services for a **fixed, li
 
 Key characteristics on Apple platforms:
 
-*   Managed entirely by your application logic after the initial purchase.
-*   Apple does not handle renewals, cancellations, or expiry notifications automatically.
+*   Purchased as a one-time transaction via StoreKit.
+*   Entitlement management (tracking expiry) is **entirely handled by your application logic** after the initial purchase. Apple does not track the expiry or renewal status for these.
 *   Often used for time-limited access to content archives, seasonal passes, or services where auto-renewal isn't desired or appropriate.
-*   Requires careful handling of expiry dates and potentially syncing purchase status across devices if you support user accounts.
+*   Requires careful handling of expiry dates based on the purchase time and product duration.
+*   Requires **acknowledging** the purchase using `transaction.finish()` to remove it from the payment queue.
+*   Requires syncing purchase status and expiry across devices if you support user accounts (typically via your own backend).
 
-In this guide, we will build a simple application that allows users to purchase a non-renewing subscription which grants access for a defined period.
+In this guide, we will build a simple application that allows users to purchase a non-renewing subscription which grants access for a defined period, managing the expiry date within the app.
