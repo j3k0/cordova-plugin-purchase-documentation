@@ -35,18 +35,11 @@ cordova plugin add cordova-plugin-purchase-braintree
 ```
 
 Also ensure you have base dependencies:
-
-Needless to say, make sure you have the tools installed on your machine. During the writing of this guide, I've been using the following environment:
-
-* **NodeJS** v10.12.0
-* **Cordova** v8.1.2
-* **macOS** 10.14.1
-
-I'm not saying it won't work with different version. If you start fresh, it might be a good idea to use an up-to-date environment.
-
+!INCLUDE "./install-dependencies.md"
 
 ### 4. Create Cordova Project
 
+!INCLUDE "setup-braintree-4-create-cordova-project.md"
 
 ### 5. Configure Android Project
 
@@ -135,6 +128,8 @@ store.initialize([
 
 ### 8. (Optional) Enable Apple Pay
 
+!INCLUDE "setup-braintree-8-apple-pay.md"
 
 ### 9. (Optional) Enable Google Pay
 
+!INCLUDE "setup-braintree-9-google-pay.md"

@@ -50,7 +50,15 @@ USE_CASES_DIR="$SCRIPT_DIR/use-cases"
 cd "$USE_CASES_DIR" || { echo "Error: Failed to enter use-cases directory: $USE_CASES_DIR" >&2; exit 1; }
 
 # Find and process all .src.md files in the current directory
-echo "Processing all *.src.md files in use-cases/ directory..."
+echo "Processing all *.src.md files in use-cases/sections directory..."
+cd sections
+find . -name '*.src.md' -print0 | while IFS= read -r -d $'\0' src_file; do
+  # Remove './' prefix if present
+  src_file_cleaned="${src_file#./}"
+  process_file "$src_file_cleaned"
+done
+cd ..
+
 find . -maxdepth 1 -name '*.src.md' -print0 | while IFS= read -r -d $'\0' src_file; do
   # Remove './' prefix if present
   src_file_cleaned="${src_file#./}"

@@ -18,79 +18,11 @@ This section covers the essential steps for setting up your Android app for In-A
 
 ### 1. Install Dependencies
 
-
-Needless to say, make sure you have the tools installed on your machine. During the writing of this guide, I've been using the following environment:
-
-* **NodeJS** v10.12.0
-* **Cordova** v8.1.2
-* **macOS** 10.14.1
-
-I'm not saying it won't work with different version. If you start fresh, it might be a good idea to use an up-to-date environment.
-
+!INCLUDE "./install-dependencies.md"
 
 ### 2. Create Cordova Project
 
-
-Making sure we have a Cordova project that we can build for Android and/or iOS.
-
-#### Create the project
-
-#### Create the project
-
-If it isn't already created:
-
-```text
-$ cordova create CordovaProject cc.fovea.purchase.demo PurchaseNC
-Creating a new cordova project.
-```
-
-For details about what those parameters are:
-
-```text
-$ cordova help create
-```
-
-Note, feel free to pick a different project ID and name. Remember whatever values you put in here.
-
-Let's head into our cordova project's directory \(should match whatever we used in the previous step.
-
-```text
-$ cd CordovaProject
-```
-#### Add Android platform
-
-```text
-$ cordova platform add android
-```
-
-Will output:
-
-```text
-    Using cordova-fetch for cordova-android@~11.0.0
-    Adding android project...
-    [...]
-    Saving android@~11.0.0 into config.xml file ...
-```
-
-Let's check if that builds.
-
-```text
-$ cordova build android
-```
-
-Which outputs:
-
-```text
-    Android Studio project detected
-    Starting a Gradle Daemon (subsequent builds will be faster)
-    [...]
-    BUILD SUCCESSFUL in 1m 49s
-    Built the following apk(s):
-    __EDITED__/platforms/android/app/build/outputs/apk/debug/app-debug.apk
-```
-
-Hopefully there's no problems with our Android build chain. If you do have problems, fixing it is out of scope from this guide but it's required!
-
+!INCLUDE "setup-android-2-create-cordova-project.md"
 
 ### 3. Setup Google Play Application & Billing
 
@@ -99,18 +31,7 @@ Hopefully there's no problems with our Android build chain. If you do have probl
 *   **Billing Setup:** Link a Google Merchant Account if you haven't already. This is usually done under "Setup" -> "Payments profile" in the Play Console. Ensure it's active.
 *   **License Testing:** Add Google accounts (full Gmail addresses) you'll use for testing under "Setup" -> "License testing" in the Play Console. These accounts can make test purchases without being charged real money.
 
-
-Make sure we have a Google Play application created and configured.
-
-### Create the App
-
-* Open the [Google Play Console](https://play.google.com/apps/publish).
-* Click "Create Application", fill in the required fields.
-
-{% hint style="info" %}
-Need more help? I recommend you check [Google's own documentation](https://support.google.com/googleplay/android-developer/answer/113469?hl=en&ref_topic=7072031). It's well detailed, easy to follow and probably the most up-to-date resource you can find.
-{% endhint %}
-
+!INCLUDE "setup-android-3-google-play.md"
 
 ### 4. Install Plugin and Configure Project
 
@@ -139,33 +60,7 @@ The plugin automatically adds the necessary `com.android.vending.BILLING` permis
 
 Define each virtual item under your app in the Play Console -> "Monetize" section -> "Products" (for one-time purchases like consumables/non-consumables) or "Subscriptions".
 
-
-There is still a bit more preparatory work: we need to setup our in-app product.
-
-Back in the "Google Play Console", open the "Store presence" ⇒ "In-app products" section.
-
-![](../.gitbook/assets/google-play-in-app-products.png)
-
-If you haven't yet uploaded an APK, it'll warn you that you need to upload a *release* APK.
-
-Once this is done, you can create a product. Google offers 2 kinds of products:
-
-* Managed Products
-* Subscriptions
-
-The latest is for auto-renewing subscriptions, in all other cases, you should a "Managed Product".
-
-* Click the **CREATE** button.
-* Fill in all the required information \(title, description, prices\).
-* Make sure the Status is **ACTIVE**.
-* **SAVE**
-
-And we're done!
-
-{% hint style="info" %}
-There's might be some delay between creating a product on the Google Play Console and seeing it in your app. If your product doesn't show up after 24h, then you should start to worry.
-{% endhint %}
-
+!INCLUDE "setup-android-7-google-play-products.md"
 
 ### 6. Upload Signed Build for Testing
 
@@ -177,27 +72,10 @@ There's might be some delay between creating a product on the Google Play Consol
 4.  Ensure your **test account** (from step 3) is added as a tester for that track and has accepted the testing invitation (usually via a Play Store link).
 5.  Install this signed version (or a *subsequent* version signed with the *same key*) onto your test device, ensuring the test account is the primary Google account on the device. Installation *must* typically come via the Play Store's testing mechanism, not `adb install`.
 
-
-Once you have built your release APK, you need to upload it to Google Play in order to be able to test In-App Purchases. In-App Purchase is not enabled in "debug build". In order to test in-app purchase, your APK needs to be signed with your release signing key. In order for Google to know your release signing key for this application, you need to upload a release APK:
-
-* Signed with this key.
-* Have the BILLING permission enabled
-  * it is done when you add the plugin to your project, so make sure you didn't skip this step.
-
-Google already provides [detailed resource on how to upload a release build](https://support.google.com/googleplay/android-developer/answer/7159011). What we want here is to:
-
-1. create an **internal testing release**
-2. **upload** it
-3. **publish** it \(privately probably\).
-
-Once you went over those steps, you can test your app with in-app purchase enabled without uploading to Google Play each time, but you need to sign the APK with the same "release" signing key.
-
-{% hint style="warning" %}
-Note that it might up to 24 hours for your IAP to work after you uploaded the first release APK.
-{% endhint %}
-
+!INCLUDE "setup-android-6-upload-to-google-play.md"
 
 ### 7. (Recommended) Setup Receipt Validation Service
 
 Server-side validation is essential for security and reliable subscription management.
 
+!INCLUDE "sections/setup-subscription-android-7-validation-server.md"

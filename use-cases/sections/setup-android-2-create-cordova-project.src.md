@@ -3,28 +3,8 @@ Making sure we have a Cordova project that we can build for Android and/or iOS.
 
 #### Create the project
 
-#### Create the project
+!INCLUDE "./create-cordova-project.md"
 
-If it isn't already created:
-
-```text
-$ cordova create CordovaProject cc.fovea.purchase.demo PurchaseNC
-Creating a new cordova project.
-```
-
-For details about what those parameters are:
-
-```text
-$ cordova help create
-```
-
-Note, feel free to pick a different project ID and name. Remember whatever values you put in here.
-
-Let's head into our cordova project's directory \(should match whatever we used in the previous step.
-
-```text
-$ cd CordovaProject
-```
 #### Add Android platform
 
 ```text
