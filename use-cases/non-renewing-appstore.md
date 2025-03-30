@@ -23,7 +23,7 @@ In this guide, we will build a simple application that allows users to purchase 
 
 First, ensure your Apple Developer account, App Store Connect (including creating the non-renewing subscription product), and Xcode project are correctly configured.
 
-&rArr; [Setup instructions here](/use-cases/setup/setup-appstore).
+&rArr; [Setup instructions here](./sections/setup-appstore.md).
 
 ## 2. Initialization & UI
 

@@ -6,7 +6,7 @@ This use case explains how to implement an **auto-renewing subscription** on And
 
 First, ensure your Google Play Console (including creating subscription products), application build, test environment, and **Google Play Developer API access** (for validation) are correctly configured.
 
-&rArr; [Setup instructions here](/use-cases/setup/setup-googleplay).
+&rArr; [Setup instructions here](./sections/setup-googleplay.md).
 
 ## 2. Initialization & UI
 

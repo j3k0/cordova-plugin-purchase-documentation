@@ -6,7 +6,7 @@ This use case explains how to implement a **consumable** product (like virtual c
 
 First, ensure your Google Play Console, application build, and test environment are correctly configured for Google Play Billing.
 
-&rArr; [Setup instructions here](/use-cases/setup/setup-googleplay).
+&rArr; [Setup instructions here](./sections/setup-googleplay.md).
 
 ## 2. Initialization & UI
 
