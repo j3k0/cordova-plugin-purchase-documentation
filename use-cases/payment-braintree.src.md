@@ -8,13 +8,13 @@ Unlike store products, payment requests typically involve a custom amount and re
 
 First, ensure your Braintree account (Sandbox and Production), Cordova project, and native platforms (iOS/Android) are correctly configured.
 
-!INCLUDE "../sections/setup-braintree.md"
+!INCLUDE "./sections/setup-braintree.md"
 
 ## 2. Code Implementation
 
 Implement the JavaScript code to initialize the Braintree adapter, display payment details, request the payment using `store.requestPayment()`, and handle the resulting events.
 
-!INCLUDE "../sections/payment-braintree-code.md"
+!INCLUDE "./sections/payment-braintree-code.md"
 
 ## 3. Server-Side Nonce Processing (Mandatory)
 
@@ -31,11 +31,11 @@ The client-side flow only generates a **payment method nonce**. This nonce is te
 
 For robust fulfillment, especially for asynchronous payment methods or post-settlement events, configure webhooks in your Braintree control panel to notify your server about transaction status changes (e.g., settlement confirmation, disputes).
 
-!INCLUDE "../sections/payment-braintree-iaptic-webhook.md"
+!INCLUDE "./sections/payment-braintree-iaptic-webhook.md"
 *(Note: This section uses Iaptic as an example validator service; adapt if using your own backend).*
 
 ## 5. Testing
 
 Follow the specific testing procedures using your Braintree Sandbox account and Braintree's test card numbers.
 
-!INCLUDE "../sections/payment-braintree-test.md"
+!INCLUDE "./sections/payment-braintree-test.md"
