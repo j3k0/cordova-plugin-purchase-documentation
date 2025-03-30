@@ -69,11 +69,8 @@ Install the purchase plugin and enable the necessary capability in Xcode.
 
 !INCLUDE "../images/xcode-capability-in-app-purchase.md"
 
-### 5. Create In-App Products in App Store Connect
-
-Define the specific items (consumables, non-consumables, subscriptions) you want to sell.
-
 !INCLUDE "setup-ios-5-create-in-app-products.md"
+
 *   **Product IDs:** Note down the exact Product IDs you create; you'll need them for `store.register()`.
 *   **Cleared for Sale:** Ensure products are marked "Cleared for Sale".
 *   **Metadata:** Fill in all required metadata, including pricing, localization, and review information (even a placeholder screenshot is often needed for testing).
