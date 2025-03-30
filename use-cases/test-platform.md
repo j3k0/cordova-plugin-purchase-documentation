@@ -1,294 +1,113 @@
 # Using the Test Platform
 
+The `cordova-plugin-purchase` includes a built-in "Test" platform adapter. This adapter simulates basic in-app purchase flows without connecting to any real payment platform like App Store or Google Play.
 
+**Purpose:**
 
-# Using the Test Platform
+*   **Development & Debugging:** Quickly test your purchase UI and basic logic integration without needing fully configured platform accounts or test devices.
+*   **Demonstration:** Show purchase flows without actual payments.
+*   **Automated Testing:** Potentially useful for setting up automated tests of your purchase logic (though limited).
 
-This guide explains how to leverage the built-in `Test` platform adapter for local development and automated testing. It allows you to simulate purchases without connecting to actual app stores. 
+**Limitations:**
+
+*   **No Real Payments:** Does not involve any actual financial transactions.
+*   **No Receipt Validation:** Cannot simulate server-side receipt validation. The `verify()` call on the Test platform provides a mock successful response.
+*   **Simplified Behavior:** Simulates basic states (approved, finished) but doesn't replicate complex platform behaviors like pending purchases (Ask to Buy, cash payments), detailed renewal intents, or specific error conditions accurately.
+*   **Predefined Products:** Uses a set of predefined products (or custom ones you register) rather than loading from a real store.
+
 ## Setup
 
-No special setup is required to use the test platform. You only need to install the plugin in your application.
+1.  **Install Plugin:**
+    ```bash
+    cordova plugin add cordova-plugin-purchase
+    ```
 
-Assuming you're starting from a blank project, we'll add the minimal amount of HTML for the purpose of this tutorial. Let's replace the `<body>` from the `www/index.html` file with the below.
+2.  **Initialize the Test Platform:**
+    In your `deviceready` handler, initialize the store specifically with the `Platform.TEST`.
 
-```markup
-<body>
-  <div id="app"></div>
-  <script type="text/javascript" src="cordova.js"></script>
-  <script type="text/javascript" src="js/index.js"></script>
-</body>
-```
+    ```javascript
+    document.addEventListener('deviceready', initTestStore, false);
 
-Let's also make sure to comment out Cordova template project's CSS.
+    function initTestStore() {
+        const { store, Platform, ProductType, ErrorCode } = CdvPurchase;
 
-You also need to enable the `'unsafe-inline'` `Content-Security-Policy` by adding it to the `default-src` section:
+        if (!store) { console.error("Store not available"); return; }
 
-```markup
-<meta http-equiv="Content-Security-Policy"
-      content="default-src 'self' 'unsafe-inline' [...]" />
-```
+        // Optional: Set verbosity for detailed logs
+        store.verbosity = LogLevel.DEBUG;
 
-You can download the [full index.html file here](https://gist.github.com/j3k0/80c69837e5bacf83c4fc2320ba2e5dc2).
-We will now create a new JavaScript file and load it from the HTML. The code below will initialize the plugin.
+        // Log errors
+        store.error(err => console.error("STORE ERROR: " + err.code + " " + err.message));
 
-{% code lineNumbers="true" %}
-```javascript
-document.addEventListener('deviceready', onDeviceReady);
+        // --- Register Test Products ---
+        // You MUST register the test products you intend to use.
+        store.register([
+            // Use built-in test products
+            CdvPurchase.Test.testProducts.CONSUMABLE,
+            CdvPurchase.Test.testProducts.CONSUMABLE_FAILING,
+            CdvPurchase.Test.testProducts.NON_CONSUMABLE,
+            CdvPurchase.Test.testProducts.PAID_SUBSCRIPTION,
+            CdvPurchase.Test.testProducts.PAID_SUBSCRIPTION_ACTIVE, // Starts as 'owned'
 
-function onDeviceReady() {
+            // Or register your own custom test product definitions
+             {
+               id: 'my_custom_test_consumable',
+               type: ProductType.CONSUMABLE,
+               platform: Platform.TEST,
+               // Optional metadata for the test product:
+               title: 'My Test Coins',
+               description: '100 test coins for development.',
+               pricing: { price: '$0.99', currency: 'USD', priceMicros: 990000 }
+             }
+        ]);
 
-  if (!window.CdvPurchase) {
-      console.log('CdvPurchase is not available');
-      return;
-  }
-  const {store} = CdvPurchase;
+        // --- Setup Event Handlers ---
+        store.when()
+            .productUpdated(p => console.log('Product updated: ' + p.id + ' title: ' + p.title))
+            .approved(transaction => {
+                console.log('Approved: ' + transaction.products[0].id);
+                // Simulate verification (always succeeds)
+                transaction.verify();
+            })
+            .verified(receipt => {
+                console.log('Verified: ' + receipt.id);
+                receipt.finish(); // Finish the transaction
+            })
+            .finished(transaction => {
+                console.log('Finished: ' + transaction.transactionId);
+                // Update UI based on ownership
+            });
 
-  store.error(function(error) {
-      console.log('ERROR ' + error.code + ': ' + error.message);
-  });
-
-  store.ready(function() {
-    console.log("CdvPurchase is ready");
-  });
- 
-  initializeStore();
-  refreshUI();
-}
-
-function initializeStore() {
-  // We will implement this soon
-}
-
-function refreshUI() {
-  // Soon...
-}
-```
-{% endcode %}
-
-Here's a little explanation:
-
-**Line 1**, it's important to wait for the "deviceready" event before using cordova plugins.
-
-**Lines 5-8**, we check if the plugin was correctly loaded.
-
-**Lines 11-13**, we setup an error handler. It just logs errors to the console.
-
-> Whatever your setup is, you should make sure this runs as soon as the javascript application starts. You have to be ready to handle IAP events as soon as possible.
-
-## Code Implementation
-
-This section explains how to use the `Test` platform adapter for local development and testing without needing actual store accounts or network connectivity to external services.
-
-### Base framework
-
-First, let's set up the basic HTML structure and the initial JavaScript, just like with other platforms.
-
-
-#### index.html
-
-Assuming you're starting from a blank project, we'll add the minimal amount of HTML for the purpose of this tutorial. Let's replace the `<body>` from the `www/index.html` file with the below.
-
-```markup
-<body>
-  <div id="app"></div>
-  <script type="text/javascript" src="cordova.js"></script>
-  <script type="text/javascript" src="js/index.js"></script>
-</body>
-```
-
-Let's also make sure to comment out Cordova template project's CSS.
-
-You also need to enable the `'unsafe-inline'` `Content-Security-Policy` by adding it to the `default-src` section:
-
-```markup
-<meta http-equiv="Content-Security-Policy"
-      content="default-src 'self' 'unsafe-inline' [...]" />
-```
-
-You can download the [full index.html file here](https://gist.github.com/j3k0/80c69837e5bacf83c4fc2320ba2e5dc2).
-#### javascript
-
-
-We will now create a new JavaScript file and load it from the HTML. The code below will initialize the plugin.
-
-{% code lineNumbers="true" %}
-```javascript
-document.addEventListener('deviceready', onDeviceReady);
-
-function onDeviceReady() {
-
-  if (!window.CdvPurchase) {
-      console.log('CdvPurchase is not available');
-      return;
-  }
-  const {store} = CdvPurchase;
-
-  store.error(function(error) {
-      console.log('ERROR ' + error.code + ': ' + error.message);
-  });
-
-  store.ready(function() {
-    console.log("CdvPurchase is ready");
-  });
- 
-  initializeStore();
-  refreshUI();
-}
-
-function initializeStore() {
-  // We will implement this soon
-}
-
-function refreshUI() {
-  // Soon...
-}
-```
-{% endcode %}
-
-Here's a little explanation:
-
-**Line 1**, it's important to wait for the "deviceready" event before using cordova plugins.
-
-**Lines 5-8**, we check if the plugin was correctly loaded.
-
-**Lines 11-13**, we setup an error handler. It just logs errors to the console.
-
-> Whatever your setup is, you should make sure this runs as soon as the javascript application starts. You have to be ready to handle IAP events as soon as possible.
-
-### Initialization
-
-To use the test platform, simply include `Platform.TEST` in your `store.initialize()` call. You can use it alongside other platforms or exclusively for testing.
-
-```javascript
-function initializeStore() {
-  const { store, Platform, ProductType } = CdvPurchase;
-
-  // Register products available on the Test platform
-  store.register([
-    // Use a built-in test product
-    {
-      id: 'test-consumable', // Matches CdvPurchase.Test.testProducts.CONSUMABLE.id
-      type: ProductType.CONSUMABLE,
-      platform: Platform.TEST
-    },
-    // Use another built-in test product
-    {
-      id: 'test-subscription-active', // Matches CdvPurchase.Test.testProducts.PAID_SUBSCRIPTION_ACTIVE.id
-      type: ProductType.PAID_SUBSCRIPTION,
-      platform: Platform.TEST
-    },
-    // Define and register a custom test product inline
-    {
-      id: 'custom-test-nonconsumable',
-      type: ProductType.NON_CONSUMABLE,
-      platform: Platform.TEST,
-      title: 'Unlock My Feature (Test)',
-      description: 'A custom non-consumable for testing.',
-      pricing: { // Simple pricing, or use PricingPhase[] for subscriptions
-        price: '$0.99',
-        currency: 'USD',
-        priceMicros: 990000
-      }
+        // Initialize ONLY the Test platform
+        store.initialize([Platform.TEST])
+            .then(() => {
+                console.log('Test Store initialized!');
+                // Products are now loaded, you can display them
+                console.log('Products: ' + JSON.stringify(store.products));
+            });
     }
-    // ... other products for other platforms can also be registered
-  ]);
+    ```
+    See `CdvPurchase.Test.testProducts` for available built-in products and `CdvPurchase.Test.registerTestProduct` for creating custom ones.
 
-  // Optionally set a validator if you want to test validation logic
-  // The Test adapter provides a mock validator.
-  // store.validator = "TEST_VALIDATOR_URL"; // Or use a function
+## Simulating Purchases
 
-  // Initialize the store, including the Test platform
-  store.initialize([Platform.TEST /*, other platforms... */])
-    .then(() => {
-      console.log('Store ready, including Test platform.');
-      refreshUI(); // Update UI after initialization
-    });
+When you call `offer.order()` for a product on the Test platform:
 
-  // Setup standard event handlers
-  store.when()
-    .productUpdated(refreshUI)
-    .receiptUpdated(refreshUI)
-    .approved(transaction => {
-      console.log('Test purchase approved: ' + transaction.transactionId);
-      // Typically verify, but for Test platform, validation is mocked
-      // transaction.verify(); // This would call the mock validator if set
-      transaction.finish(); // Finish the transaction
-    })
-    .verified(receipt => { // Only called if a validator is set
-      console.log('Test receipt verified.');
-      receipt.finish();
-    });
-}
+1.  A `prompt()` dialog will appear asking for confirmation (`Y` to approve, `E` to fail, anything else to cancel).
+2.  If approved (`Y`), the `approved` event fires.
+3.  Calling `transaction.verify()` immediately triggers the `verified` event (no actual validation occurs).
+4.  Calling `receipt.finish()` triggers the `finished` event.
 
-// Remember to implement refreshUI() to display products
-function refreshUI() {
-  // Your UI update logic here...
-  // It should iterate through store.products and store.localReceipts/verifiedPurchases
-  // and display relevant information and purchase buttons.
-  // See examples in other tutorials (e.g., subscription-generic-initialization.md)
-  // for UI rendering patterns.
-}
-```
+**Specific Behaviors:**
 
-### Built-in Test Products
+*   `CdvPurchase.Test.testProducts.CONSUMABLE_FAILING`: Ordering this product will simulate a purchase failure (like entering `E` in the prompt).
+*   `CdvPurchase.Test.testProducts.PAID_SUBSCRIPTION_ACTIVE`: This product starts in the `owned` state. It simulates renewals roughly every 2 minutes (check logs).
+*   `CdvPurchase.Test.testProducts.PAID_SUBSCRIPTION`: Behaves like a normal subscription; purchasing it makes it `owned`, and it simulates renewals.
 
-The `Test` platform comes with predefined products you can register by ID:
+## Use Cases
 
-*   **`CdvPurchase.Test.testProducts.CONSUMABLE` (id: `test-consumable`)**: A standard consumable product. Purchase simulation succeeds by default.
-*   **`CdvPurchase.Test.testProducts.CONSUMABLE_FAILING` (id: `test-consumable-fail`)**: A consumable product whose purchase simulation will always fail (unless forced via prompt).
-*   **`CdvPurchase.Test.testProducts.NON_CONSUMABLE` (id: `test-non-consumable`)**: A standard non-consumable product. Purchase simulation succeeds by default. Can only be "purchased" once per session unless app state is cleared.
-*   **`CdvPurchase.Test.testProducts.PAID_SUBSCRIPTION` (id: `test-subscription`)**: A standard auto-renewing subscription. Includes a 3-week trial phase followed by monthly billing. Purchase simulation succeeds by default. Renews every few minutes during the test session.
-*   **`CdvPurchase.Test.testProducts.PAID_SUBSCRIPTION_ACTIVE` (id: `test-subscription-active`)**: An auto-renewing subscription that starts in the `APPROVED` state (simulating an existing subscription). Renews every few minutes during the test session.
+*   Quickly prototype your store UI and purchase flow logic.
+*   Debug event handling (`approved`, `verified`, `finished`, `productUpdated`).
+*   Test scenarios like purchasing consumables, unlocking non-consumables, or subscribing/unsubscribing (simulated).
 
-You register these using their predefined `id` and `type` with `platform: Platform.TEST`. Their title, description, and pricing are predefined within the adapter.
-
-### Custom Test Products
-
-You can define your own test products directly within the `store.register` call, as shown in the initialization example for `custom-test-nonconsumable`.
-
-*   Provide `id`, `type`, and `platform: Platform.TEST`.
-*   Optionally provide `title`, `description`, `group`.
-*   Provide pricing information using `pricing`:
-    *   For simple one-time payments (consumable/non-consumable): `{ price: string, currency: string, priceMicros: number }`
-    *   For subscriptions (paid/non-renewing): Use an array of `PricingPhase` objects, similar to how you'd define real product pricing.
-
-Alternatively, use the `CdvPurchase.Test.registerTestProduct()` function *before* `store.register` if you prefer to define them separately.
-
-```javascript
-// Defined before store.register
-CdvPurchase.Test.registerTestProduct({
-  id: 'another-custom-sub',
-  type: ProductType.PAID_SUBSCRIPTION,
-  platform: Platform.TEST, // platform is actually ignored by registerTestProduct but good practice
-  title: 'My Custom Sub',
-  pricing: [{ price: '$4.99', currency: 'USD', priceMicros: 4990000, billingPeriod: 'P1M', recurrenceMode: RecurrenceMode.INFINITE_RECURRING, paymentMode: PaymentMode.PAY_AS_YOU_GO }]
-});
-
-// Then register it with the store
-store.register({
-  id: 'another-custom-sub',
-  type: ProductType.PAID_SUBSCRIPTION,
-  platform: Platform.TEST,
-});
-```
-
-### Purchase Flow with Test Platform
-
-When you call `store.order(offer)` for a `Test` platform product:
-
-1.  A standard JavaScript `prompt()` dialog appears.
-2.  It asks: `Do you want to purchase ${offer.productId} for ${offer.pricingPhases[0].price}? Enter "Y" to confirm. Enter "E" to fail with an error. Anything else to cancel.`
-3.  **Entering "Y" (case-insensitive):** Simulates a successful purchase. The transaction moves to the `APPROVED` state, triggering the `.approved()` handler.
-4.  **Entering "E" (case-insensitive):** Simulates a purchase failure. The `store.order()` promise rejects with an `IError` (code `ErrorCode.PURCHASE`).
-5.  **Entering anything else or cancelling the prompt:** Simulates user cancellation. The `store.order()` promise rejects with an `IError` (code `ErrorCode.PAYMENT_CANCELLED`).
-
-This allows you to test the different outcomes of your purchase flow logic locally.
-
-### Receipt Validation
-
-If you set `store.validator`, the `Test` adapter provides a mock validation function. When `transaction.verify()` is called:
-*   It waits for 500ms (simulating network delay).
-*   It returns a mock `VerifiedReceipt` based on the local `Transaction` data.
-*   It triggers the `.verified()` event handler.
-
-This allows testing of your receipt validation and entitlement logic without needing a real validation server during development.
+**Remember:** Always test thoroughly on real devices with actual platform sandbox/test accounts before release. The Test platform is a development tool, not a substitute for real-world testing.

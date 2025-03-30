@@ -1,55 +1,53 @@
 # About the Plugin
 
-The Cordova purchase plugin presents a unified interface for all supported platforms: Apple AppStore, Google Play, Windows, Braintree.
+The Cordova Purchase plugin (`cordova-plugin-purchase`) provides a unified JavaScript API (`CdvPurchase.store`) for interacting with various In-App Purchase platforms and payment providers from within Cordova, Capacitor, and Ionic applications.
 
-The main functionalities exposed by the plugin will allow you:
+## Core Goal: Abstraction
 
-* Load **Products** - To show information about your In-App Products: title and pricing.
-* Handle the **Purchase flow** - React to events to finalize a pending purchase.
-* **Initiate** a purchases and payments - When users click "buy".
-* Analyze **Purchase Receipts** - To determine what the user owns.
+The primary goal is to abstract the complexities and differences between platform-specific SDKs (like Apple's StoreKit and Google Play Billing Library) and payment gateways (like Braintree). This allows developers to write purchase-related code once and have it work across multiple platforms with minimal platform-specific adjustments.
 
-> A common misconception is that handling the purchase flow should be done after initiating a purchase. Don't forget that users can initiate a transaction from outside the app, for example by redeeming a promo code or when a purchase is shared between users with Family Sharing.
+## Key Components & Flow
 
-## Displaying products
+1.  **Initialization (`store.initialize()`):**
+    *   You specify which platforms (App Store, Google Play, Braintree, Test) you want to activate.
+    *   The plugin initializes the corresponding native SDKs or bridges.
+    *   It attempts to load existing purchase receipts from the device.
+    *   It fetches product details (title, price, description, offers) for registered products from the respective stores.
 
-Platform owners \(Apple, Google, etc.\) request that you load the details for your products from their stores. This ensure that the displayed price always reflects the real details. Hardcoding price will create issues when the actual price changes for reasons outside your control: for instance tax changes, price tiers changes, etc.
+2.  **Product Registration (`store.register()`):**
+    *   You tell the plugin about the products you've configured in the platform consoles (App Store Connect, Google Play Console).
+    *   You provide the `id`, `type` (`ProductType`), and `platform` (`Platform`) for each product.
 
-The plugin requires you to register the list of all your products and will take care of loading the details. Your UI should reflect the data loaded by the plugin. It should hide products that cannot be loaded, as they might not be available anymore.
+3.  **Event Handling (`store.when()`):**
+    *   The plugin operates asynchronously. You register listeners for events to react to changes.
+    *   **`productUpdated`:** Fires when product details (like price) are loaded or updated. Use this to update your UI.
+    *   **`receiptUpdated`:** Fires when the local device receipt information changes (e.g., a new purchase is detected, a transaction finishes).
+    *   **`approved`:** Fires when a payment is authorized by the platform but *before* it's finalized. **Crucially, verify this transaction before granting entitlement.**
+    *   **`verified`:** Fires *after* a receipt/transaction has been successfully validated by your configured `store.validator`. This is the secure point to grant entitlement.
+    *   **`finished`:** Fires after `transaction.finish()` or `receipt.finish()` successfully completes, acknowledging the transaction with the platform.
+    *   **`pending`:** Fires if a transaction requires external action (e.g., Ask to Buy, delayed payment methods).
+    *   **`error`:** Catches general plugin errors.
 
-Each product has a title, description and a list of available offers. Each offer present different pricing options for the same product. For subscriptions, pricing is defined as a list of phase: for example 3 week for free, followed by 12 months at $1.99 per month, followed by $4.99 per month.
+4.  **Initiating Purchases/Payments:**
+    *   **`offer.order()`:** Initiates the purchase flow for a specific product offer loaded from a store (App Store, Google Play).
+    *   **`store.requestPayment()`:** Initiates a payment request for a custom amount, typically used with payment gateways like Braintree.
 
-A product can be purchased only if it's not already owned and there's not a transaction in progress for that product. Products have a field \(`canPurchase`\) that indicates if it can be purchased or not. Your UI will have to check for that field and display a _Buy_ button only if `canPurchase` is true.
+5.  **Managing Purchases:**
+    *   **`transaction.verify()`:** Sends the transaction's receipt data to your configured `store.validator`.
+    *   **`transaction.finish()` / `receipt.finish()`:** Acknowledges the transaction(s) with the platform, marking them as processed. For consumables, this also consumes the item. **This is mandatory.**
+    *   **`store.owned()`:** Checks if a product is currently considered owned based on available (preferably verified) receipt data.
+    *   **`store.restorePurchases()`:** Asks the platform to restore previously purchased non-consumables and non-expired subscriptions.
 
-## Purchase flow
+6.  **Receipt Validation (`store.validator`):**
+    *   You provide a URL to your backend server (or use a service like [Iaptic](https://www.iaptic.com/)) that can validate receipts with Apple/Google servers.
+    *   The plugin sends receipt data to this endpoint during the `verify()` step.
+    *   The validator returns the verified status and authoritative purchase details (like subscription expiry).
+    *   **This is essential for security and reliable entitlement management.**
 
-Purchasing a product is a multi-step process, often asynchronous:
+## Architecture
 
-1.  **Initiate** a purchase (either by the user in-app or externally like redeeming a code).
-2.  Platform SDK shows **Payment UI** (user confirms/authenticates).
-3.  Get **approval** notification in the app (payment authorized, but not final).
-4.  **(Crucial Step) Validate the purchase receipt** with a server to confirm legitimacy and get accurate details (like subscription expiry).
-5.  **Deliver** the purchased virtual good or unlock the feature based on the *validated* status.
-6.  **Finalize** (Finish/Acknowledge) the transaction to confirm delivery to the platform.
+*   **JavaScript Core:** Provides the unified API (`CdvPurchase.store`) and manages adapters.
+*   **Platform Adapters:** Internal components responsible for interacting with each specific platform (App Store, Google Play, Braintree, Test).
+*   **Native Bridges:** Cordova plugins (Objective-C/Swift for iOS/macOS, Java/Kotlin for Android) that communicate with the native platform SDKs (StoreKit, Google Play Billing Library, Braintree SDK).
 
-After an order has been initiated and approved by the platform and user, your app receives the **`approved`** event containing transaction data. **Crucially, you should not grant entitlement based solely on this event.** Instead, your app should:
-
-1.  **Verify the transaction receipt** using a secure server. This step confirms the purchase is legitimate and retrieves authoritative details like subscription status and expiry dates directly from Apple/Google.
-2.  **Deliver the product** *after* successful verification.
-3.  **Finalize (finish/acknowledge)** the transaction once the product is delivered. Only after finalization is the purchase considered complete by the platform, and for subscriptions/non-consumables, it prevents the transaction from being presented repeatedly. Finalization also ensures you get paid.
-
-The **validation** and **delivery** steps should ideally happen on **your server**. The plugin facilitates sending receipt data to your chosen validation endpoint (e.g., using `transaction.verify()`). _Our service [Iaptic](https://www.iaptic.com/) simplifies this validation process significantly._
-
-> While it might look like a linear process, don't forget that the process can be interrupted and restarted at any point! Transactions can remain pending for approval for a few days (for example with _Ask to Buy_ on devices used by kids), approved and unfinished transactions might remain in the queue after the application crashed or the network connection was lost,... anything can happen.
-> 
-> That's why an app must be ready to handle purchase process events as soon as the application is started. A classic mistake is to assume that **approval** will only happen after the user clicked the _Buy_ button, which is **not** true. **Equally important is validating every approved transaction before granting entitlement.**
-
-## Requesting payments
-
-The plugin now also supports Braintree, that lets you charge custom amounts to your customers. The process is similar:
-
-1. Initiate a payment request
-2. Get approval
-3. Deliver and finalize the transaction
-
-OK, enough with theory! We will get into the practical details in the guide.
+This layered approach allows the JavaScript API to remain consistent while the adapters and bridges handle the platform-specific implementations.

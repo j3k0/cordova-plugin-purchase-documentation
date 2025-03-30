@@ -73,7 +73,7 @@ function initializeStore() {
         return;
     }
 
-    const { store, ProductType, Platform, LogLevel } = CdvPurchase;
+    const { store, ProductType, Platform, LogLevel, Utils } = CdvPurchase; // Added Utils
     console.log('Store plugin version: ' + store.version);
 
     // Optional: Set log level for debugging
@@ -94,8 +94,16 @@ function renderUI() {
 }
 
 // --- Action Functions (stubs for now) ---
-// window.subscribe = function(productId, platform, offerId) { ... };
-// window.restoreSubs = function() { ... };
+window.subscribe = function(productId, platform, offerId) {
+    // (Implementation in platform-specific purchase section)
+    console.log(`Placeholder: subscribe(${productId}, ${platform}, ${offerId})`);
+    alert('Purchase logic to be added.');
+};
+window.restoreSubs = function() {
+    // (Implementation in platform-specific purchase section)
+    console.log('Placeholder: restoreSubs()');
+    alert('Restore logic to be added.');
+};
 ```
 
 **Step 3: Register Subscription Products**
@@ -169,8 +177,8 @@ store.error(function(error) {
 
 **Step 6: Implement UI Rendering (`renderUI`)**
 
-*   **What:** Create the `renderUI` function. It should display the overall subscription status (derived from verified purchases) and the details of each available subscription product, including a "Subscribe" button if appropriate.
-*   **Why:** Shows the user their current status and available options.
+*   **What:** Create the `renderUI` function. It should display the overall subscription status (derived from **verified** purchases) and the details of each available subscription product, including a "Subscribe" or "Manage" button as appropriate.
+*   **Why:** Shows the user their current status and available options, relying on validated data for accuracy.
 
 Replace the placeholder `renderUI` function with this:
 
@@ -179,7 +187,7 @@ Replace the placeholder `renderUI` function with this:
 
 function renderUI() {
     console.log('Rendering UI with current state:', appState);
-    const { store, ProductType, Platform, RecurrenceMode, PaymentMode, Utils } = CdvPurchase; // Import necessary types/enums
+    const { store, ProductType, Platform, RecurrenceMode, PaymentMode, Utils, RenewalIntent } = CdvPurchase; // Import necessary types/enums
 
     const statusEl = document.getElementById('subscription-status');
     const productsEl = document.getElementById('subscription-products');
@@ -208,9 +216,9 @@ function renderUI() {
         const expiry = activeSub.expiryDate ? new Date(activeSub.expiryDate).toLocaleDateString() : 'N/A';
         const productName = store.get(activeSub.id, activeSub.platform)?.title ?? activeSub.id;
         statusMessage = `Subscribed to ${productName} (Expires: ${expiry})`;
-        if (activeSub.renewalIntent === 'Lapse') statusMessage += ' - Will Not Renew';
+        if (activeSub.renewalIntent === RenewalIntent.LAPSE) statusMessage += ' - Will Not Renew';
         if (activeSub.isTrialPeriod) statusMessage += ' (Trial)';
-        if (activeSub.isBillingRetryPeriod) statusMessage += ' (Billing Issue!)';
+        if (activeSub.isBillingRetryPeriod) statusMessage += ' <span style="color:red;">(Billing Issue!)</span>';
     } else {
         // Check for the latest expired subscription to inform the user
         const latestExpired = store.verifiedPurchases
@@ -221,7 +229,7 @@ function renderUI() {
             statusMessage = `Subscription expired on ${expiry}. Please resubscribe.`;
         }
     }
-    statusEl.textContent = `Subscription Status: ${statusMessage}`;
+    statusEl.innerHTML = `Subscription Status: ${statusMessage}`; // Use innerHTML for potential styling spans
 
     // Render Subscription Products
     productsEl.innerHTML = store.products
@@ -236,6 +244,7 @@ function renderUI() {
                     const priceDetails = offer.pricingPhases.map(phase => {
                         let phaseDesc = `${phase.price}`;
                         if (phase.billingPeriod) {
+                           // Use formatDurationEN for better period display
                            phaseDesc += ` / ${Utils.formatDurationEN(phase.billingPeriod, { omitOne: true })}`;
                         }
                         if (phase.paymentMode === PaymentMode.FREE_TRIAL) {
@@ -288,12 +297,30 @@ function renderUI() {
          managementEl.innerHTML += `<button onclick="window.restoreSubs()">Restore Purchases</button>`;
     }
 }
+
+// Helper to format ISO durations (add this function or import if separate)
+if (!CdvPurchase.Utils) CdvPurchase.Utils = {}; // Ensure namespace exists
+if (!CdvPurchase.Utils.formatDurationEN) {
+    CdvPurchase.Utils.formatDurationEN = function(iso, options) {
+      if (!iso) return '';
+      const l = iso.length;
+      const n = iso.slice(1, l - 1);
+      if (n === '1') {
+        return options?.omitOne ?
+          ({ 'D': 'day', 'W': 'week', 'M': 'month', 'Y': 'year' }[iso[l - 1]]) || iso[l - 1]
+          : ({ 'D': '1 day', 'W': '1 week', 'M': '1 month', 'Y': '1 year' }[iso[l - 1]]) || iso[l - 1];
+      } else {
+        const u = ({ 'D': 'days', 'W': 'weeks', 'M': 'months', 'Y': 'years' }[iso[l - 1]]) || iso[l - 1];
+        return `${n} ${u}`;
+      }
+    }
+}
 ```
 
 **Step 7: Setup Event Listeners**
 
-*   **What:** Listen for product and receipt updates using `store.when()`.
-*   **Why:** To keep the UI synchronized with the latest data fetched from the stores and the validator.
+*   **What:** Listen for product and receipt updates using `store.when()`. Add listeners for `verified` and `receiptUpdated` to trigger UI refreshes based on the latest validated data.
+*   **Why:** To keep the UI synchronized with the latest subscription status fetched from the stores and the validator.
 
 Add this inside `initializeStore`:
 
@@ -305,20 +332,20 @@ console.log('Setting up event listeners...');
 store.when()
     .productUpdated(product => {
         console.log("Product updated: " + product.id);
-        // Find and update the product in our local state (appState.products)
+        // Update internal product state and re-render UI
         const index = appState.products.findIndex(p => p.id === product.id && p.platform === product.platform);
         if (index >= 0) appState.products[index] = product;
         else appState.products.push(product);
-        renderUI(); // Refresh the whole UI
+        renderUI();
     })
     .receiptUpdated(() => {
         console.log("Receipt updated (local)");
-        // Re-render to potentially update purchase/owned status based on local data
+        // Re-render UI in case local changes affect purchasability, but rely on verified for status
         renderUI();
     })
     .verified(() => {
         console.log("Receipt verified");
-        // Re-render to update purchase/owned status based on verified data
+        // CRITICAL: Re-render UI to reflect the latest verified subscription status
         renderUI();
     });
     // We will add .approved() and .finished() handlers in the platform-specific

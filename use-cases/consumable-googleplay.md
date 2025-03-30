@@ -1,251 +1,99 @@
-# Consumable Product with Google Play
+# Consumable on Google Play
+
+This use case explains how to implement a consumable product (like virtual currency or extra lives) on Android using Google Play.
 
 
-We will proceed in steps: setup, initialization, presentation and purchase.
+## Initialization
 
-First some setup.
-
-1. Install NodeJS and Cordova
-2. Setup your Cordova project
-3. Prepare an Application on Google Play
-4. Install the In-App Purchases plugin
-5. Build a Release APK
-6. Create a Product on Google Play
-7. Upload a Release APK to Google Play
-8. Prepare Test Accounts
-
-Of course you can skip the first few steps if you already have a working application you want to integrate the code into.
-
-Once we have a Cordova application with IAP support enabled and everything is in place on Google Play, we will get into some coding.
-
-1. Initialize the in-app purchase plugin
-2. Handle the purchase events
-3. Deliver our product
-4. Secure the transactions
+We use the generic initialization structure and provide specific implementations for rendering the UI and granting the consumable item (e.g., coins).
 
 
-## Setup for Google Play
+```javascript
+// --- Specific Implementations for Consumable Coins ---
 
-### 1. Install Dependencies
+// Example: Store balance in localStorage (INSECURE - use SecureStorage or backend!)
+let userCoinBalance = 0;
+const COIN_BALANCE_KEY = 'userCoinBalance';
+const COINS_PER_PURCHASE = 100; // Amount granted by MY_CONSUMABLE_ID
 
+function loadBalance() {
+    try {
+        userCoinBalance = parseInt(window.localStorage.getItem(COIN_BALANCE_KEY) || '0');
+    } catch (e) {
+        log('Error loading balance: ' + e);
+        userCoinBalance = 0;
+    }
+}
+function saveBalance() {
+    try {
+        window.localStorage.setItem(COIN_BALANCE_KEY, userCoinBalance.toString());
+    } catch (e) {
+        log('Error saving balance: ' + e);
+    }
+}
 
-Needless to say, make sure you have the tools installed on your machine. During the writing of this guide, I've been using the following environment:
+// This function updates the UI based on the coin balance
+function renderUI() {
+    const messagesEl = document.getElementById('messages');
+    if (messagesEl) messagesEl.textContent = 'Store ready.'; // Clear status message
 
-* **NodeJS** v10.12.0
-* **Cordova** v8.1.2
-* **macOS** 10.14.1
+    const balanceEl = document.getElementById('balance');
+    if (balanceEl) {
+        balanceEl.textContent = 'Coins: ' + userCoinBalance;
+    }
 
-I'm not saying it won't work with different version. If you start fresh, it might be a good idea to use an up-to-date environment.
+    // Re-render product display
+    const product = CdvPurchase.store.get('consumable1_gp'); // Use your actual Google Play Product ID
+    if (product) renderProduct(product);
+}
 
+// Function to grant the consumable item (coins)
+function grantCoins(amount) {
+    log(`Granting ${amount} coins.`);
+    userCoinBalance += amount;
+    saveBalance(); // Persist the new balance
+    renderUI(); // Update the displayed balance
+}
 
-### 2. Create Cordova Project
+// function renderProduct(product) { ... }
+// function requestPurchase(platform, productId, offerId) { ... }
+// function updateMessages(text) { ... }
+// function log(msg) { ... }
 
+// --- Final Setup ---
 
-Making sure we have a Cordova project that we can build for Android and/or iOS.
+// Re-register product with correct platform
+function initStore() {
+    const { store, ProductType, Platform } = CdvPurchase;
+    // ... other init steps from included file, excluding the generic registration...
 
-#### Create the project
+    store.register({
+        id: 'consumable1_gp', // Use your actual Google Play Product ID
+        type: ProductType.CONSUMABLE,
+        platform: Platform.GOOGLE_PLAY
+    });
 
-#### Create the project
+    // *** Setup Validator (Recommended) ***
+    // store.validator = "YOUR_VALIDATOR_URL";
 
-If it isn't already created:
+    // ... rest of initStore from included file (event listeners, initialize call) ...
+}
 
-```text
-$ cordova create CordovaProject cc.fovea.purchase.demo PurchaseNC
-Creating a new cordova project.
+// Load initial balance and render UI on device ready
+document.addEventListener('deviceready', () => {
+    loadBalance();
+    renderUI();
+}, false);
 ```
 
-For details about what those parameters are:
+## Purchase Flow
 
-```text
-$ cordova help create
-```
+The core purchase flow logic (`approved`, `verified`, `finished`) is in the included generic section. For Google Play consumables:
 
-Note, feel free to pick a different project ID and name. Remember whatever values you put in here.
+1.  **Granting the Item:** The `grantCoins` function (called after `approved` without validation, or after `verified` with validation) adds the coins to the user's balance and saves it.
+2.  **Finishing/Consuming:** The `transaction.finish()` or `receipt.finish()` call consumes the purchase on Google Play via the Billing Library's `consumeAsync`, allowing it to be purchased again.
 
-Let's head into our cordova project's directory \(should match whatever we used in the previous step.
+*(Note: Validation adds a layer of security against replay attacks or fraudulent claims, even for consumables, especially if the balance is important or synced server-side).*
 
-```text
-$ cd CordovaProject
-```
-#### Add Android platform
-
-```text
-$ cordova platform add android
-```
-
-Will output:
-
-```text
-    Using cordova-fetch for cordova-android@~11.0.0
-    Adding android project...
-    [...]
-    Saving android@~11.0.0 into config.xml file ...
-```
-
-Let's check if that builds.
-
-```text
-$ cordova build android
-```
-
-Which outputs:
-
-```text
-    Android Studio project detected
-    Starting a Gradle Daemon (subsequent builds will be faster)
-    [...]
-    BUILD SUCCESSFUL in 1m 49s
-    Built the following apk(s):
-    __EDITED__/platforms/android/app/build/outputs/apk/debug/app-debug.apk
-```
-
-Hopefully there's no problems with our Android build chain. If you do have problems, fixing it is out of scope from this guide but it's required!
-
-
-### 3. Create Google Play Application
-
-
-Make sure we have a Google Play application created and configured.
-
-### Create the App
-
-* Open the [Google Play Console](https://play.google.com/apps/publish).
-* Click "Create Application", fill in the required fields.
-
-{% hint style="info" %}
-Need more help? I recommend you check [Google's own documentation](https://support.google.com/googleplay/android-developer/answer/113469?hl=en&ref_topic=7072031). It's well detailed, easy to follow and probably the most up-to-date resource you can find.
-{% endhint %}
-
-
-### 4. Install Cordova Purchase Plugin
-
-
-To install the plugin, we will use the usual `cordova plugin add` command.
-
-```text
-cordova plugin add cordova-plugin-purchase"
-```
-
-Now let's try to build.
-
-```text
-cordova build android
-```
-
-Successful build?
-
-```text
-[...]
-BUILD SUCCESSFUL in 2s
-```
-
-All good! Seems like we can build an app with support for the Billing API.
-
-Let's now prepare a release APK.
-
-
-### 5. Android Release APK
-
-
-To generate a release build, I generally use the following script: [android-release.sh](https://gist.github.com/j3k0/28f60a7d5622508634d09f94c59d6dfc)
-
-The script calls `cordova build android --release` with the correct command line arguments. It requires you have generated a `keystore` file for your application already.
-
-If you haven't generated a keystore file for your application yet, you can use the following command line:
-
-```text
-keytool -genkey -v -keystore android-release.keystore -alias release \
--keyalg RSA -keysize 2048 -validity 10000
-```
-
-I'll ask you a few questions. The only tricky one is "Do you wan't to use the same password for the alias?", the answer is _yes_. Please note that the above command defines the keystore's `alias` as **release**, you can use any value, but just remember the value you chose.
-
-Keep the `android-release.keystore` file in a safe place, backup it everywhere you can! Don't loose it, don't loose the password. You won't EVER be able to update your app on Google Play without it!
-
-Then build.
-
-```text
-$ export KEYSTORE_ALIAS=release
-$ export KEYSTORE_PASSWORD=my_password
-$ ./android-release.sh
-```
-
-Replace `$KEYSTORE_ALIAS` and `$KEYSTORE_PASSWORD` with whatever match your those from your `keystore` file...
-
-The output should end with a line like this:
-
-```text
-Build is ready:
-
-<SOME_PATH>/android-release-20181015-1145.apk
-```
-
-There you go, this is your first release APK.
-
-
-### 6. Upload to Google Play
-
-
-Once you have built your release APK, you need to upload it to Google Play in order to be able to test In-App Purchases. In-App Purchase is not enabled in "debug build". In order to test in-app purchase, your APK needs to be signed with your release signing key. In order for Google to know your release signing key for this application, you need to upload a release APK:
-
-* Signed with this key.
-* Have the BILLING permission enabled
-  * it is done when you add the plugin to your project, so make sure you didn't skip this step.
-
-Google already provides [detailed resource on how to upload a release build](https://support.google.com/googleplay/android-developer/answer/7159011). What we want here is to:
-
-1. create an **internal testing release**
-2. **upload** it
-3. **publish** it \(privately probably\).
-
-Once you went over those steps, you can test your app with in-app purchase enabled without uploading to Google Play each time, but you need to sign the APK with the same "release" signing key.
-
-{% hint style="warning" %}
-Note that it might up to 24 hours for your IAP to work after you uploaded the first release APK.
-{% endhint %}
-
-
-### 7. Create In-App Products
-
-
-There is still a bit more preparatory work: we need to setup our in-app product.
-
-Back in the "Google Play Console", open the "Store presence" ⇒ "In-app products" section.
-
-![](../.gitbook/assets/google-play-in-app-products.png)
-
-If you haven't yet uploaded an APK, it'll warn you that you need to upload a *release* APK.
-
-Once this is done, you can create a product. Google offers 2 kinds of products:
-
-* Managed Products
-* Subscriptions
-
-The latest is for auto-renewing subscriptions, in all other cases, you should a "Managed Product".
-
-* Click the **CREATE** button.
-* Fill in all the required information \(title, description, prices\).
-* Make sure the Status is **ACTIVE**.
-* **SAVE**
-
-And we're done!
-
-{% hint style="info" %}
-There's might be some delay between creating a product on the Google Play Console and seeing it in your app. If your product doesn't show up after 24h, then you should start to worry.
-{% endhint %}
-
-
-### 8. Prepare Test Accounts
-
-
-To test your Google Play Billing implementation with actual in-app purchases, you must use a test account. By default, the only test account registered is the one that's associated with your developer account. You can register additional test accounts by using the Google Play Console.
-
-1. Navigate to Settings > Account details.
-2. In the License Testing section, add your tester's email addresses to Gmail accounts with testing access field.
-3. Save your changes.
-
-{% hint style="info" %}
-Testers can begin making purchases of your in-app products within 15 minutes.
-{% endhint %}
-
+## Android Specific Notes
 

@@ -1,15 +1,43 @@
-# Edit files
+# Contributing to the Documentation
 
-Edit the files named `use-cases/*.src.md`, `use-cases/sections/*` and `discovery` directories. Those markdown files are digested by [mardown-pp](https://github.com/amyreese/markdown-pp), a markdown preprocessor. This allows including files to compile into a single use case, without repeating too much of the same.
+Thank you for considering contributing to the `cordova-plugin-purchase` documentation! Clear and accurate documentation is vital for the community.
 
-- `use-cases/*.src.md` are the entrypoint for the various documented use cases.
-- `use-cases/sections` are sections potentially repeated in various use cases.
-- `use-cases/code` are code example. Having them in separate files allows code completion (and validation), which minimize risks of typo.
+## Editing Files
 
-# Build and Commit
+Please edit the **source markdown files** located in the repository, primarily:
 
-To generate the final files, run `./build.sh`. Make sure you have markdown-pp installed on your computer.
+*   **`use-cases/*.src.md`:** These are the main entry points for specific implementation guides (e.g., `subscription-appstore.src.md`). They use a preprocessor syntax to include shared content.
+*   **`use-cases/sections/*.md`:** Reusable sections of documentation included within the `*.src.md` files (e.g., setup steps, platform-specific notes).
+*   **`use-cases/code/*.js`:** JavaScript code examples included in the documentation. Keeping code in separate `.js` files helps with syntax checking and consistency.
+*   **`discover/*.md`:** Conceptual guides explaining IAP technology, the plugin's approach, and best practices like receipt validation.
+*   **`doc/*.md`:** Supporting documents like the migration guide and troubleshooting tips.
+*   **Root files:** `README.md`, `SUMMARY.md` (Table of Contents), etc.
 
-This will generate `use-cases/*.md` files for each `.src.md file`.
+These source files are processed by [markdown-pp](https://github.com/mcforge/markdown-pp) (a Markdown preprocessor) to generate the final documentation files (the `.md` files directly under `use-cases/`).
 
-Then you can open a PR with your proposed changes here: https://github.com/j3k0/cordova-plugin-purchase-documentation
+**Do NOT directly edit the `.md` files inside the `use-cases/` directory (e.g., `use-cases/subscription-appstore.md`). These are generated files and your changes will be overwritten.**
+
+The `!INCLUDE` directive is used within `.src.md` files to pull in content from the `sections/` and `code/` directories.
+
+## Building the Documentation
+
+Before committing your changes, you need to generate the final markdown files.
+
+1.  **Install markdown-pp:** If you don't have it, install it globally:
+    ```bash
+    npm install -g markdown-pp
+    ```
+2.  **Run the build script:** From the root directory of the documentation repository, execute:
+    ```bash
+    ./build.sh
+    ```
+    This script will find all `*.src.md` files in the `use-cases/` directory and process them using `markdown-pp`, generating the corresponding `.md` output files in the same directory.
+
+## Committing Changes
+
+1.  Edit the relevant `.src.md`, `sections/*.md`, `code/*.js`, `discover/*.md`, or `doc/*.md` files.
+2.  Run `./build.sh` to generate the final `.md` files.
+3.  **Commit ALL modified files**, including both the source files you edited (e.g., `*.src.md`) and the generated output files (e.g., `*.md`).
+4.  Open a Pull Request with your proposed changes against the main repository: [https://github.com/j3k0/cordova-plugin-purchase-documentation](https://github.com/j3k0/cordova-plugin-purchase-documentation)
+
+Thank you for helping improve the documentation!

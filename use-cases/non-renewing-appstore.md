@@ -26,6 +26,8 @@ The App Store Connect interface and Apple's requirements change often. This guid
 **Always refer to the official Apple documentation as the primary source:**
 *   [App Store Connect Help](https://help.apple.com/app-store-connect/)
 *   [In-App Purchase Configuration](https://developer.apple.com/help/app-store-connect/configure-in-app-purchase-settings/overview-for-configuring-in-app-purchases)
+*   [Setting Up StoreKit Testing in Xcode](https://developer.apple.com/documentation/storekit/setting_up_storekit_testing_in_xcode) (Recommended for local testing)
+*   [Generating Keys (Shared Secret)](https://developer.apple.com/documentation/appstoreserverapi/creating_api_keys_to_use_with_the_app_store_server_api) (Needed for Receipt Validation)
 {% endhint %}
 
 This section covers the essential steps for setting up your iOS/macOS app for In-App Purchases with the Cordova plugin.
@@ -76,9 +78,9 @@ $ cordova platform add ios
 ### 3. Setup AppStore Application & Agreements
 
 *   **Apple Developer Account:** Ensure you have an active Apple Developer Program membership.
-*   **App Record:** Create an App Record for your application in [App Store Connect](https://appstoreconnect.apple.com).
-*   **Agreements, Tax, and Banking:** Ensure all agreements are accepted and banking/tax information is complete in the "Agreements, Tax, and Banking" section of App Store Connect. Your app won't be able to process purchases otherwise.
-*   **Bundle ID:** Verify the Bundle ID in App Store Connect exactly matches the `id` in your `config.xml`.
+*   **App Record:** Create an App Record for your application in [App Store Connect](https://appstoreconnect.apple.com). You'll need a unique Bundle ID.
+*   **Agreements, Tax, and Banking:** This is **critical**. Navigate to the "Agreements, Tax, and Banking" section in App Store Connect. Ensure all agreements, especially the "Paid Apps" agreement, are reviewed, accepted, and **Active**. Provide complete banking and tax information. Your app won't be able to process *any* purchases (even free trials or sandbox tests) if this section isn't fully set up and active.
+*   **Bundle ID:** Go to "App Information" for your app record. Verify the Bundle ID listed exactly matches the `id` attribute in your project's `config.xml` widget tag (`<widget id="com.yourcompany.yourapp" ...>`).
 
 
 First, I assume you have an Apple developer account. If not time to register, because it's mandatory.
@@ -96,7 +98,30 @@ Since you are here, let's retrieve the Shared Secret. You can use an App-Specifi
 
 
 
-### 4. Install and Prepare with XCode
+### 4. Install Plugin and Configure Xcode Project
+
+Install the plugin:
+```bash
+cordova plugin add cordova-plugin-purchase
+```
+
+Then, configure your Xcode project:
+
+1.  Prepare the Cordova iOS platform:
+    ```bash
+    cordova prepare ios
+    ```
+2.  Open your project in Xcode (use the `.xcworkspace` file if it exists, otherwise the `.xcodeproj`):
+    ```bash
+    open platforms/ios/*.xcworkspace  # or .xcodeproj if no workspace
+    ```
+3.  Select your project target in the Project Navigator (the left sidebar).
+4.  Go to the **"Signing & Capabilities"** tab.
+5.  Ensure a valid "Team" is selected and signing (Development or Distribution) is configured.
+6.  Click **"+ Capability"** near the top.
+7.  Search for and add **"In-App Purchase"**. It should appear in the capabilities list.
+
+    !INCLUDE "../images/xcode-capability-in-app-purchase.md"
 
 
 When you only require iOS support, no need for special command line arguments:
@@ -127,8 +152,11 @@ Now try to **build the app from Xcode**. It might point you to a few stuff it mi
 
 Successful build? You're good to go!
 
+*Note: The included section primarily repeats the capability step, ensure it's consistent.*
 
-### 5. Create In-App Products
+### 5. Create In-App Products in App Store Connect
+
+You need to define each virtual item you want to sell within App Store Connect.
 
 ### 5. Create In-App Products
 
@@ -143,7 +171,9 @@ Even if that sounds stupid, you need to fill-in ALL metadata in order to use the
 The process is well explained by Apple, so I'll not enter into more details.
 
 
-### 6. Create Test Users
+### 6. Create Sandbox Test Users
+
+Real purchases cost real money. For testing, you need **Sandbox Apple IDs**.
 
 ### 6. Create Test Users
 
@@ -154,6 +184,11 @@ You can do so from the AppStore Connect website, in the _Users & Access_ section
 From there, it's just a matter of hitting "+" and filling the form. While you're at it, create 2-3 test users: it will be handy for testing.
 
 ![](../.gitbook/assets/appstore-test-users.png)
+
+
+### 7. (Recommended) Setup Receipt Validation Service
+
+Server-side validation is essential for security and reliable subscription management.
 
 
 ## Code Implementation
@@ -194,34 +229,86 @@ We will now create a new JavaScript file and load it from the HTML. The code bel
 
 {% code lineNumbers="true" %}
 ```javascript
-document.addEventListener('deviceready', onDeviceReady);
+// Wait for Cordova to be ready
+document.addEventListener('deviceready', onDeviceReady, false);
 
 function onDeviceReady() {
+  console.log('Device is ready.');
 
-  if (!window.CdvPurchase) {
-      console.log('CdvPurchase is not available');
+  // Check if the CdvPurchase plugin is available
+  if (!window.CdvPurchase || !window.CdvPurchase.store) {
+      console.error('CdvPurchase plugin is not available. Ensure it is installed and loaded correctly.');
+      document.getElementById('app').innerHTML = 'Error: Purchase plugin not found.';
       return;
   }
-  const {store} = CdvPurchase;
 
+  // Alias the store object for easier access
+  const { store, LogLevel, ErrorCode } = CdvPurchase;
+  console.log('CdvPurchase.store object found, version ' + store.version);
+
+  // Optional: Set the verbosity level for debugging
+  // LogLevel.DEBUG provides the most detailed logs
+  store.verbosity = LogLevel.DEBUG;
+
+  // Setup a global error handler for the store
   store.error(function(error) {
-      console.log('ERROR ' + error.code + ': ' + error.message);
+      console.error('STORE ERROR: Code=' + error.code + ' Message=' + error.message);
+      // Display the error to the user in a dedicated element
+      const errorEl = document.getElementById('error-display'); // Ensure this element exists in your HTML
+      if (errorEl) {
+          errorEl.textContent = 'Error: ' + error.message;
+          // Optionally clear the error after a few seconds
+          setTimeout(() => { if (errorEl.textContent === 'Error: ' + error.message) errorEl.textContent = ''; }, 8000);
+      }
   });
 
+  // Setup a listener for when the store is ready
+  // This guarantees that initialize() has completed successfully
   store.ready(function() {
-    console.log("CdvPurchase is ready");
+    console.log("CdvPurchase store is ready.");
+    // Initial UI refresh after the store is ready
+    refreshUI();
   });
- 
+
+  // Initialize the store and related components
   initializeStore();
+
+  // Perform an initial UI refresh (might show loading states)
   refreshUI();
 }
 
 function initializeStore() {
-  // We will implement this soon
+  console.log('Calling initializeStore()...');
+  const { store } = CdvPurchase; // Get store instance again
+
+  // TODO: Register products using store.register([...])
+  console.log('Registering products...');
+  // store.register([...]); // Add your product registrations here
+
+  // TODO: Set the validator URL or function
+  console.log('Setting validator...');
+  // store.validator = "YOUR_VALIDATOR_URL";
+
+  // TODO: Setup event listeners using store.when()...
+  console.log('Setting up event listeners...');
+  // store.when()...
+
+  // TODO: Call store.initialize([...platforms])
+  console.log('Calling store.initialize()...');
+  // store.initialize([...]);
 }
 
 function refreshUI() {
-  // Soon...
+  console.log('Calling refreshUI()...');
+  // TODO: Implement UI updates based on product/purchase status
+  // This function will be called by event listeners and after initialization.
+  const appEl = document.getElementById('app');
+  if (appEl) {
+      // Example: Display loading state or initial content
+      // appEl.innerHTML = '<p>Store is initializing...</p>';
+  } else {
+      console.error('App element not found for UI refresh.');
+  }
 }
 ```
 {% endcode %}
@@ -319,7 +406,7 @@ function initializeStore() {
         return;
     }
 
-    const { store, ProductType, Platform, LogLevel } = CdvPurchase;
+    const { store, ProductType, Platform, LogLevel, Utils } = CdvPurchase; // Added Utils
     console.log('Store plugin version: ' + store.version);
 
     // Optional: Set log level for debugging
@@ -340,8 +427,16 @@ function renderUI() {
 }
 
 // --- Action Functions (stubs for now) ---
-// window.subscribe = function(productId, platform, offerId) { ... };
-// window.restoreSubs = function() { ... };
+window.subscribe = function(productId, platform, offerId) {
+    // (Implementation in platform-specific purchase section)
+    console.log(`Placeholder: subscribe(${productId}, ${platform}, ${offerId})`);
+    alert('Purchase logic to be added.');
+};
+window.restoreSubs = function() {
+    // (Implementation in platform-specific purchase section)
+    console.log('Placeholder: restoreSubs()');
+    alert('Restore logic to be added.');
+};
 ```
 
 **Step 3: Register Subscription Products**
@@ -415,8 +510,8 @@ store.error(function(error) {
 
 **Step 6: Implement UI Rendering (`renderUI`)**
 
-*   **What:** Create the `renderUI` function. It should display the overall subscription status (derived from verified purchases) and the details of each available subscription product, including a "Subscribe" button if appropriate.
-*   **Why:** Shows the user their current status and available options.
+*   **What:** Create the `renderUI` function. It should display the overall subscription status (derived from **verified** purchases) and the details of each available subscription product, including a "Subscribe" or "Manage" button as appropriate.
+*   **Why:** Shows the user their current status and available options, relying on validated data for accuracy.
 
 Replace the placeholder `renderUI` function with this:
 
@@ -425,7 +520,7 @@ Replace the placeholder `renderUI` function with this:
 
 function renderUI() {
     console.log('Rendering UI with current state:', appState);
-    const { store, ProductType, Platform, RecurrenceMode, PaymentMode, Utils } = CdvPurchase; // Import necessary types/enums
+    const { store, ProductType, Platform, RecurrenceMode, PaymentMode, Utils, RenewalIntent } = CdvPurchase; // Import necessary types/enums
 
     const statusEl = document.getElementById('subscription-status');
     const productsEl = document.getElementById('subscription-products');
@@ -454,9 +549,9 @@ function renderUI() {
         const expiry = activeSub.expiryDate ? new Date(activeSub.expiryDate).toLocaleDateString() : 'N/A';
         const productName = store.get(activeSub.id, activeSub.platform)?.title ?? activeSub.id;
         statusMessage = `Subscribed to ${productName} (Expires: ${expiry})`;
-        if (activeSub.renewalIntent === 'Lapse') statusMessage += ' - Will Not Renew';
+        if (activeSub.renewalIntent === RenewalIntent.LAPSE) statusMessage += ' - Will Not Renew';
         if (activeSub.isTrialPeriod) statusMessage += ' (Trial)';
-        if (activeSub.isBillingRetryPeriod) statusMessage += ' (Billing Issue!)';
+        if (activeSub.isBillingRetryPeriod) statusMessage += ' <span style="color:red;">(Billing Issue!)</span>';
     } else {
         // Check for the latest expired subscription to inform the user
         const latestExpired = store.verifiedPurchases
@@ -467,7 +562,7 @@ function renderUI() {
             statusMessage = `Subscription expired on ${expiry}. Please resubscribe.`;
         }
     }
-    statusEl.textContent = `Subscription Status: ${statusMessage}`;
+    statusEl.innerHTML = `Subscription Status: ${statusMessage}`; // Use innerHTML for potential styling spans
 
     // Render Subscription Products
     productsEl.innerHTML = store.products
@@ -482,6 +577,7 @@ function renderUI() {
                     const priceDetails = offer.pricingPhases.map(phase => {
                         let phaseDesc = `${phase.price}`;
                         if (phase.billingPeriod) {
+                           // Use formatDurationEN for better period display
                            phaseDesc += ` / ${Utils.formatDurationEN(phase.billingPeriod, { omitOne: true })}`;
                         }
                         if (phase.paymentMode === PaymentMode.FREE_TRIAL) {
@@ -534,12 +630,30 @@ function renderUI() {
          managementEl.innerHTML += `<button onclick="window.restoreSubs()">Restore Purchases</button>`;
     }
 }
+
+// Helper to format ISO durations (add this function or import if separate)
+if (!CdvPurchase.Utils) CdvPurchase.Utils = {}; // Ensure namespace exists
+if (!CdvPurchase.Utils.formatDurationEN) {
+    CdvPurchase.Utils.formatDurationEN = function(iso, options) {
+      if (!iso) return '';
+      const l = iso.length;
+      const n = iso.slice(1, l - 1);
+      if (n === '1') {
+        return options?.omitOne ?
+          ({ 'D': 'day', 'W': 'week', 'M': 'month', 'Y': 'year' }[iso[l - 1]]) || iso[l - 1]
+          : ({ 'D': '1 day', 'W': '1 week', 'M': '1 month', 'Y': '1 year' }[iso[l - 1]]) || iso[l - 1];
+      } else {
+        const u = ({ 'D': 'days', 'W': 'weeks', 'M': 'months', 'Y': 'years' }[iso[l - 1]]) || iso[l - 1];
+        return `${n} ${u}`;
+      }
+    }
+}
 ```
 
 **Step 7: Setup Event Listeners**
 
-*   **What:** Listen for product and receipt updates using `store.when()`.
-*   **Why:** To keep the UI synchronized with the latest data fetched from the stores and the validator.
+*   **What:** Listen for product and receipt updates using `store.when()`. Add listeners for `verified` and `receiptUpdated` to trigger UI refreshes based on the latest validated data.
+*   **Why:** To keep the UI synchronized with the latest subscription status fetched from the stores and the validator.
 
 Add this inside `initializeStore`:
 
@@ -551,20 +665,20 @@ console.log('Setting up event listeners...');
 store.when()
     .productUpdated(product => {
         console.log("Product updated: " + product.id);
-        // Find and update the product in our local state (appState.products)
+        // Update internal product state and re-render UI
         const index = appState.products.findIndex(p => p.id === product.id && p.platform === product.platform);
         if (index >= 0) appState.products[index] = product;
         else appState.products.push(product);
-        renderUI(); // Refresh the whole UI
+        renderUI();
     })
     .receiptUpdated(() => {
         console.log("Receipt updated (local)");
-        // Re-render to potentially update purchase/owned status based on local data
+        // Re-render UI in case local changes affect purchasability, but rely on verified for status
         renderUI();
     })
     .verified(() => {
         console.log("Receipt verified");
-        // Re-render to update purchase/owned status based on verified data
+        // CRITICAL: Re-render UI to reflect the latest verified subscription status
         renderUI();
     });
     // We will add .approved() and .finished() handlers in the platform-specific
@@ -645,6 +759,7 @@ window.restoreSubs = function() {
 ---
 
 This sets up the generic part for handling subscriptions. The UI will now display product information and subscription status based on *verified* data (once available). The next steps involve implementing the purchase flow (`store.order` call within `window.subscribe`, and the `.approved()`, `.verified()`, `.finished()` handlers) specific to either the App Store or Google Play.
+
 *Note: Adapt the UI logic in `subscription-generic-initialization.md`. The concept of `product.owned` is less relevant here; you need to track ownership and expiry based on purchase history (likely stored locally or synced via your backend). Show "Access until [Your Calculated Expiry Date]".*
 
 ### Purchase Flow
@@ -658,111 +773,239 @@ Handling the purchase flow for non-renewing subscriptions on Apple platforms inv
 *   Implement logic to check the expiry date to grant or deny access to the content/service.
 *   If you support user accounts, you need to sync this entitlement across the user's devices.
 
-### Purchase Flow (iOS/macOS Non-Renewing)
+### Purchase Flow (iOS/App Store Non-Renewing Subscription)
 
-Handling the purchase flow for non-renewing subscriptions on Apple platforms involves purchasing the product like any other, acknowledging it, and then managing the entitlement period within your application logic. Apple does not automatically track the expiry or renewal for this type of subscription.
+Handling non-renewing subscriptions on iOS/App Store involves acknowledging the purchase and, crucially, calculating and storing the access duration within your application logic, as Apple does not manage this period.
 
-1.  **Initiate Order:**
-    When the user clicks the "Subscribe" or "Extend" button, call `store.order()` on the relevant offer.
+**Step 1: Implement the Purchase Action**
 
-    ```javascript
-    function purchaseNonRenewingSubscription() {
-        const offer = store.get('my_non_renewing_sub_id', Platform.APPLE_APPSTORE)?.getOffer();
-        if (offer) {
-            store.order(offer)
-                .then(result => {
-                    if (result && result.isError) {
-                        // Handle error (e.g., payment cancelled)
-                        console.error("Order failed: " + result.message);
-                    } else {
-                        // Optional: Update UI to show processing state if needed
-                        console.log("Order successful, waiting for approval/verification.");
-                    }
-                });
+*   **What:** Implement the function called by your "Subscribe" or "Extend Access" button (let's call it `window.purchaseNonRenewing`) to initiate the order via `store.order()`.
+*   **Why:** Starts the App Store purchase process for the non-renewing product.
+
+Create this function in `www/js/index.js`:
+
+```javascript
+// In js/index.js
+
+// Make globally accessible for button onclick
+window.purchaseNonRenewing = function() {
+    const productId = 'non_renewing_sub_1_month'; // <<< YOUR Non-Renewing Product ID
+    console.log(`Purchase button clicked for non-renewing: ${productId}`);
+    const { store, Platform } = CdvPurchase;
+
+    const product = store.get(productId, Platform.APPLE_APPSTORE);
+    const offer = product?.getOffer(); // Assuming a default offer
+
+    if (offer) {
+        console.log(`Initiating order for non-renewing offer: ${offer.id}`);
+        // Optional: Update UI to show processing
+        // setState({ isPurchasing: true });
+
+        store.order(offer)
+            .then(result => {
+                if (result && result.code === store.ErrorCode.PAYMENT_CANCELLED) {
+                    console.log("User cancelled the purchase.");
+                    // setState({ isPurchasing: false });
+                } else if (result && result.isError) {
+                    console.error("Order initiation failed: " + result.message);
+                    // setState({ isPurchasing: false, error: result.message });
+                } else {
+                    console.log("Order initiated. Waiting for approval...");
+                }
+            })
+            .catch(err => {
+                 console.error("Unexpected error during non-renewing order:", err);
+                 // setState({ isPurchasing: false, error: 'Unexpected error' });
+            });
+    } else {
+        console.error(`Cannot purchase: Product (${productId}) or offer not found.`);
+        alert('Unable to purchase. Product details might still be loading.');
+    }
+}
+```
+
+**Step 2: Handle the "Approved" State -> Verify (Optional but Recommended)**
+
+*   **What:** Add an `.approved()` listener. Verification is not strictly mandatory for *functionality* like consumables, but highly recommended for non-renewing subs to get an accurate `purchaseDate` from Apple's servers, which is crucial for calculating the expiry.
+*   **Why:** An accurate start date ensures the user gets the correct access duration.
+
+Add this within the `store.when()` chain in `initializeStore`:
+
+```javascript
+// Inside initializeStore() -> store.when() chain
+
+    .approved(transaction => {
+        console.log(`Transaction ${transaction.transactionId} approved for ${transaction.products[0]?.id}.`);
+
+        // Verify to get accurate purchaseDate, though not strictly required for unlock
+        if (store.validator) {
+            console.log('Verification pending for ' + transaction.transactionId);
+            // setState({ isVerifying: true });
+            transaction.verify();
         } else {
-            console.error("Offer not found for non-renewing subscription.");
+             console.warn("Receipt validator not configured. Using local date for expiry calculation.");
+             // Proceed without verification, using potentially less accurate local date
+             grantAccessAndFinish(transaction);
+        }
+    })
+    // Add .verified() and .finished() next
+```
+
+**Step 3: Handle the "Verified" State (Recommended)**
+
+*   **What:** Add a `.verified()` listener. Runs after successful validation.
+*   **Why:** This provides the most reliable `purchaseDate`. Use this point to calculate expiry, grant access, and finish the transaction.
+
+Add this within the `store.when()` chain:
+
+```javascript
+// Inside initializeStore() -> store.when() chain
+
+    .verified(receipt => {
+        console.log(`Receipt verified for transaction ${receipt.transactions[0]?.transactionId}`);
+        // setState({ isVerifying: false });
+
+        // Find the relevant transaction from the product ID
+        const verifiedTransaction = receipt.transactions
+            .find(t => t.products[0]?.id === 'non_renewing_sub_1_month'); // <<< YOUR Non-Renewing Product ID
+
+        if (verifiedTransaction) {
+            grantAccessAndFinish(verifiedTransaction);
+        } else {
+            console.error("Verified receipt didn't contain the expected non-renewing transaction?");
+            receipt.finish(); // Finish anyway to clear queue if possible
+        }
+    })
+    // Add .finished() next
+```
+
+**Step 4: Handle the "Finished" State**
+
+*   **What:** Add a `.finished()` listener. Fires after `transaction.finish()` completes.
+*   **Why:** Confirms acknowledgment with the App Store.
+
+Add this within the `store.when()` chain:
+
+```javascript
+// Inside initializeStore() -> store.when() chain
+
+    .finished(transaction => {
+        console.log(`Transaction ${transaction.transactionId} finished for ${transaction.products[0]?.id}.`);
+        // Access should already be granted. Update UI if needed.
+        // setState({ isPurchasing: false, isVerifying: false });
+        refreshAccessUI(); // You'll need a function to display access expiry
+    });
+
+// --- Final Initialization Call ---
+store.initialize(...).then(...);
+```
+
+**Step 5: Implement Access Granting, Expiry Calculation, and Finishing**
+
+*   **What:** Create the `grantAccessAndFinish` function. This calculates the expiry date based on the product's duration and the transaction's `purchaseDate`, stores this expiry date persistently, updates the UI, and calls `transaction.finish()`.
+*   **Why:** This is the core logic for non-renewing subscriptions. Your app manages the entitlement period. `finish()` acknowledges the transaction with Apple.
+
+Add this new function to `www/js/index.js`:
+
+```javascript
+// In js/index.js
+
+// Key for storing expiry date
+const ACCESS_EXPIRY_KEY = 'myServiceAccessExpiry';
+
+function grantAccessAndFinish(transaction) {
+    const productId = transaction.products[0]?.id;
+    console.log(`Granting access for non-renewing subscription ${productId}, transaction ${transaction.transactionId}...`);
+
+    // 1. Determine duration based on productId (e.g., from a config map)
+    let durationMonths = 0;
+    if (productId === 'non_renewing_sub_1_month') { // <<< YOUR Non-Renewing Product ID
+        durationMonths = 1;
+    } else if (productId === 'non_renewing_sub_1_year') {
+        durationMonths = 12;
+    } // Add other durations as needed
+
+    if (durationMonths === 0) {
+        console.error(`Unknown duration for product ${productId}. Cannot grant access.`);
+        transaction.finish(); // Finish anyway to clear the queue
+        return;
+    }
+
+    // 2. Get purchase date (use verified date if available, else fallback)
+    // The purchaseDate from a VERIFIED transaction is more reliable.
+    const purchaseDate = transaction.purchaseDate || new Date(); // Fallback to current time if date missing
+
+    // 3. Calculate new expiry date
+    // Check existing expiry first if extending access is allowed
+    const currentExpiryStr = window.localStorage.getItem(ACCESS_EXPIRY_KEY);
+    let currentExpiry = currentExpiryStr ? new Date(currentExpiryStr) : new Date(0);
+    // Start new duration from now or from the end of current access, whichever is later
+    const startDate = Math.max(Date.now(), currentExpiry.getTime());
+    const newExpiryDate = new Date(startDate);
+    newExpiryDate.setMonth(newExpiryDate.getMonth() + durationMonths);
+
+    console.log(`Purchase Date: ${purchaseDate.toISOString()}`);
+    console.log(`Current Expiry: ${currentExpiry.toISOString()}`);
+    console.log(`Calculated New Expiry: ${newExpiryDate.toISOString()} (Duration: ${durationMonths} months)`);
+
+    // 4. Store the new expiry date persistently
+    window.localStorage.setItem(ACCESS_EXPIRY_KEY, newExpiryDate.toISOString());
+
+    // 5. Refresh UI to show updated access period
+    refreshAccessUI(); // Implement this function
+    alert(`Access granted/extended until ${newExpiryDate.toLocaleDateString()}!`);
+
+    // 6. Finish the transaction with the App Store
+    console.log(`Finishing transaction ${transaction.transactionId}...`);
+    transaction.finish();
+}
+
+// --- UI Refresh for Access ---
+// You need a function to display the expiry date
+function refreshAccessUI() {
+    const expiryString = window.localStorage.getItem(ACCESS_EXPIRY_KEY);
+    const accessStatusEl = document.getElementById('access-status'); // Add this element to your HTML
+    if (accessStatusEl) {
+        if (expiryString) {
+            const expiryDate = new Date(expiryString);
+            if (expiryDate > new Date()) {
+                accessStatusEl.textContent = `Access valid until: ${expiryDate.toLocaleDateString()}`;
+            } else {
+                accessStatusEl.textContent = 'Access expired.';
+            }
+        } else {
+            accessStatusEl.textContent = 'No access.';
         }
     }
-    ```
+     // Also refresh product button states
+    const product = CdvPurchase.store.get('non_renewing_sub_1_month'); // Use your product ID
+    if (product) refreshProductUI(product); // Assuming refreshProductUI exists
+}
 
-2.  **Handle Approval & Verification (Optional but Recommended):**
-    Set up listeners for the `approved` and `verified` states. Verification is useful for obtaining the `purchaseDate` accurately from Apple's servers, which you'll need to calculate the expiry.
+// Call refreshAccessUI on startup too
+document.addEventListener('deviceready', refreshAccessUI);
+```
 
-    ```javascript
-    // In your store initialization (e.g., inside onDeviceReady or initStore)
-    store.when()
-        .approved(transaction => {
-            // Optional: Verify the transaction to get accurate purchaseDate
-            // and confirm legitimacy.
-            if (store.validator) {
-                transaction.verify();
-            } else {
-                // No validator, proceed directly to finish/acknowledge
-                // Note: transaction.purchaseDate might be less reliable without validation.
-                acknowledgePurchase(transaction);
-            }
-        })
-        .verified(receipt => {
-            // Acknowledgment is done after verification succeeds
-            const transaction = receipt.transactions.find(t => t.products[0]?.id === 'my_non_renewing_sub_id'); // Find the relevant transaction
-            if (transaction) {
-                acknowledgePurchase(transaction);
-            }
-        });
-    ```
+*   **Important:** You need to add an element with `id="access-status"` to your HTML to display the expiry information. The `refreshProductUI` function (from the generic section) should also be adapted if you want the purchase button label to change (e.g., "Extend Access" instead of "Subscribe").
 
-3.  **Acknowledge (Finish) the Purchase & Calculate Expiry:**
-    Call `transaction.finish()` to acknowledge the purchase with Apple. Crucially, you must then calculate and store the expiry date based on the product's defined duration and the transaction's `purchaseDate`.
+---
 
-    ```javascript
-    function acknowledgePurchase(transaction) {
-        // Grant entitlement based on the product purchased
-        // 1. Get the accurate purchase date (ideally from verified receipt if possible)
-        const purchaseDate = transaction.purchaseDate || new Date(); // Fallback to now if date missing
+**Build and Test (iOS/App Store Non-Renewing)**
 
-        // 2. Determine the duration from your product definition
-        const productDurationMonths = 6; // Example: Get this (e.g., 6 months) based on transaction.products[0].id
+Follow the standard iOS testing procedure:
 
-        // 3. Calculate expiry date
-        const expiryDate = new Date(purchaseDate);
-        expiryDate.setMonth(expiryDate.getMonth() + productDurationMonths);
+1.  **Prepare & Build:** `cordova prepare ios`, then open and build in Xcode.
+2.  **Sandbox Tester:** Ensure device is signed out of App Store, use Sandbox account when prompted by the app.
+3.  **Run:** Launch from Xcode on a physical device.
+4.  **Test Purchase:**
+    *   Tap the "Subscribe" (or "Extend Access") button.
+    *   Sign in with Sandbox Tester.
+    *   Confirm purchase.
+    *   Observe logs: `approved`, `verified` (if validator set), `Granting access...`, `Calculated New Expiry...`, `Finishing transaction...`, `finished`.
+    *   Verify the UI updates to show the calculated expiry date in the `#access-status` element.
+    *   **Restart the app:** Confirm the expiry date persists.
+    *   **Test Extension:** If applicable, purchase the same item again and verify the expiry date is correctly extended from the *previous* expiry date or *now*, whichever is later.
 
-        // 4. Store the expiry date persistently and associate with the user/device
-        //    This might involve localStorage, secure storage, or your backend.
-        //    If syncing across devices, ensure this is tied to the user's account.
-        window.localStorage.setItem('nonRenewingExpiry_' + transaction.products[0].id, expiryDate.toISOString());
-        console.log(`Access granted for ${transaction.products[0].id} until: ${expiryDate.toISOString()}`);
+---
 
-        // 5. Acknowledge the purchase with Apple AppStore
-        transaction.finish();
-
-        // 6. Refresh UI to show the new expiry date
-        refreshUI(); // Ensure your refreshUI reads the stored expiry date
-    }
-    ```
-
-4.  **Manage Entitlement:**
-    Your application must check the stored expiry date whenever the user tries to access the protected content or service. Sync this state if users can log into accounts on multiple devices.
-
-    ```javascript
-    function hasActiveNonRenewingAccess(productId) {
-        const expiryString = window.localStorage.getItem('nonRenewingExpiry_' + productId);
-        if (!expiryString) return false;
-        const expiryDate = new Date(expiryString);
-        return expiryDate > new Date();
-    }
-
-    // Example usage:
-    if (hasActiveNonRenewingAccess('my_non_renewing_sub_id')) {
-        // Show premium content
-    } else {
-        // Show purchase options
-    }
-    ```
-
-**Key Points:**
-
-*   **Acknowledge:** Always call `transaction.finish()`.
-*   **Track Expiry:** Your app *must* calculate, store, and check the expiry date. Apple does not manage this for non-renewing types.
-*   **Purchase Date:** Use the `transaction.purchaseDate`. Verification (`transaction.verify()`) provides the most reliable date from Apple's servers.
-*   **Persistence & Syncing:** Store the expiry date securely and sync across devices if necessary for your use case.
+This flow handles non-renewing subscriptions on iOS/App Store by relying on your application to manage the entitlement period after acknowledging the purchase with Apple via `transaction.finish()`.
