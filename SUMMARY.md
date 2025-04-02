@@ -17,6 +17,7 @@
     *   [AppStore Setup (iOS & macOS)](use-cases/sections/setup-appstore.md)
     *   [Google Play Setup (Android)](use-cases/sections/setup-googleplay.md)
     *   [Braintree Setup](use-cases/sections/setup-braintree.md)
+    *   [Initial Javascript](use-cases/sections/code-initial-javascript.md)
 *   **Product Types**
     *   [Consumable (Google Play)](use-cases/consumable-googleplay.md)
     *   [Consumable (AppStore)](use-cases/consumable-appstore.md)
