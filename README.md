@@ -41,8 +41,8 @@ This documentation provides guides and use cases for implementing In-App Purchas
 **Key Sections:**
 
 *   [**Introduction**](introduction.md): Overview and core concepts.
-*   [**Discover**](discover/): Learn about IAP technology, the plugin's approach, and the critical importance of receipt validation.
-*   [**Use Cases**](use-cases/): Step-by-step guides for implementing specific product types (Consumables, Subscriptions, etc.) on different platforms (App Store, Google Play, Braintree, Test). Includes setup instructions.
+*   [**Discover**]: Learn about IAP technology, the plugin's approach, and the critical importance of receipt validation.
+*   [**Use Cases**]: Step-by-step guides for implementing specific product types (Consumables, Subscriptions, etc.) on different platforms (App Store, Google Play, Braintree, Test). Includes setup instructions.
 *   [**API Reference**](https://github.com/j3k0/cordova-plugin-purchase/tree/v13/api): Detailed documentation for all classes, methods, and properties.
 *   [**Troubleshooting**](doc/troubleshooting.md): Solutions for common problems.
 *   [**Migration Guide (v13)**](doc/migration-to-v13.md): Instructions for upgrading from older versions.
