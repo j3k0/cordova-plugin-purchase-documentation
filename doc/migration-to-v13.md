@@ -98,7 +98,7 @@ store.register([{
 *   Check local transaction state via `store.findInLocalReceipts(product)?.state`.
 *   Check **validated** ownership and expiry via `store.owned(product)` or by inspecting `store.verifiedPurchases`. **Do not rely on local receipts for subscription status or permanent non-consumable unlocks.**
 
-See the table in the main [Migration Guide](https://github.com/j3k0/cordova-plugin-purchase/blob/v13/doc/migration-to-v13.md#product-fields) for a detailed mapping of old fields to new locations.
+See the table in the main [Migration Guide]([https://github.com/j3k0/cordova-plugin-purchase/wiki/HOWTO:-Migrate-to-v1]) for a detailed mapping of old fields to new locations.
 
 ## 5. Event Handling (`store.when()`)
 
