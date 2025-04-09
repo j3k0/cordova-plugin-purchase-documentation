@@ -11,7 +11,7 @@ The Braintree control panel interface, SDKs, and requirements change often. This
 *   [Braintree Get Started](https://developer.paypal.com/braintree/docs/start/overview)
 *   [Client SDK Setup (iOS)](https://developer.paypal.com/braintree/docs/guides/client-sdk/setup/ios/v6)
 *   [Client SDK Setup (Android)](https://developer.paypal.com/braintree/docs/guides/client-sdk/setup/android/v6)
-*   [Tokenization Keys & Client Tokens](https://developer.paypal.com/braintree/docs/guides/authorization)
+*   [Tokenization Keys & Client Tokens](https://developer.paypal.com/braintree/docs/guides/authorization/tokenization-key/javascript/v3/)
 *   [Drop-in UI Guide](https://developer.paypal.com/braintree/docs/guides/drop-in/overview)
 {% endhint %}
 
