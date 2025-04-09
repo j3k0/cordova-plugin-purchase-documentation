@@ -313,7 +313,7 @@ While you can build your own server to interact with the Google Play Developer A
         *   Creating a **Service Account** in your Google Cloud Console project that is linked to your Google Play Developer Console.
         *   Granting the necessary permissions (like "View financial data" and "Manage orders and subscriptions") to this Service Account within the Google Play Console.
         *   Uploading the JSON key file for the Service Account to Iaptic.
-    *   Iaptic provides detailed guides for this process: [Connect With Google](https://www.iaptic.com/documentation/setup/connect-with-google-publisher-api)
+    *   Iaptic provides detailed guides for this process: [Connect With Google](https://www.iaptic.com/documentation/connect-with-google-publisher-api/)
 3.  **Configure the Plugin:**
     *   Go to the "Setup" section in your Iaptic dashboard and find the "Cordova" setup instructions.
     *   Copy the provided `store.validator` URL. It will look something like `https://validator.iaptic.com/...`.
@@ -342,4 +342,4 @@ With the validator configured and connected to the Google Play Developer API, th
 
 ---
 
-After completing these steps, your Google Play Console, application build, and test device should be configured to support In-App Purchases using `cordova-plugin-purchase`. You can now proceed to implement the purchase logic in your application code as shown [here](/use-cases/setup/code-framework)).
+After completing these steps, your Google Play Console, application build, and test device should be configured to support In-App Purchases using `cordova-plugin-purchase`. You can now proceed to implement the purchase logic in your application code as shown [here](/use-cases/setup/code-framework).

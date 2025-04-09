@@ -335,7 +335,7 @@ Implement the logic to handle the subscription purchase or plan change process. 
 
 ### Purchase Flow (Android/Google Play Subscription)
 
-This section details the purchase logic for **auto-renewing subscriptions** on **Android using Google Play**, assuming you have completed the [generic subscription initialization](subscription-generic-initialization.md). Handling subscriptions reliably requires verification and **acknowledgment** via `transaction.finish()`.
+This section details the purchase logic for **auto-renewing subscriptions** on **Android using Google Play**, assuming you have completed the [generic subscription initialization](sections/subscription-generic-initialization.md). Handling subscriptions reliably requires verification and **acknowledgment** via `transaction.finish()`.
 
 **Step 1: Implement the Subscription Purchase Action (`subscribe`)**
 
@@ -516,6 +516,7 @@ Testing subscriptions on Google Play requires using testing tracks and specific 
 ---
 
 This covers the Android subscription flow. Key points are the necessity of a **validator connected to the Google Play Developer API** and **acknowledging** purchases via `transaction.finish()`.
+
 ## 4. Receipt Validation (Mandatory)
 
 Server-side validation using the **Google Play Developer API** is **essential** for subscriptions to determine the current status, expiry date, renewal intent, grace periods, and handle renewals and cancellations correctly. Local receipts are insufficient.
