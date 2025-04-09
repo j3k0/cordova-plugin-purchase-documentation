@@ -4,9 +4,7 @@ This section describes the minimal code required to implement an auto-renewing s
 
 ### Base framework
 
-First, let's set up the basic HTML structure and the initial JavaScript to load the plugin.
-
-!INCLUDE "./code-framework.src.md"
+First, let's set up the basic HTML structure and the initial JavaScript to load the plugin, make sure you have performed the basic [Code Framework Setup](/setup/code-framework).
 
 ### Initialization & Presentation
 

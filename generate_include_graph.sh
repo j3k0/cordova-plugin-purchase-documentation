@@ -10,6 +10,7 @@
 SRC_DIR="src" # Directory to scan
 MERMAID_OUTPUT_FILE="include_graph.mmd"
 FOCUS_TARGETS=() # Array to store focus paths
+CODE_EXTENSIONS=("js" "ts" "java" "cs" "py" "swift" "kt") # Extensions for code file styling
 
 # --- Argument Parsing ---
 while [[ "$#" -gt 0 ]]; do
@@ -153,20 +154,22 @@ echo "Scanning '$SRC_DIR' for files..."
 # 1. Find all files and store normalized paths in an associative array
 declare -A existing_files # Requires Bash 4+
 file_count=0
-# Use process substitution to read find output line by line
-while IFS= read -r file; do
+
+# Use mapfile (readarray) for safer filename handling
+mapfile -d '' -t files_found < <(find "$SRC_DIR" -type f -print0 | sort -z)
+
+for file in "${files_found[@]}"; do
     # Normalize path using realpath relative to the current directory (.)
-    # The -m flag allows non-existent intermediate directories (useful for checking)
-    normalized_file=$("$REALPATH_CMD" -m --relative-to=. "$file" 2>/dev/null)
+    normalized_file=$("$REALPATH_CMD" -m --relative-to=. "$file" 2>/dev/null | tr -d '\r\n') # Clean CR/LF
     if [ -n "$normalized_file" ]; then
-      existing_files["$normalized_file"]=1 # Requires Bash 4+
+      existing_files["$normalized_file"]=1 # Add the cleaned path as a key
       ((file_count++))
       # Pre-sanitize IDs for all existing files
       sanitize_id "$normalized_file" > /dev/null
     else
       echo "Warning: Could not normalize path for file: $file" >&2
     fi
-done < <(find "$SRC_DIR" -type f | sort)
+done
 
 echo "Found $file_count unique files."
 if [ "$file_count" -eq 0 ]; then
@@ -199,18 +202,17 @@ while IFS= read -r line; do
 
     # Extract included target path (part within the first pair of quotes after INCLUDE/INCLUDECODE)
     # Handle both !INCLUDE "..." and !INCLUDECODE "..." (case-insensitive for safety)
-    target_raw=$(echo "$line" | grep -ioE '(!INCLUDE|!INCLUDECODE)[^"]*"[^"]+"' | sed -E 's/.*"([^"]+)".*/\1/' | head -n 1)
+    target_raw=$(echo "$line" | grep -ioE '(!INCLUDE|!INCLUDECODE)[^\"]*\"[^\"]+\"' | sed -E 's/.*\"([^\"]+)\".*/\1/' | head -n 1)
 
     if [ -z "$target_raw" ]; then
         echo "Warning: Could not parse target path from include line: $line" >&2
         continue
     fi
 
-    # Resolve target path: it's relative to the source file's directory
+    # --- REVERTED PATH RESOLUTION: Always relative to source file's directory --- 
     source_dir=$(dirname "$source_file_raw")
-    # Use realpath -m to resolve relative paths like "../" and "./" correctly
-    # Run relative to current dir (.) to get paths consistent with existing_files keys
-    resolved_target=$("$REALPATH_CMD" -m --relative-to=. "$source_dir/$target_raw" 2>/dev/null)
+    resolved_target=$("$REALPATH_CMD" -m --relative-to=. "$source_dir/$target_raw" 2>/dev/null | tr -d '\r\n') # Clean CR/LF
+    # --- END REVERTED PATH RESOLUTION ---
     is_unresolved=0
 
     if [ -z "$resolved_target" ]; then
@@ -239,10 +241,13 @@ while IFS= read -r line; do
     backward_graph["$target_id"]="${backward_graph[$target_id]:-} $source_id"
 
 
-    # Check if target exists (only if it wasn't explicitly unresolved)
-    # Requires Bash 4+ for '-v' operator
+    # Check if target exists
     if [[ "$is_unresolved" -eq 0 ]] && [[ ! -v existing_files["$resolved_target"] ]]; then
-        # Target MISSING
+        # --- Restore simpler DEBUG ---
+        if [[ "$source_file_raw" == *"payment-braintree-code.src.md"* ]]; then
+             echo "DEBUG [Check Failed]: Resolved target path: '$resolved_target'"
+        fi
+        # --- END DEBUG ---
         echo "Warning: Included file NOT FOUND: '$resolved_target' (normalized from '$target_raw' in '$source_file_raw')" >&2
         is_broken_link["$link_key"]=1
         ((broken_count++))
@@ -396,6 +401,19 @@ echo "Writing Mermaid file: $MERMAID_OUTPUT_FILE"
                  if [ ! -z "$escaped_path" ] && [ "$escaped_path" != "" ]; then
                     echo "    $node_id[\"$escaped_path\"]" # Mermaid node definition
                     ((nodes_shown++))
+
+                    # Check if it's a code file and apply style
+                    file_ext="${original_path##*.}"
+                    is_code=0
+                    for ext in "${CODE_EXTENSIONS[@]}"; do
+                        if [[ "$file_ext" == "$ext" ]]; then
+                            is_code=1
+                            break
+                        fi
+                    done
+                    if [[ "$is_code" -eq 1 ]]; then
+                        echo "    style $node_id fill:#lightblue,stroke:#00008b,stroke-width:1px" # Apply distinct style
+                    fi
                  fi
             fi
         done
@@ -432,34 +450,7 @@ echo "Writing Mermaid file: $MERMAID_OUTPUT_FILE"
     fi
     echo ""
 
-    # --- Corrected Broken Link Styling ---
-    # Calculate broken indices AFTER sorting the final links
-    declare -A final_broken_indices_corrected # Use a new name for clarity
-    final_broken_count_corrected=0
-    if [ "$final_link_count" -gt 0 ]; then
-        # We already have sorted_final_link_keys from the link writing section
-        current_index=0
-        for link_key in "${sorted_final_link_keys[@]}"; do
-            if [[ -v is_broken_link["$link_key"] ]]; then
-                final_broken_indices_corrected["$current_index"]=1
-                ((final_broken_count_corrected++))
-            fi
-            ((current_index++))
-        done
-    fi
     # --- End Corrected Broken Link Styling ---
-
-    if [ "$final_broken_count_corrected" -gt 0 ]; then
-        echo "%% -- Styling for Missing Includes ($final_broken_count_corrected links in RED) --"
-        # Sort indices for consistent output order (indices are now correct)
-        mapfile -t sorted_broken_indices < <(printf '%s\n' "${!final_broken_indices_corrected[@]}" | sort -n)
-        for index in "${sorted_broken_indices[@]}"; do
-            # Mermaid syntax: linkStyle INDEX stroke:color,stroke-width:pixels;
-            echo "linkStyle $index stroke:#ff0000,stroke-width:2px;"
-        done
-    elif [ "$final_link_count" -gt 0 ]; then
-         echo "%% No broken includes found in the displayed graph."
-    fi
 
 } > "$MERMAID_OUTPUT_FILE"
 

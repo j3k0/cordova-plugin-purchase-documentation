@@ -4,9 +4,7 @@ This section describes the minimal code required to implement a non-consumable p
 
 ### Base framework
 
-First, we set up the basic HTML structure and the initial JavaScript to load the plugin.
-
-!INCLUDE "./code-framework.src.md"
+First, we set up the basic HTML structure and the initial JavaScript to load the plugin. If you haven't already, check [Setup Code Framework](/setup/code-framework).
 
 ### Initialization & Presentation
 

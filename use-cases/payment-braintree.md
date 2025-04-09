@@ -18,8 +18,7 @@ This section details the code implementation steps for processing a custom payme
 
 ### 1. Base Framework
 
-First, ensure you have the basic HTML structure and initial JavaScript setup as outlined in the [Code Framework section](code-framework.md). This includes waiting for `deviceready` and basic plugin checks.
-
+First, ensure you have the basic HTML structure and initial JavaScript setup as outlined in the [Code Framework section](/setup/code-framework). This includes waiting for `deviceready` and basic plugin checks.
 
 ### 2. Initialization (`initializeStoreAndSetupListeners`)
 

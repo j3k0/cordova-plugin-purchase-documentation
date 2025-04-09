@@ -30,8 +30,7 @@ This section explains how to use the `Test` platform adapter for local developme
 
 ### 1. Base Framework
 
-Ensure you have the basic HTML structure and initial JavaScript setup (waiting for `deviceready`, basic plugin checks, `setStatus` helper, placeholder functions) as outlined in the Code Framework section.
-
+Ensure you have the basic HTML structure and initial JavaScript setup (waiting for `deviceready`, basic plugin checks, `setStatus` helper, placeholder functions) as outlined in the [Code Framework Setup](/setup/code-framework) section.
 
 ### 2. Initialization (`initializeStoreAndSetupListeners`)
 
