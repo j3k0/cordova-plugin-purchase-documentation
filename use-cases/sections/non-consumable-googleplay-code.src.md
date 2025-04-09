@@ -18,8 +18,6 @@ Next, we initialize the plugin, register our non-consumable product, and set up 
 
 !INCLUDE "./non-consumable-generic-initialization.md"
 
-*Initial HTML modification suggestion for `./use-cases/sections/non-consumable-generic-initialization.md`: Adapt the example to reflect unlocking a feature. Instead of `window.localStorage.goldCoins`, use something like `window.localStorage.featureUnlocked = "YES"` and update the UI based on this flag.*
-
 ### Purchase Flow
 
 Finally, we handle the purchase events. For non-consumables on Google Play, the key is to **acknowledge** the purchase to prevent automatic refunds.

@@ -1,6 +1,6 @@
 ### Purchase Flow (Android/Google Play Consumable)
 
-This section implements the purchase logic for consumable items (like virtual currency) on Android using Google Play, assuming you have completed the [generic consumable initialization](sections/consumable-generic-initialization.md). The key step here is **consuming** the purchase using `transaction.finish()` after it's been granted to the user.
+This section implements the purchase logic for consumable items (like virtual currency) on Android using Google Play. The key step here is **consuming** the purchase using `transaction.finish()` after it's been granted to the user.
 
 **Step 1: Implement the Purchase Action (`buyConsumable`)**
 

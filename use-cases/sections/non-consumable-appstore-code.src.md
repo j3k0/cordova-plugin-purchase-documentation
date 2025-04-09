@@ -18,8 +18,6 @@ Now, we'll initialize the plugin, register our non-consumable product, and set u
 
 !INCLUDE "./non-consumable-generic-initialization.md"
 
-*Initial HTML modification suggestion for `./use-cases/sections/non-consumable-generic-initialization.md`: Adapt the example to unlock a feature instead of granting gold coins. For instance, show a "Feature Locked/Unlocked" status and a purchase button to unlock it.*
-
 ### Purchase Flow
 
 Finally, we need to handle the purchase events triggered when the user buys the non-consumable product. This typically involves:
