@@ -13,28 +13,28 @@
 
 ## Use Cases
 
-*   **[Setup](setup/index.md)**
-    *   [AppStore Setup (iOS & macOS)](setup/setup-appstore.md)
-    *   [Google Play Setup (Android)](setup/setup-googleplay.md)
-    *   [Braintree Setup](setup/setup-braintree.md)
-    *   [Initial Framework](setup/code-framework.md)
-*   **Product Types**
-    *   [Consumable (Google Play)](use-cases/consumable-googleplay.md)
-    *   [Consumable (AppStore)](use-cases/consumable-appstore.md)
-    *   [Non-Consumable (Google Play)](use-cases/non-consumable-googleplay.md)
-    *   [Non-Consumable (AppStore)](use-cases/non-consumable-appstore.md)
-    *   [Subscription (Google Play)](use-cases/subscription-googleplay.md)
-    *   [Subscription (AppStore)](use-cases/subscription-appstore.md)
-    *   [Non-Renewing Subscription (Google Play)](use-cases/non-renewing-googleplay.md)
-    *   [Non-Renewing Subscription (AppStore)](use-cases/non-renewing-appstore.md)
-*   **Payment Providers**
-    *   [Payment Request (Braintree)](use-cases/payment-braintree.md)
-*   **Testing**
-    *   [Using the Test Platform](use-cases/test-platform.md)
-*   **Platform Specifics**
-    *   [macOS Specifics](use-cases/macos-specifics.md)
+* [Setup](setup/index.md)
+  * [AppStore Setup (iOS & macOS)](setup/setup-appstore.md)
+  * [Google Play Setup (Android)](setup/setup-googleplay.md)
+  * [Braintree Setup](setup/setup-braintree.md)
+  * [Initial Framework](setup/code-framework.md)
+* [Product Types](use-cases/product-types/README.md)
+  * [Consumable (Google Play)](use-cases/consumable-googleplay.md)
+  * [Consumable (AppStore)](use-cases/consumable-appstore.md)
+  * [Non-Consumable (Google Play)](use-cases/non-consumable-googleplay.md)
+  * [Non-Consumable (AppStore)](use-cases/non-consumable-appstore.md)
+  * [Subscription (Google Play)](use-cases/subscription-googleplay.md)
+  * [Subscription (AppStore)](use-cases/subscription-appstore.md)
+  * [Non-Renewing Subscription (Google Play)](use-cases/non-renewing-googleplay.md)
+  * [Non-Renewing Subscription (AppStore)](use-cases/non-renewing-appstore.md)
+* [Payment Providers](use-cases/payment-providers/README.md)
+  * [Payment Request (Braintree)](use-cases/payment-braintree.md)
+* [Testing](use-cases/testing/README.md)
+  * [Using the Test Platform](use-cases/test-platform.md)
+* [Platform Specifics](use-cases/platform-specifics/README.md)
+  * [macOS Specifics](use-cases/macos-specifics.md)
 
 ## References
 
-*   [API v13+](https://github.com/j3k0/cordova-plugin-purchase/tree/v13/api)
-*   [Troubleshooting](doc/troubleshooting.md)
+* [API v13+](https://github.com/j3k0/cordova-plugin-purchase/tree/v13/api)
+* [Troubleshooting](doc/troubleshooting.md)
