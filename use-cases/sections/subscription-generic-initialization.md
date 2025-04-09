@@ -2,7 +2,7 @@ This section guides you through setting up the initial HTML and JavaScript requi
 
 **Assumptions:**
 
-*   You have completed the [basic JavaScript setup](code-initial-javascript.md).
+*   You have completed the [basic Framework setup](code-framework.md).
 *   You have created subscription products (and potentially subscription groups) in your target platform's developer console.
 
 **Step 1: Update HTML Structure**

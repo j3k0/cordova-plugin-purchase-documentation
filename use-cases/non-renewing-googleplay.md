@@ -33,7 +33,7 @@ This section covers the initial setup and UI display for a **non-renewing subscr
 
 **Assumptions:**
 
-*   You have completed the [basic JavaScript setup](code-initial-javascript.md).
+*   You have completed the [basic Framework setup](code-framework.md).
 *   You have created a non-renewing subscription product in your target platform's developer console.
 
 **Step 1: Implement `initializeStoreAndSetupListeners`**
