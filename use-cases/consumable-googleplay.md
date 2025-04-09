@@ -16,7 +16,7 @@ This section covers the initial setup and UI display for a **consumable** produc
 
 **Assumptions:**
 
-*   You have completed the basic [Code Framework Setup](/setup/code-framework).
+*   You have completed the basic [Code Framework Setup](../setup/code-framework.md).
 *   You have created a consumable product in your target platform's developer console (App Store Connect or Google Play Console).
 
 **Step 1: Implement `initializeStoreAndSetupListeners`**
