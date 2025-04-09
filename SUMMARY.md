@@ -13,11 +13,11 @@
 
 ## Use Cases
 
-*   **Setup**
-    *   [AppStore Setup (iOS & macOS)](use-cases/setup-appstore.md)
-    *   [Google Play Setup (Android)](use-cases/setup-googleplay.md)
-    *   [Braintree Setup](use-cases/setup-braintree.md)
-    *   [Initial Framework](use-cases/code-framework.md)
+*   **[Setup](setup/index.md)**
+    *   [AppStore Setup (iOS & macOS)](setup/setup-appstore.md)
+    *   [Google Play Setup (Android)](setup/setup-googleplay.md)
+    *   [Braintree Setup](setup/setup-braintree.md)
+    *   [Initial Framework](setup/code-framework.md)
 *   **Product Types**
     *   [Consumable (Google Play)](use-cases/consumable-googleplay.md)
     *   [Consumable (AppStore)](use-cases/consumable-appstore.md)

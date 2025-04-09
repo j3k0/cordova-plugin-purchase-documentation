@@ -11,15 +11,46 @@ check_markdown_pp() {
   echo "Using markdown-pp version: $(markdown-pp --version)"
 }
 
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+SRC_DIR="$SCRIPT_DIR/src"
+
 # Function to process a single .src.md file
 process_file() {
-  local src_file="$1"
-  local output_file="${src_file%.src.md}.md"
-  echo "Processing $src_file -> $output_file"
-  # Use markdown-pp with options: -o output, source file
-  markdown-pp -o "$output_file" "$src_file"
+  local full_src_path="$1"
+  # Directory containing the source file
+  local src_file_dir
+  src_file_dir=$(dirname "$full_src_path")
+  # Basename of the source file (for markdown-pp input)
+  local src_file_basename
+  src_file_basename=$(basename "$full_src_path")
+
+  # Calculate absolute output path
+  local relative_src_path="${full_src_path#"$SCRIPT_DIR/"}"       # e.g., src/discover/about.src.md
+  local output_path_relative_to_root="${relative_src_path#src/}" # e.g., discover/about.src.md
+  local absolute_output_file="$SCRIPT_DIR/${output_path_relative_to_root%.src.md}.md" # e.g., /path/to/proj/discover/about.md
+
+  # Absolute output directory (for mkdir)
+  local absolute_output_dir
+  absolute_output_dir=$(dirname "$absolute_output_file")
+
+  echo "Processing (from $src_file_dir) $src_file_basename -> $absolute_output_file"
+
+  # Create the absolute output directory if it doesn't exist
+  mkdir -p "$absolute_output_dir"
   if [ $? -ne 0 ]; then
-    echo "Error processing $src_file" >&2
+    echo "Error creating directory $absolute_output_dir" >&2
+    exit 1
+  fi
+
+  # Change to source file's directory, run markdown-pp, change back
+  pushd "$src_file_dir" > /dev/null
+  # Use absolute output path and source file basename
+  markdown-pp -o "$absolute_output_file" "$src_file_basename"
+  local status=$?
+  popd > /dev/null
+
+  if [ $status -ne 0 ]; then
+    echo "Error processing $full_src_path (markdown-pp failed)" >&2
     exit 1
   fi
 }
@@ -34,7 +65,10 @@ if [ "$1" == "--help" ]; then
   echo "Usage: ./build.sh [--help]"
   echo
   echo "This script generates final .md files from .src.md source files"
-  echo "in the ./use-cases directory using the markdown-pp preprocessor."
+  echo "found within the ./src directory using the markdown-pp preprocessor."
+  echo "Output files are placed in corresponding directories outside ./src."
+  echo "(e.g., src/doc/page.src.md -> doc/page.md)"
+  echo "markdown-pp is run from the source file's directory to resolve includes relative to the file."
   echo "Ensure markdown-pp is installed ('npm install -g markdown-pp')."
   echo
   exit 0
@@ -43,30 +77,19 @@ fi
 # Check dependencies
 check_markdown_pp
 
-SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-USE_CASES_DIR="$SCRIPT_DIR/use-cases"
+# Check if src directory exists
+if [ ! -d "$SRC_DIR" ]; then
+  echo "Error: Source directory not found: $SRC_DIR" >&2
+  exit 1
+fi
 
-# Navigate to the use-cases directory
-cd "$USE_CASES_DIR" || { echo "Error: Failed to enter use-cases directory: $USE_CASES_DIR" >&2; exit 1; }
-
-# Find and process all .src.md files in the current directory
-echo "Processing all *.src.md files in use-cases/sections directory..."
-cd sections
-find . -name '*.src.md' -print0 | while IFS= read -r -d $'\0' src_file; do
-  # Remove './' prefix if present
-  src_file_cleaned="${src_file#./}"
-  process_file "$src_file_cleaned"
-done
-cd ..
-
-find . -maxdepth 1 -name '*.src.md' -print0 | while IFS= read -r -d $'\0' src_file; do
-  # Remove './' prefix if present
-  src_file_cleaned="${src_file#./}"
-  process_file "$src_file_cleaned"
+# Find and process all .src.md files within the src directory
+echo "Processing all *.src.md files in $SRC_DIR ..."
+find "$SRC_DIR" -maxdepth 2 -type f -name '*.src.md' -print0 | while IFS= read -r -d $'\0' src_file; do
+  process_file "$src_file"
 done
 
-# Return to the original directory
-cd "$SCRIPT_DIR" || exit 1
+rsync -r "$SRC_DIR/use-cases/code/" "$SCRIPT_DIR/use-cases/code"
 
 echo
 echo "#####################"

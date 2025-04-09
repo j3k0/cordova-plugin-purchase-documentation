@@ -335,7 +335,7 @@ Implement the logic to handle the subscription purchase or plan change process. 
 
 ### Purchase Flow (Android/Google Play Subscription)
 
-This section details the purchase logic for **auto-renewing subscriptions** on **Android using Google Play**, assuming you have completed the [generic subscription initialization](sections/subscription-generic-initialization.md). Handling subscriptions reliably requires verification and **acknowledgment** via `transaction.finish()`.
+This section details the purchase logic for **auto-renewing subscriptions** on **Android using Google Play**. Handling subscriptions reliably requires verification and **acknowledgment** via `transaction.finish()`.
 
 **Step 1: Implement the Subscription Purchase Action (`subscribe`)**
 

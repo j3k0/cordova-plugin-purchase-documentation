@@ -1,0 +1,1 @@
+!INCLUDE "./sections/setup-googleplay.src.md"
