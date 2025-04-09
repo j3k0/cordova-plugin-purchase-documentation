@@ -254,7 +254,7 @@ function initializeStoreAndSetupListeners() {
 
 // Function to check if the feature is unlocked (reads from storage)
 function isFeatureUnlocked() {
-  // WARNING: localStorage is INSECURE. Use SecureStorage plugin or server check.
+  // WARNING: localStorage is INSECURE. Use secure storage or server check.
   try {
     return window.localStorage.getItem(FEATURE_KEY) === 'YES';
   } catch (e) {
@@ -370,7 +370,7 @@ if (typeof setStatus !== 'function') {
 6.  **UI Rendering (Lines 60-106):**
     *   The `refreshUI` function now focuses on displaying the product and the *ownership status* of the feature.
     *   It uses `store.owned(MY_NON_CONSUMABLE_ID)` as the primary way to check ownership. This method intelligently uses verified receipt data if available (and a validator is configured), falling back to less reliable local data otherwise.
-    *   It includes a fallback check to `isFeatureUnlocked()` (which reads from `localStorage` in this example) to handle cases where the store might not be fully ready or if validation isn't used. **Warning:** `localStorage` is insecure; use the [SecureStorage-adapter](https://github.com/mibrito707/cordova-plugin-securestorage-adapter) plugin or a server backend for production.
+    *   It includes a fallback check to `isFeatureUnlocked()` (which reads from `localStorage` in this example) to handle cases where the store might not be fully ready or if validation isn't used. **Warning:** `localStorage` is insecure; use a secure storage or a server backend for production.
     *   The "Buy" button is only shown if the feature is *not* owned (`!owned`) and the offer `canPurchase`. If owned, it displays "(Already Purchased)".
 7.  **Placeholders (Lines 109-125):** Empty functions `purchaseFeature` and `grantEntitlement` are defined for later implementation in platform-specific guides. `grantEntitlement` includes an *insecure* example of setting the `localStorage` flag.
 8.  **Initial Load (Lines 128-138):** Ensures initialization runs and the UI reflects any previously stored ownership status on startup.
