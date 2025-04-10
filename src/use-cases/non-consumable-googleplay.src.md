@@ -6,7 +6,7 @@ This use case explains how to implement a **non-consumable** product (like unloc
 
 First, ensure your Google Play Console, application build, and test environment are correctly configured for Google Play Billing.
 
-&rArr; [Setup instructions here](./sections/setup-googleplay.md).
+&rArr; [Setup instructions here](../setup/setup-googleplay.md).
 
 ## 2. Initialization & UI
 

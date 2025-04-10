@@ -23,7 +23,7 @@ In this guide, we will build a simple application that allows users to purchase 
 
 First, ensure your Google Play Console (including creating the one-time product used for non-renewing access), application build, and test environment are correctly configured.
 
-&rArr; [Setup instructions here](./sections/setup-googleplay.md).
+&rArr; [Setup instructions here](../setup/setup-googleplay.md).
 
 ## 2. Initialization & UI
 

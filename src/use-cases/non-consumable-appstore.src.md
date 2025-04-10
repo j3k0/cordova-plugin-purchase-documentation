@@ -6,7 +6,7 @@ This use case explains how to implement a **non-consumable** product (like unloc
 
 First, ensure your Apple Developer account, App Store Connect, and Xcode project are correctly configured for In-App Purchases.
 
-&rArr; [Setup instructions here](./sections/setup-appstore.md).
+&rArr; [Setup instructions here](../setup/setup-appstore.md).
 
 ## 2. Initialization & UI
 

@@ -7,7 +7,7 @@ This use case explains how to implement a **non-renewing subscription** product 
 
 First, ensure your Apple Developer account, App Store Connect (including creating the non-renewing subscription product), and Xcode project are correctly configured.
 
-&rArr; [Setup instructions here](./sections/setup-appstore.md).
+&rArr; [Setup instructions here](../setup/setup-appstore.md).
 
 ## 2. Initialization & UI
 
