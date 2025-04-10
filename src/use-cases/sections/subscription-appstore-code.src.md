@@ -14,7 +14,9 @@ Now, we'll initialize the plugin, register our subscription products, and set up
 *   Displaying product details (title, description, price, expiry).
 *   Showing a "Subscribe" button only when the product `canPurchase`.
 
+
 !INCLUDE "./subscription-generic-initialization.src.md"
+
 
 ### Purchase Flow
 
@@ -23,4 +25,6 @@ Finally, we need to handle the purchase events triggered when the user initiates
 *   Verifying the transaction with the receipt validator upon approval.
 *   Finishing the transaction once verified to grant access.
 
+
 !INCLUDE "./subscription-ios.src.md"
+

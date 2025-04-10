@@ -14,6 +14,7 @@ See [Setup Braintree][/setup/setup-braintree]
 
 Implement the JavaScript code to initialize the Braintree adapter, display payment details, request the payment using `store.requestPayment()`, and handle the resulting events.
 
+
 This section details the code implementation steps for processing a custom payment using the Braintree platform via `cordova-plugin-purchase` and its Braintree extension.
 
 ### 1. Base Framework
@@ -397,6 +398,7 @@ if (typeof setAppState !== 'function') { setAppState = (state, message) => { con
 
 With these pieces in place, your app can initialize Braintree, display payment options, request a payment, and handle the nonce processing via your backend validator.
 
+
 ## 3. Server-Side Nonce Processing (Mandatory)
 
 The client-side flow only generates a **payment method nonce**. This nonce is temporary and represents the user's authorized payment method (e.g., card details, PayPal account).
@@ -411,6 +413,7 @@ The client-side flow only generates a **payment method nonce**. This nonce is te
 ## 4. Server-to-Server Webhooks (Recommended)
 
 For robust fulfillment, especially for asynchronous payment methods or post-settlement events, configure webhooks in your Braintree control panel to notify your server about transaction status changes (e.g., settlement confirmation, disputes).
+
 
 When using a validation service like Iaptic to process the Braintree payment nonce, the service typically handles the communication with the Braintree gateway (e.g., calling `transaction.sale`). After a successful transaction on Braintree's side, Iaptic (or your custom validator) will notify *your* application backend via a server-to-server webhook.
 
@@ -445,11 +448,14 @@ Here's an **example** structure of what a webhook payload *might* look like (act
 }
 ```
 
-Handling this webhook correctly on your server is crucial for reliable order fulfillment after a Braintree payment processed via a validator. Consult your chosen validation service's documentation for specific details on their webhook format and security recommendations.*(Note: This section uses Iaptic as an example validator service; adapt if using your own backend).*
+Handling this webhook correctly on your server is crucial for reliable order fulfillment after a Braintree payment processed via a validator. Consult your chosen validation service's documentation for specific details on their webhook format and security recommendations.
+
+*(Note: This section uses Iaptic as an example validator service; adapt if using your own backend).*
 
 ## 5. Testing
 
 Follow the specific testing procedures using your Braintree Sandbox account and Braintree's test card numbers.
+
 
 After implementing the code from the previous sections, you can test the Braintree payment flow.
 
@@ -490,3 +496,4 @@ After implementing the code from the previous sections, you can test the Braintr
 *   Simulate failures in your validator endpoint to test the `.unverified()` handler.
 
 This process allows you to verify the client-side flow and the crucial interaction with your backend for processing the payment nonce.
+

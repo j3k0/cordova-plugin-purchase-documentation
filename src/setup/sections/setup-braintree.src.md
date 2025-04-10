@@ -44,19 +44,27 @@ cordova plugin add cordova-plugin-purchase-braintree
 ```
 
 Also ensure you have base Cordova/Node development tools installed:
+
+
 !INCLUDE "./install-dependencies.src.md"
+
 
 ### 4. Create or Prepare Cordova Project
 
 Set up your Cordova project and add the required platforms (iOS and/or Android).
 
 *   **Create Project:**
+
+
     !INCLUDE "./create-cordova-project.src.md"
+
+
 *   **Add Platforms:**
-    ```bash
-    cordova platform add ios
-    cordova platform add android
-    ```
+
+```bash
+cordova platform add ios
+cordova platform add android
+```
 
 ### 5. Configure Android Project (Gradle/Dependencies)
 

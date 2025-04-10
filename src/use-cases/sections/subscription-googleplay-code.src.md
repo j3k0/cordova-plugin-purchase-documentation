@@ -15,7 +15,9 @@ Now, we'll initialize the plugin, register our subscription products, and set up
 *   Displaying the current subscription status (subscribed, expired, in grace period) based on verified receipt data.
 *   Showing a "Subscribe" button only when the product `canPurchase`.
 
+
 !INCLUDE "./subscription-generic-initialization.src.md"
+
 
 *Note: The reliability of fields like `expiryDate` and `owned` status heavily depends on using a receipt validator connected to the Google Play Developer API.*
 
@@ -26,4 +28,6 @@ Finally, we handle the purchase events for subscriptions. This requires verifica
 *   Verify the transaction with the receipt validator upon approval using `transaction.verify()`.
 *   Acknowledge the purchase by calling `receipt.finish()` (or `transaction.finish()`) once verified. This is crucial to prevent automatic refunds and ensures proper subscription state management by Google Play.
 
+
 !INCLUDE "./subscription-android.src.md"
+

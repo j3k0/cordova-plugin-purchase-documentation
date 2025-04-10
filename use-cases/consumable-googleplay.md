@@ -13,6 +13,7 @@ First, ensure your Google Play Console, application build, and test environment 
 
 Next, set up the basic JavaScript to initialize the plugin, register your consumable product, and display its information and the user's balance.
 
+
 This section covers the initial setup and UI display for a **consumable** product (like virtual currency or game lives) using the `cordova-plugin-purchase` plugin (v13+). It focuses on registering the product and displaying its information, deferring the actual purchase logic to platform-specific guides.
 
 **Assumptions:**
@@ -204,11 +205,14 @@ if (typeof setStatus !== 'function') {
 8.  **Initial Load (Lines 116-126):** Ensures the initialization runs and the initial UI (including balance) is rendered when the device is ready.
 
 This setup prepares your app to display the consumable product. The next steps involve implementing the platform-specific purchase flow (Android or iOS) to handle the actual buying process and granting the item.
+
+
 *   **Note:** Replace the placeholder product ID (`'consumable1'`) in the code with your actual Google Play Product ID. Adapt the `grantCoins` function and UI rendering (`refreshUI`) to match your specific consumable item. Remember to use secure storage instead of `localStorage` for balances in production. Also, update the `store.register` call within the included code to specify `Platform.GOOGLE_PLAY`.
 
 ## 3. Purchase Flow
 
 Implement the logic to handle the purchase process when the user taps the "Buy" button. This involves initiating the order and handling the `approved`, `verified` (optional but recommended), and `finished` events to grant the item and **consume** the purchase using `transaction.finish()`.
+
 
 ### Purchase Flow (Android/Google Play Consumable)
 
@@ -377,9 +381,11 @@ Follow the testing procedure outlined for non-consumables on Android, keeping co
 
 This completes the consumable purchase flow for Android/Google Play. The key step is using `transaction.finish()`, which implicitly consumes the product on this platform for this product type, making it available for purchase again.
 
+
 ## 4. Receipt Validation (Recommended)
 
 Validating receipts server-side prevents fraud and ensures purchases are legitimate before granting items, even for consumables.
+
 
 {% hint style="info" icon="info" %}
 **Receipt Validation Reminder**
@@ -394,6 +400,7 @@ Remember, for subscriptions and non-consumables, relying solely on local device 
 
 Ensure `store.validator` is configured in your `initStore()` function.
 {% endhint %}
+
 ## 5. Testing
 
 Follow the specific testing procedures for Google Play (signed release build, testing tracks, license tester accounts) outlined in the platform-specific purchase flow section above.

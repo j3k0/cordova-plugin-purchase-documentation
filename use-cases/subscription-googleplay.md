@@ -12,6 +12,7 @@ First, ensure your Google Play Console (including creating subscription products
 
 Next, set up the basic JavaScript to initialize the plugin, register your subscription products (including `group` if applicable), configure the **mandatory validator**, and display subscription status based on **verified** receipt data obtained via the Google Play Developer API.
 
+
 This section guides you through setting up the initial HTML and JavaScript required to initialize the purchase plugin for **subscriptions**, register your subscription products, configure a validator (essential for subscriptions), and display product information and subscription status. The actual purchase flow logic is deferred to platform-specific guides.
 
 **Assumptions:**
@@ -327,11 +328,14 @@ if (!CdvPurchase.Utils.formatDurationEN) {
 8.  **Initial Load & Helpers (Lines 171-end):** Ensures initialization runs and includes the `formatDurationEN` helper if not already present.
 
 This setup prepares your app to display subscription products and their status based on **validated receipt data**. The next steps involve implementing the platform-specific purchase flow (`subscribe` function and the `.approved`, `.verified`, `.finished` listeners).
+
+
 *   **Note:** Replace placeholder product IDs and the group name with your actual values. Update the `store.register` call within the included code to specify `Platform.GOOGLE_PLAY`. Ensure your `store.validator` URL is correctly configured and linked to a backend capable of using the Google Play Developer API.
 
 ## 3. Purchase Flow
 
 Implement the logic to handle the subscription purchase or plan change process. This involves initiating the order (potentially with upgrade/downgrade parameters), verifying the transaction via your validator, and **acknowledging** the purchase with `receipt.finish()`.
+
 
 ### Purchase Flow (Android/Google Play Subscription)
 
@@ -517,9 +521,11 @@ Testing subscriptions on Google Play requires using testing tracks and specific 
 
 This covers the Android subscription flow. Key points are the necessity of a **validator connected to the Google Play Developer API** and **acknowledging** purchases via `transaction.finish()`.
 
+
 ## 4. Receipt Validation (Mandatory)
 
 Server-side validation using the **Google Play Developer API** is **essential** for subscriptions to determine the current status, expiry date, renewal intent, grace periods, and handle renewals and cancellations correctly. Local receipts are insufficient.
+
 
 {% hint style="info" icon="info" %}
 **Receipt Validation Reminder**
@@ -534,6 +540,7 @@ Remember, for subscriptions and non-consumables, relying solely on local device 
 
 Ensure `store.validator` is configured in your `initStore()` function.
 {% endhint %}
+
 ## 5. Testing
 
 Follow the specific testing procedures for Google Play (signed release build, testing tracks, license tester accounts, validator connected to Developer API) outlined in the platform-specific purchase flow section above. Test initial purchases, accelerated renewals, cancellations, and plan changes (if applicable).

@@ -14,7 +14,9 @@ Next, we initialize the plugin, register our non-consumable product, and set up 
 *   Showing a "Buy" or "Unlock" button only when the product `canPurchase`.
 *   Checking the `product.owned` status to reflect whether the feature is unlocked in the UI.
 
+
 !INCLUDE "./non-consumable-generic-initialization.src.md"
+
 
 ### Purchase Flow
 
@@ -24,4 +26,6 @@ Finally, we handle the purchase events. For non-consumables on Google Play, the 
 *   **Acknowledge** the purchase by calling `transaction.finish()`. This confirms delivery to Google Play. **Do not consume** non-consumable products.
 *   Update your application state (e.g., set `window.localStorage.featureUnlocked = "YES"`) and refresh the UI.
 
+
 !INCLUDE "./non-consumable-android.src.md"
+

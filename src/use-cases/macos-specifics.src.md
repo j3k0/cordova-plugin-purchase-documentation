@@ -44,7 +44,9 @@ For macOS apps, especially those intended for the Mac App Store, you typically n
     *   Under the newly added "App Sandbox" section, review the permissions.
     *   Ensure **"Network: Outgoing Connections (Client)"** is **checked**. This is usually required for your app to communicate with external services, including potentially your receipt validation server.
 
+
 !INCLUDE "../images/xcode-capability-app-sandbox.src.md"
+
 
 ## Testing on macOS
 

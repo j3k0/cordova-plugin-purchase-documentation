@@ -14,7 +14,9 @@ Now, we'll initialize the plugin, register our non-renewing subscription product
 *   Displaying the current access expiry date if the subscription is active. *Your application needs to calculate and store this based on purchase history.*
 *   Showing a "Subscribe" or "Extend" button. Non-renewing subscriptions can typically be purchased multiple times to extend access.
 
+
 !INCLUDE "./subscription-generic-initialization.src.md"
+
 
 *Note: Adapt the UI logic in `subscription-generic-initialization.md`. The concept of `product.owned` is less relevant here; you need to track ownership and expiry based on purchase history (likely stored locally or synced via your backend). Show "Access until [Your Calculated Expiry Date]".*
 
@@ -29,4 +31,6 @@ Handling the purchase flow for non-renewing subscriptions on Apple platforms inv
 *   Implement logic to check the expiry date to grant or deny access to the content/service.
 *   If you support user accounts, you need to sync this entitlement across the user's devices.
 
+
 !INCLUDE "./non-renewing-ios-purchase.src.md"
+

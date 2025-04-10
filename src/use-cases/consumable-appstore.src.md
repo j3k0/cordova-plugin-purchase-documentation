@@ -12,20 +12,27 @@ First, ensure your Apple Developer account, App Store Connect, and Xcode project
 
 Next, set up the basic JavaScript to initialize the plugin, register your consumable product, and display its information and the user's balance.
 
+
 !INCLUDE "./sections/consumable-generic-initialization.src.md"
+
+
 *   **Note:** Replace the placeholder product ID (`'consumable1'`) in the code with your actual App Store Product ID. Adapt the `grantCoins` function and UI rendering (`refreshUI`) to match your specific consumable item (e.g., lives, credits). Remember to use secure storage instead of `localStorage` for balances in production.
 
 ## 3. Purchase Flow
 
 Implement the logic to handle the purchase process when the user taps the "Buy" button. This involves initiating the order and handling the `approved`, `verified` (optional but recommended), and `finished` events to grant the item and consume the purchase.
 
+
 !INCLUDE "./sections/consumable-ios.src.md"
+
 
 ## 4. Receipt Validation (Recommended)
 
 While not strictly mandatory for basic consumable functionality on iOS (unlike subscriptions), validating receipts server-side prevents fraud and ensures purchases are legitimate before granting items.
 
+
 !INCLUDE "./sections/receipt-validation-reminder.src.md"
+
 
 ## 5. Testing
 

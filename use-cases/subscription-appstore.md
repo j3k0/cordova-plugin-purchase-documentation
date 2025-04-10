@@ -12,6 +12,7 @@ First, ensure your Apple Developer account, App Store Connect (including creatin
 
 Next, set up the basic JavaScript to initialize the plugin, register your subscription products (including `group` if applicable), configure the **mandatory validator**, and display subscription status based on **verified** receipt data.
 
+
 This section guides you through setting up the initial HTML and JavaScript required to initialize the purchase plugin for **subscriptions**, register your subscription products, configure a validator (essential for subscriptions), and display product information and subscription status. The actual purchase flow logic is deferred to platform-specific guides.
 
 **Assumptions:**
@@ -327,11 +328,14 @@ if (!CdvPurchase.Utils.formatDurationEN) {
 8.  **Initial Load & Helpers (Lines 171-end):** Ensures initialization runs and includes the `formatDurationEN` helper if not already present.
 
 This setup prepares your app to display subscription products and their status based on **validated receipt data**. The next steps involve implementing the platform-specific purchase flow (`subscribe` function and the `.approved`, `.verified`, `.finished` listeners).
+
+
 *   **Note:** Replace placeholder product IDs (`'subscription_monthly'`, `'subscription_yearly'`) and the group name (`'premium_access'`) with your actual values. Ensure your `store.validator` URL is correctly configured.
 
 ## 3. Purchase Flow
 
 Implement the logic to handle the subscription purchase or plan change process. This involves initiating the order, verifying the transaction via your validator, and acknowledging the purchase with `receipt.finish()`.
+
 
 ### Purchase Flow (iOS/App Store Subscription)
 
@@ -491,9 +495,11 @@ Testing subscriptions follows the standard iOS procedure, paying attention to re
 
 This completes the subscription purchase flow for iOS/App Store. Accurate status relies heavily on the configured receipt validator. Remember to call `transaction.finish()` after successful verification.
 
+
 ## 4. Receipt Validation (Mandatory)
 
 Server-side validation is **essential** for subscriptions to determine the current status, expiry date, renewal intent, and handle events like renewals, cancellations, and billing issues.
+
 
 {% hint style="info" icon="info" %}
 **Receipt Validation Reminder**
@@ -508,6 +514,7 @@ Remember, for subscriptions and non-consumables, relying solely on local device 
 
 Ensure `store.validator` is configured in your `initStore()` function.
 {% endhint %}
+
 ## 5. Testing
 
 Follow the specific testing procedures for iOS/macOS Sandbox environments outlined in the platform-specific purchase flow section above. Pay close attention to testing initial purchases, accelerated renewals, cancellations, and plan changes (if applicable) via the Sandbox subscription management UI.

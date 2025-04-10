@@ -14,7 +14,9 @@ Now, we'll initialize the plugin, register our non-consumable product, and set u
 *   Showing a "Buy" or "Unlock" button only when the product `canPurchase`.
 *   Reflecting the unlocked status in the UI (e.g., showing the premium feature or hiding ads).
 
+
 !INCLUDE "./non-consumable-generic-initialization.src.md"
+
 
 ### Purchase Flow
 
@@ -24,4 +26,6 @@ Finally, we need to handle the purchase events triggered when the user buys the 
 *   Finishing the transaction once approved (or verified) to grant access permanently.
 *   Updating the UI to reflect the unlocked status.
 
+
 !INCLUDE "./non-consumable-ios.src.md"
+

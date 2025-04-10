@@ -12,6 +12,7 @@ First, ensure your Apple Developer account, App Store Connect, and Xcode project
 
 Next, set up the basic JavaScript to initialize the plugin, register your non-consumable product, and display its information based on ownership status.
 
+
 This section covers the initial setup and UI display for a **non-consumable** product (like unlocking a premium feature or removing ads) using the `cordova-plugin-purchase` plugin (v13+). It focuses on registering the product and displaying its information based on ownership status, deferring the actual purchase logic to platform-specific guides.
 
 **Assumptions:**
@@ -213,11 +214,14 @@ if (typeof setStatus !== 'function') {
 8.  **Initial Load (Lines 128-138):** Ensures initialization runs and the UI reflects any previously stored ownership status on startup.
 
 This setup prepares your app to display the non-consumable product and its current ownership state. The next steps involve implementing the platform-specific purchase flow (Android or iOS) to handle buying the product and securely granting/persisting the entitlement.
+
+
 *   **Note:** Replace the placeholder product ID (`'unlock_premium_feature'`) and the storage key (`FEATURE_KEY`) in the code with your actual values. Crucially, replace the insecure `localStorage` example in `grantEntitlement` and `isFeatureUnlocked` with a secure storage mechanism (like `cordova-plugin-securestorage-adapter`) or server-side state management.
 
 ## 3. Purchase Flow
 
 Implement the logic to handle the purchase process. This involves initiating the order and handling the `approved`, `verified` (highly recommended), and `finished` events to grant the entitlement permanently and acknowledge the purchase with the App Store using `transaction.finish()`.
+
 
 ### Purchase Flow (iOS/App Store Non-Consumable)
 
@@ -400,9 +404,11 @@ Follow the standard iOS testing procedure:
 ---
 
 This completes the non-consumable purchase flow for iOS/App Store. The key is calling `transaction.finish()` after granting the entitlement to acknowledge the purchase with Apple.
+
 ## 4. Receipt Validation (Highly Recommended)
 
 Server-side validation is crucial for non-consumables to securely verify ownership and enable reliable purchase restoration across devices.
+
 
 {% hint style="info" icon="info" %}
 **Receipt Validation Reminder**
@@ -417,6 +423,7 @@ Remember, for subscriptions and non-consumables, relying solely on local device 
 
 Ensure `store.validator` is configured in your `initStore()` function.
 {% endhint %}
+
 ## 5. Testing
 
 Follow the specific testing procedures for iOS/macOS Sandbox environments outlined in the platform-specific purchase flow section above, including testing the "Restore Purchases" functionality.

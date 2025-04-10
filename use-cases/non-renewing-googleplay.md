@@ -2,6 +2,7 @@
 
 This use case explains how to implement a **non-renewing subscription** product (granting access for a fixed period) on Android using the Google Play platform and `cordova-plugin-purchase` v13+. Your application is responsible for managing the expiry date, and the purchase must be acknowledged.
 
+
 # Non-Renewing Subscription on Android
 
 This guide demonstrates how to implement a **non-renewing subscription** product using the Google Play platform for Android applications.
@@ -19,6 +20,7 @@ Key characteristics on Google Play:
 
 In this guide, we will build a simple application that allows users to purchase a non-renewing subscription granting access for a specific period, managing the expiry date within the app.
 
+
 ## 1. Platform Setup
 
 First, ensure your Google Play Console (including creating the one-time product used for non-renewing access), application build, and test environment are correctly configured.
@@ -28,6 +30,7 @@ First, ensure your Google Play Console (including creating the one-time product 
 ## 2. Initialization & UI
 
 Next, set up the basic JavaScript to initialize the plugin, register your non-renewing product, and display its information based on the access expiry date managed by your app.
+
 
 This section covers the initial setup and UI display for a **non-renewing subscription** product (granting access for a fixed period like 1 month or 1 year) using the `cordova-plugin-purchase` plugin (v13+). It focuses on registering the product and displaying its information based on the access expiry date managed by your application. The actual purchase logic is deferred to platform-specific guides.
 
@@ -227,11 +230,14 @@ if (!CdvPurchase.Utils.formatDurationEN) {
 8.  **Initial Load & Helpers (Lines 136-end):** Ensures initialization runs and the UI reflects any previously stored expiry status on startup. Includes the `formatDurationEN` helper.
 
 This setup prepares your app to display non-renewing subscription products and their current access status based on locally managed expiry dates. The next steps involve implementing the platform-specific purchase flow and the `grantAccessAndFinish` logic.
+
+
 *   **Note:** Replace the placeholder product ID (`'non_renewing_1_month'`) and the storage key (`ACCESS_EXPIRY_KEY`) with your actual values. Update the `store.register` call within the included code to specify `Platform.GOOGLE_PLAY`. Use a secure method instead of `localStorage` to store the expiry date in production.
 
 ## 3. Purchase Flow
 
 Implement the logic to handle the purchase process. This involves initiating the order, handling `approved` and `verified` (recommended for accurate purchase date), calculating and storing the expiry date, and **acknowledging** the purchase with `transaction.finish()`. Acknowledgment is mandatory within 3 days on Google Play for this type.
+
 
 ### Purchase Flow (Android/Google Play Non-Renewing Subscription)
 
@@ -414,9 +420,11 @@ Follow the standard Android testing procedure:
 
 This handles the non-renewing subscription flow on Android, ensuring the purchase is acknowledged via `transaction.finish()` while your application manages the entitlement period based on the calculated expiry date.
 
+
 ## 4. Receipt Validation (Recommended)
 
 Validating the receipt provides a secure way to confirm the purchase and obtain a reliable `purchaseDate` for calculating the expiry.
+
 
 {% hint style="info" icon="info" %}
 **Receipt Validation Reminder**
@@ -431,6 +439,7 @@ Remember, for subscriptions and non-consumables, relying solely on local device 
 
 Ensure `store.validator` is configured in your `initStore()` function.
 {% endhint %}
+
 ## 5. Testing
 
 Follow the specific testing procedures for Google Play (signed release build, testing tracks, license tester accounts) outlined in the platform-specific purchase flow section above. Test purchasing, expiry checks, and potentially extending access by purchasing again.

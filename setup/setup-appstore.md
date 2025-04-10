@@ -19,6 +19,7 @@ The App Store Connect interface and Apple's requirements (like agreements) can c
 Ensure you have the basic development tools installed (Node.js, Cordova CLI, Xcode).
 
 
+
 Needless to say, make sure you have the tools installed on your machine. During the writing of this guide, I've been using the following environment:
 
 * **NodeJS** v10.12.0
@@ -28,9 +29,11 @@ Needless to say, make sure you have the tools installed on your machine. During 
 I'm not saying it won't work with different version. If you start fresh, it might be a good idea to use an up-to-date environment.
 
 
+
 ### 2. Create or Prepare Cordova Project
 
 Set up your Cordova project and add the iOS platform.
+
 
 #### Create the project
 
@@ -54,11 +57,14 @@ Let's head into our cordova project's directory \(should match whatever we used 
 ```text
 $ cd CordovaProject
 ```
+
 #### Add iOS platform
 
 ```text
 $ cordova platform add ios
 ```
+
+
 
 *   **Important:** Ensure the `<widget id="...">` in your `config.xml` matches the Bundle ID you will use in App Store Connect.
 
@@ -81,6 +87,7 @@ Configure your app record and ensure all necessary legal agreements are active.
     4.  **Copy and securely store this secret.** It will be needed for your validation server (e.g., in your Iaptic settings or custom backend).
 
 
+
 First, I assume you have an Apple developer account. If not time to register, because it's mandatory.
 
 Let's now head to the [AppStore Connect](https://appstoreconnect.apple.com) website. In order to start developing and testing In-App Purchases, you need all contracts in place as well as your financial information setup. Make sure there are no warning left there.
@@ -92,6 +99,7 @@ I'll not guide you through the whole procedure, just create setup your Apple app
 Since you are here, let's retrieve the Shared Secret. You can use an App-Specific one or a Master Shared Secret, at your convenience: both will work. Keep the value around, it'll be required, especially if you are implementing subscriptions.
 
 ![](../.gitbook/assets/appstore-shared-secret.png)
+
 
 
 
@@ -117,6 +125,8 @@ Install the purchase plugin and enable the necessary capability in Xcode.
     *   Search for and add **"In-App Purchase"**. Verify it appears in the list.
 
 
+
+
 ### 5. Create In-App Products
 
 If you followed the [Setup AppStore Application](#3-setup-appstore-application) section, you should have everything setup. Head again to the App's In-App Purchases page: select your application, then _Features_, then _In-App Purchases_.
@@ -130,9 +140,11 @@ Even if that sounds stupid, you need to fill-in ALL metadata in order to use the
 The process is well explained by Apple, so I'll not enter into more details.
 
 
+
 *   **Product IDs:** Note down the exact Product IDs you create; you'll need them for `store.register()`.
 *   **Cleared for Sale:** Ensure products are marked "Cleared for Sale".
 *   **Metadata:** Fill in all required metadata, including pricing, localization, and review information (even a placeholder screenshot is often needed for testing).
+
 
 ### 6. Create Test Users
 
@@ -145,7 +157,9 @@ From there, it's just a matter of hitting "+" and filling the form. While you're
 ![](../.gitbook/assets/appstore-test-users.png)
 
 
+
 *   **Important:** Use these accounts *only* when prompted by your app during a purchase flow on a test device/build. Do not sign into the main App Store settings with them.
+
 
 ### 7. (Recommended) Setup Receipt Validation Service
 
@@ -177,6 +191,8 @@ For subscriptions (and non-consumables), **server-side receipt validation is ess
         ```
     *   You will also need the **App-Specific Shared Secret** from App Store Connect for Iaptic to validate iOS receipts. Enter this secret in your Iaptic application settings.
 
+
+
 First, I assume you have an Apple developer account. If not time to register, because it's mandatory.
 
 Let's now head to the [AppStore Connect](https://appstoreconnect.apple.com) website. In order to start developing and testing In-App Purchases, you need all contracts in place as well as your financial information setup. Make sure there are no warning left there.
@@ -192,6 +208,7 @@ Since you are here, let's retrieve the Shared Secret. You can use an App-Specifi
 
 
 
+
 2.  **Build Your Own Server:**
     *   Requires significant backend development.
     *   You'll need to call Apple's `verifyReceipt` endpoint: [Apple Verify Receipt Docs](https://developer.apple.com/documentation/appstorereceipts/verifyreceipt).
@@ -202,6 +219,7 @@ Since you are here, let's retrieve the Shared Secret. You can use an App-Specifi
     *   You will need the **App-Specific Shared Secret** for your server logic.
 
 **Choosing not to validate receipts server-side will lead to unreliable subscription status, inability to handle renewals/cancellations correctly, and significant security vulnerabilities.**
+
 *   **Remember:** You'll need the **App-Specific Shared Secret** obtained in Step 3 for your validation server.
 
 ---

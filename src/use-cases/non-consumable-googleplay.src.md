@@ -12,20 +12,27 @@ First, ensure your Google Play Console, application build, and test environment 
 
 Next, set up the basic JavaScript to initialize the plugin, register your non-consumable product, and display its information based on ownership status.
 
+
 !INCLUDE "./sections/non-consumable-generic-initialization.src.md"
+
+
 *   **Note:** Replace the placeholder product ID (`'unlock_premium_feature'`) and the storage key (`FEATURE_KEY`) in the code with your actual values. Update the `store.register` call within the included code to specify `Platform.GOOGLE_PLAY`. Replace the insecure `localStorage` example with a secure storage mechanism or server-side state management.
 
 ## 3. Purchase Flow
 
 Implement the logic to handle the purchase process. This involves initiating the order and handling the `approved`, `verified` (highly recommended), and `finished` events to grant the entitlement permanently and **acknowledge** the purchase with Google Play using `transaction.finish()`. Acknowledgment is mandatory within 3 days on Google Play for non-consumables.
 
+
 !INCLUDE "./sections/non-consumable-android.src.md"
+
 
 ## 4. Receipt Validation (Highly Recommended)
 
 Server-side validation is crucial for non-consumables to securely verify ownership and prevent fraud.
 
+
 !INCLUDE "./sections/receipt-validation-reminder.src.md"
+
 
 ## 5. Testing
 

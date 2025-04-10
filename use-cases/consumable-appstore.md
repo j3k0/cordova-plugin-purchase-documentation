@@ -12,6 +12,7 @@ First, ensure your Apple Developer account, App Store Connect, and Xcode project
 
 Next, set up the basic JavaScript to initialize the plugin, register your consumable product, and display its information and the user's balance.
 
+
 This section covers the initial setup and UI display for a **consumable** product (like virtual currency or game lives) using the `cordova-plugin-purchase` plugin (v13+). It focuses on registering the product and displaying its information, deferring the actual purchase logic to platform-specific guides.
 
 **Assumptions:**
@@ -203,11 +204,14 @@ if (typeof setStatus !== 'function') {
 8.  **Initial Load (Lines 116-126):** Ensures the initialization runs and the initial UI (including balance) is rendered when the device is ready.
 
 This setup prepares your app to display the consumable product. The next steps involve implementing the platform-specific purchase flow (Android or iOS) to handle the actual buying process and granting the item.
+
+
 *   **Note:** Replace the placeholder product ID (`'consumable1'`) in the code with your actual App Store Product ID. Adapt the `grantCoins` function and UI rendering (`refreshUI`) to match your specific consumable item (e.g., lives, credits). Remember to use secure storage instead of `localStorage` for balances in production.
 
 ## 3. Purchase Flow
 
 Implement the logic to handle the purchase process when the user taps the "Buy" button. This involves initiating the order and handling the `approved`, `verified` (optional but recommended), and `finished` events to grant the item and consume the purchase.
+
 
 ### Purchase Flow (iOS/App Store Consumable)
 
@@ -370,9 +374,11 @@ Follow the testing procedure outlined for non-consumables on iOS:
 
 This completes the purchase flow for iOS/App Store consumables. The key is calling `transaction.finish()` after successfully granting the item to the user, which consumes the purchase on this platform.
 
+
 ## 4. Receipt Validation (Recommended)
 
 While not strictly mandatory for basic consumable functionality on iOS (unlike subscriptions), validating receipts server-side prevents fraud and ensures purchases are legitimate before granting items.
+
 
 {% hint style="info" icon="info" %}
 **Receipt Validation Reminder**
@@ -387,6 +393,7 @@ Remember, for subscriptions and non-consumables, relying solely on local device 
 
 Ensure `store.validator` is configured in your `initStore()` function.
 {% endhint %}
+
 ## 5. Testing
 
 Follow the specific testing procedures for iOS/macOS Sandbox environments outlined in the platform-specific purchase flow section above.

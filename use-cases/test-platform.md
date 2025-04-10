@@ -1,3 +1,5 @@
+
+
 # Using the Test Platform
 
 This guide explains how to leverage the built-in `Test` platform adapter (`CdvPurchase.Platform.TEST`) for local development and testing of your In-App Purchase logic.
@@ -23,6 +25,7 @@ The Test platform simulates basic purchase flows **without connecting to any rea
 **Always test thoroughly on real devices using actual platform Sandbox/Test accounts before releasing your application.**
 
 The Code Implementation section will detail how to set up and use the Test platform.
+
 
 ## Code Implementation
 
@@ -352,3 +355,4 @@ if (typeof refreshUI !== 'function') { refreshUI = () => console.log('Placeholde
 *   **Promise Handling (Lines 15-28):** The promise returned by `order()` resolves/rejects quickly after the prompt is dismissed, mainly indicating if the *request* was initiated or immediately failed/cancelled. The final purchase *outcome* is handled by the event listeners.
 
 This setup allows you to test the full client-side purchase lifecycle locally using simple prompts for interaction. Remember to replace the Test platform logic with real platform adapters and server-side validation for production.
+

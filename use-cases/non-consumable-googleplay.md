@@ -12,6 +12,7 @@ First, ensure your Google Play Console, application build, and test environment 
 
 Next, set up the basic JavaScript to initialize the plugin, register your non-consumable product, and display its information based on ownership status.
 
+
 This section covers the initial setup and UI display for a **non-consumable** product (like unlocking a premium feature or removing ads) using the `cordova-plugin-purchase` plugin (v13+). It focuses on registering the product and displaying its information based on ownership status, deferring the actual purchase logic to platform-specific guides.
 
 **Assumptions:**
@@ -213,11 +214,14 @@ if (typeof setStatus !== 'function') {
 8.  **Initial Load (Lines 128-138):** Ensures initialization runs and the UI reflects any previously stored ownership status on startup.
 
 This setup prepares your app to display the non-consumable product and its current ownership state. The next steps involve implementing the platform-specific purchase flow (Android or iOS) to handle buying the product and securely granting/persisting the entitlement.
+
+
 *   **Note:** Replace the placeholder product ID (`'unlock_premium_feature'`) and the storage key (`FEATURE_KEY`) in the code with your actual values. Update the `store.register` call within the included code to specify `Platform.GOOGLE_PLAY`. Replace the insecure `localStorage` example with a secure storage mechanism or server-side state management.
 
 ## 3. Purchase Flow
 
 Implement the logic to handle the purchase process. This involves initiating the order and handling the `approved`, `verified` (highly recommended), and `finished` events to grant the entitlement permanently and **acknowledge** the purchase with Google Play using `transaction.finish()`. Acknowledgment is mandatory within 3 days on Google Play for non-consumables.
+
 
 ### Purchase Flow (Android/Google Play Non-Consumable)
 
@@ -428,9 +432,11 @@ Testing Google Play In-App Purchases requires specific steps:
 
 This completes the non-consumable purchase flow for Android. The key takeaway is the necessity of **acknowledging** the purchase using `transaction.finish()` to prevent automatic refunds by Google Play.
 
+
 ## 4. Receipt Validation (Highly Recommended)
 
 Server-side validation is crucial for non-consumables to securely verify ownership and prevent fraud.
+
 
 {% hint style="info" icon="info" %}
 **Receipt Validation Reminder**
@@ -445,6 +451,7 @@ Remember, for subscriptions and non-consumables, relying solely on local device 
 
 Ensure `store.validator` is configured in your `initStore()` function.
 {% endhint %}
+
 ## 5. Testing
 
 Follow the specific testing procedures for Google Play (signed release build, testing tracks, license tester accounts) outlined in the platform-specific purchase flow section above.

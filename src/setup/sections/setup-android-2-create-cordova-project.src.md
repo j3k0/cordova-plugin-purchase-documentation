@@ -3,7 +3,9 @@ Making sure we have a Cordova project that we can build for Android and/or iOS.
 
 #### Create the project
 
+
 !INCLUDE "./create-cordova-project.src.md"
+
 
 #### Add Android platform
 

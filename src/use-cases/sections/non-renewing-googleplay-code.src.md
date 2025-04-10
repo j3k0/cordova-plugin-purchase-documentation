@@ -14,7 +14,9 @@ Now, we'll initialize the plugin, register our non-renewing subscription product
 *   Displaying the current access expiry date if the subscription is active.
 *   Showing a "Subscribe" or "Extend" button. Google Play treats these similarly to consumables, so they can typically be purchased again once expired (or potentially even before to extend).
 
+
 !INCLUDE "./subscription-generic-initialization.src.md"
+
 
 *Note: Adapt the UI logic in `subscription-generic-initialization.md`. Instead of just "Subscribed", show "Access until [Expiry Date]". The `product.owned` status for non-renewing subscriptions might depend on local data or validator logic correctly interpreting the expiry.*
 
@@ -26,4 +28,6 @@ Handling the purchase flow for non-renewing subscriptions on Google Play is simi
 *   **Acknowledge** the purchase by calling `transaction.finish()`. This prevents Google Play from automatically refunding after 3 days. **Do not consume** non-renewing subscriptions.
 *   Your application logic should track the expiry date based on the purchase time and product duration to manage access.
 
+
 !INCLUDE "./non-renewing-android-purchase.src.md"
+

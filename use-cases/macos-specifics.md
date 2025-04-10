@@ -45,6 +45,8 @@ For macOS apps, especially those intended for the Mac App Store, you typically n
     *   Ensure **"Network: Outgoing Connections (Client)"** is **checked**. This is usually required for your app to communicate with external services, including potentially your receipt validation server.
 
 
+
+
 ## Testing on macOS
 
 Testing macOS In-App Purchases requires using **Sandbox Tester accounts** but involves a specific login procedure different from iOS:

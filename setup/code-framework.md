@@ -1,5 +1,6 @@
 #### index.html
 
+
 Assuming you're starting from a blank Cordova project, let's set up the minimal HTML needed for the tutorials.
 
 **Step 1: Modify `www/index.html`**
@@ -52,7 +53,9 @@ In the `<head>` of your `www/index.html`, find the `<meta http-equiv="Content-Se
 
 You might want to comment out or remove the default CSS (`www/css/index.css`) from the Cordova template project to avoid style conflicts with the simple examples.
 
+
 #### JavaScript (`www/js/index.js`)
+
 
 This section provides the minimal JavaScript foundation needed to start using the `cordova-plugin-purchase` plugin in your `www/js/index.js` file (or equivalent).
 
@@ -158,3 +161,4 @@ function refreshUI() {
 7.  **Placeholders (Lines 54-72):** Empty definitions for `initializeStoreAndSetupListeners` and `refreshUI`, their specific logic depends on the use case and will be provided in subsequent steps of the tutorials.
 
 This minimal base ensures the plugin is loaded and basic logging/error handling is in place before diving into platform-specific or product-type-specific configurations in the main use-case guides.
+

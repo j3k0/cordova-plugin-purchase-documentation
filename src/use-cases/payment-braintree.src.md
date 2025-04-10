@@ -14,7 +14,9 @@ See [Setup Braintree][/setup/setup-braintree]
 
 Implement the JavaScript code to initialize the Braintree adapter, display payment details, request the payment using `store.requestPayment()`, and handle the resulting events.
 
+
 !INCLUDE "./sections/payment-braintree-code.src.md"
+
 
 ## 3. Server-Side Nonce Processing (Mandatory)
 
@@ -31,11 +33,16 @@ The client-side flow only generates a **payment method nonce**. This nonce is te
 
 For robust fulfillment, especially for asynchronous payment methods or post-settlement events, configure webhooks in your Braintree control panel to notify your server about transaction status changes (e.g., settlement confirmation, disputes).
 
+
 !INCLUDE "./sections/payment-braintree-iaptic-webhook.src.md"
+
+
 *(Note: This section uses Iaptic as an example validator service; adapt if using your own backend).*
 
 ## 5. Testing
 
 Follow the specific testing procedures using your Braintree Sandbox account and Braintree's test card numbers.
 
+
 !INCLUDE "./sections/payment-braintree-test.src.md"
+

@@ -18,13 +18,18 @@ The App Store Connect interface and Apple's requirements (like agreements) can c
 
 Ensure you have the basic development tools installed (Node.js, Cordova CLI, Xcode).
 
+
 !INCLUDE "./install-dependencies.src.md"
+
 
 ### 2. Create or Prepare Cordova Project
 
 Set up your Cordova project and add the iOS platform.
 
+
 !INCLUDE "setup-ios-2-create-cordova-project.src.md"
+
+
 *   **Important:** Ensure the `<widget id="...">` in your `config.xml` matches the Bundle ID you will use in App Store Connect.
 
 ### 3. Setup AppStore Connect Application & Agreements
@@ -45,7 +50,9 @@ Configure your app record and ensure all necessary legal agreements are active.
     3.  Generate or view the secret.
     4.  **Copy and securely store this secret.** It will be needed for your validation server (e.g., in your Iaptic settings or custom backend).
 
+
 !INCLUDE "setup-ios-3-create-app-store-application.src.md"
+
 
 ### 4. Install Plugin and Configure Xcode Project
 
@@ -67,19 +74,26 @@ Install the purchase plugin and enable the necessary capability in Xcode.
     *   Click **"+ Capability"**.
     *   Search for and add **"In-App Purchase"**. Verify it appears in the list.
 
+
 !INCLUDE "../images/xcode-capability-in-app-purchase.src.md"
 
+
 !INCLUDE "setup-ios-5-create-in-app-products.src.md"
+
 
 *   **Product IDs:** Note down the exact Product IDs you create; you'll need them for `store.register()`.
 *   **Cleared for Sale:** Ensure products are marked "Cleared for Sale".
 *   **Metadata:** Fill in all required metadata, including pricing, localization, and review information (even a placeholder screenshot is often needed for testing).
 
+
 !INCLUDE "setup-ios-6-test-users.src.md"
+
 
 *   **Important:** Use these accounts *only* when prompted by your app during a purchase flow on a test device/build. Do not sign into the main App Store settings with them.
 
+
 !INCLUDE "setup-subscription-ios-7-validation-server.src.md"
+
 
 *   **Remember:** You'll need the **App-Specific Shared Secret** obtained in Step 3 for your validation server.
 

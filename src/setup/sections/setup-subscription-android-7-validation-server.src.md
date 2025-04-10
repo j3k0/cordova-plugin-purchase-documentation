@@ -2,7 +2,9 @@
 
 For subscriptions (and non-consumables), **server-side receipt validation is essential** for security and reliable status tracking.
 
+
 !INCLUDE "../../use-cases/sections/receipt-validation-reminder.src.md"
+
 
 **Options:**
 
