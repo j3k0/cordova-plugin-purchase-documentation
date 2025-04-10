@@ -4,7 +4,7 @@ This section describes the minimal code required to implement a non-renewing sub
 
 ### Base framework
 
-First, let's set up the basic HTML structure and the initial JavaScript to load the plugin, make sure you have performed the basic [Code Framework Setup](/setup/code-framework).
+First, let's set up the basic HTML structure and the initial JavaScript to load the plugin, make sure you have performed the basic [Code Framework Setup](../setup/code-framework.md).
 
 ### Initialization & Presentation
 
@@ -15,10 +15,8 @@ Now, we'll initialize the plugin, register our non-renewing subscription product
 *   Showing a "Subscribe" or "Extend" button. Google Play treats these similarly to consumables, so they can typically be purchased again once expired (or potentially even before to extend).
 
 
-!INCLUDE "./subscription-generic-initialization.src.md"
+!INCLUDE "./subscription-generic-initialization.sr
 
-
-*Note: Adapt the UI logic in `subscription-generic-initialization.md`. Instead of just "Subscribed", show "Access until [Expiry Date]". The `product.owned` status for non-renewing subscriptions might depend on local data or validator logic correctly interpreting the expiry.*
 
 ### Purchase Flow
 

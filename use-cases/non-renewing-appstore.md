@@ -225,7 +225,7 @@ Implement the logic to handle the purchase process. This involves initiating the
 
 ### Purchase Flow (iOS/App Store Non-Renewing Subscription)
 
-This section implements the purchase logic for **non-renewing subscriptions** on **iOS/App Store**, assuming you have completed the [generic non-renewing initialization](non-renewing-generic-initialization.md). Your application manages the entitlement period, and you **must acknowledge** the purchase using `transaction.finish()`.
+This section implements the purchase logic for **non-renewing subscriptions** on **iOS/App Store**. Your application manages the entitlement period, and you **must acknowledge** the purchase using `transaction.finish()`.
 
 **Step 1: Implement the Purchase Action (`purchaseNonRenewing`)**
 

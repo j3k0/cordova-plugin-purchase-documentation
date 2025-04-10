@@ -1,6 +1,6 @@
 ### Purchase Flow (iOS/App Store Subscription)
 
-This section details the purchase logic for **auto-renewing subscriptions** on **iOS/App Store**, assuming you have completed the [generic subscription initialization](subscription-generic-initialization.md). Handling subscriptions reliably requires verification and **acknowledgment** via `transaction.finish()`.
+This section details the purchase logic for **auto-renewing subscriptions** on **iOS/App Store**. Handling subscriptions reliably requires verification and **acknowledgment** via `transaction.finish()`.
 
 **Step 1: Implement the Subscription Purchase Action (`subscribe`)**
 
@@ -133,7 +133,7 @@ Testing subscriptions follows the standard iOS procedure, paying attention to re
 2.  **Configure & Run in Xcode:**
     *   Set up signing (Team, Certificates).
     *   Select your **physical test device**. Simulators are unreliable for IAP.
-    *   **Validator:** Ensure `store.validator` is configured and your server has the correct **App-Specific Shared Secret**. See [Setup Guide - Step 7](sections/setup-subscription-ios-7-validation-server.md).
+    *   **Validator:** Ensure `store.validator` is configured and your server has the correct **App-Specific Shared Secret**. See [Setup Guide - Step 7](../setup/setup-appstore.md).
     *   **Sandbox Tester:** On the device, go to `Settings -> App Store`. Sign out of any production Apple ID. **Do not** sign in to the Sandbox account yet.
     *   Run the app from Xcode (▶).
 3.  **Test Subscription Purchase:**

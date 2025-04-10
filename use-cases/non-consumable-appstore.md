@@ -17,7 +17,7 @@ This section covers the initial setup and UI display for a **non-consumable** pr
 
 **Assumptions:**
 
-*   You have completed the [basic Framework setup](/use-cases/setup/code-framework).
+*   You have completed the [basic Framework setup](/../setup/code-framework.md).
 *   You have created a non-consumable product in your target platform's developer console.
 
 **Step 1: Implement `initializeStoreAndSetupListeners`**
@@ -225,7 +225,7 @@ Implement the logic to handle the purchase process. This involves initiating the
 
 ### Purchase Flow (iOS/App Store Non-Consumable)
 
-This section details the purchase logic specific to **iOS/App Store** for **non-consumable** items (like unlocking a feature permanently), assuming you have completed the [generic non-consumable initialization](non-consumable-generic-initialization.md). Similar to Android, the purchase must be finalized using `transaction.finish()` to remove it from the payment queue.
+This section details the purchase logic specific to **iOS/App Store** for **non-consumable** items (like unlocking a feature permanently). Similar to Android, the purchase must be finalized using `transaction.finish()` to remove it from the payment queue.
 
 **Step 1: Implement the Purchase Action (`purchaseFeature`)**
 

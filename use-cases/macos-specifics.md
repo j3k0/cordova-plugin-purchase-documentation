@@ -19,7 +19,7 @@ The App Store Connect interface, Xcode capabilities, and macOS testing procedure
     ```bash
     cordova platform add osx
     ```
-2.  **App Store Connect Setup:** Complete the general [Setup for AppStore](sections/setup-appstore.md) guide. Most steps (Apple Developer Account, App Record, Agreements, Product Creation, Shared Secret, Sandbox Users) are identical for iOS and macOS apps distributed via the App Store.
+2.  **App Store Connect Setup:** Complete the general [Setup for AppStore](../setup/setup-appstore.md) guide. Most steps (Apple Developer Account, App Record, Agreements, Product Creation, Shared Secret, Sandbox Users) are identical for iOS and macOS apps distributed via the App Store.
 
 ## Xcode Project Configuration
 

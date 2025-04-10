@@ -1,6 +1,6 @@
 ### Purchase Flow (iOS/App Store Non-Consumable)
 
-This section details the purchase logic specific to **iOS/App Store** for **non-consumable** items (like unlocking a feature permanently), assuming you have completed the [generic non-consumable initialization](non-consumable-generic-initialization.md). Similar to Android, the purchase must be finalized using `transaction.finish()` to remove it from the payment queue.
+This section details the purchase logic specific to **iOS/App Store** for **non-consumable** items (like unlocking a feature permanently). Similar to Android, the purchase must be finalized using `transaction.finish()` to remove it from the payment queue.
 
 **Step 1: Implement the Purchase Action (`purchaseFeature`)**
 

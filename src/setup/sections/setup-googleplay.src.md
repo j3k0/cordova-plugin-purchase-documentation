@@ -128,4 +128,4 @@ Server-side validation is essential for security and reliable subscription manag
 
 ---
 
-After completing these steps, your Google Play Console, application build, and test device should be configured to support In-App Purchases using `cordova-plugin-purchase`. You can now proceed to implement the purchase logic in your application code as shown [here](/use-cases/setup/code-framework).
+After completing these steps, your Google Play Console, application build, and test device should be configured to support In-App Purchases using `cordova-plugin-purchase`. You can now proceed to implement the purchase logic in your application code as shown [here](/../setup/code-framework.md).

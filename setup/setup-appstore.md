@@ -1,3 +1,5 @@
+
+
 ## Setup for iOS AppStore
 
 This guide details the necessary steps to configure your development environment, Apple Developer account, and App Store Connect settings before implementing In-App Purchases for iOS or macOS using `cordova-plugin-purchase` v13+.
@@ -224,4 +226,5 @@ Since you are here, let's retrieve the Shared Secret. You can use an App-Specifi
 
 ---
 
-After completing these steps, your Apple Developer account, App Store Connect record, and Xcode project should be configured to support In-App Purchases using `cordova-plugin-purchase`. You can now proceed to implement the purchase logic in your application code as shown [here](/use-cases/setup/code-framework).
+After completing these steps, your Apple Developer account, App Store Connect record, and Xcode project should be configured to support In-App Purchases using `cordova-plugin-purchase`. You can now proceed to implement the purchase logic in your application code as shown [here](/../setup/code-framework.md).
+

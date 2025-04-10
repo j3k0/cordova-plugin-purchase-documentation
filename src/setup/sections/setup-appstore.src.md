@@ -99,4 +99,4 @@ Install the purchase plugin and enable the necessary capability in Xcode.
 
 ---
 
-After completing these steps, your Apple Developer account, App Store Connect record, and Xcode project should be configured to support In-App Purchases using `cordova-plugin-purchase`. You can now proceed to implement the purchase logic in your application code as shown [here](/use-cases/setup/code-framework).
+After completing these steps, your Apple Developer account, App Store Connect record, and Xcode project should be configured to support In-App Purchases using `cordova-plugin-purchase`. You can now proceed to implement the purchase logic in your application code as shown [here](/../setup/code-framework.md).

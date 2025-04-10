@@ -2,7 +2,7 @@ This section covers the initial setup and UI display for a **non-consumable** pr
 
 **Assumptions:**
 
-*   You have completed the [basic Framework setup](/use-cases/setup/code-framework).
+*   You have completed the [basic Framework setup](/../setup/code-framework.md).
 *   You have created a non-consumable product in your target platform's developer console.
 
 **Step 1: Implement `initializeStoreAndSetupListeners`**

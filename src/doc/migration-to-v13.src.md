@@ -210,8 +210,8 @@ store.when()
 
 ## 9. Braintree Integration
 
-Version 13 introduces official Braintree support via the `cordova-plugin-purchase-braintree` extension. If you were using previous unofficial Braintree integrations, you'll need to migrate to the new adapter structure, using `store.initialize()` with `Platform.BRAINTREE` and `store.requestPayment()`. Refer to the [Braintree Use Case](https://purchase.cordova.fovea.cc/use-cases/payment-braintree).
+Version 13 introduces official Braintree support via the `cordova-plugin-purchase-braintree` extension. If you were using previous unofficial Braintree integrations, you'll need to migrate to the new adapter structure, using `store.initialize()` with `Platform.BRAINTREE` and `store.requestPayment()`. Refer to the [Braintree Use Case](../use-cases/payment-braintree.md).
 
 ---
 
-Review these changes carefully and update your application code accordingly. Test thoroughly after migration, especially the purchase and validation flows. Consult the [API documentation](https://github.com/j3k0/cordova-plugin-purchase/tree/v13/api) for detailed information on the new methods and classes.
+Review these changes carefully and update your application code accordingly. Test thoroughly after migration, especially the purchase and validation flows. Consult the [API documentation](https://www.iaptic.com/documentation/cordova-plugin-api/) for detailed information on the new methods and classes.

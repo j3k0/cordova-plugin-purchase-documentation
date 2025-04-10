@@ -1,6 +1,6 @@
 ### Purchase Flow (Android/Google Play Non-Consumable)
 
-This section details the purchase logic specific to **Android/Google Play** for **non-consumable** items (like unlocking a feature permanently), assuming you have completed the [generic non-consumable initialization](non-consumable-generic-initialization.md). The key step on Android is **acknowledging** the purchase within 3 days using `transaction.finish()` to prevent automatic refunds.
+This section details the purchase logic specific to **Android/Google Play** for **non-consumable** items (like unlocking a feature permanently). The key step on Android is **acknowledging** the purchase within 3 days using `transaction.finish()` to prevent automatic refunds.
 
 **Step 1: Implement the Purchase Action (`purchaseFeature`)**
 

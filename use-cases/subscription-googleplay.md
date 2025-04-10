@@ -6,7 +6,7 @@ This use case explains how to implement an **auto-renewing subscription** on And
 
 First, ensure your Google Play Console (including creating subscription products), application build, test environment, and **Google Play Developer API access** (for validation) are correctly configured.
 
-&rArr; [Setup instructions here](..setup/setup-googleplay.md).
+&rArr; [Setup instructions here](../setup/setup-googleplay.md).
 
 ## 2. Initialization & UI
 
@@ -504,7 +504,7 @@ Testing subscriptions on Google Play requires using testing tracks and specific 
 
 1.  **Create Release Build:** Sign your APK/AAB with your **release keystore**.
 2.  **Upload to Play Console:** Upload the build to **Internal testing** or **Closed testing**.
-3.  **Validator Setup:** Ensure your `store.validator` is configured and your validation server is connected to the **Google Play Developer API** using a Service Account key. This is mandatory for getting correct subscription status. See [Setup Guide - Step 9](sections/setup-subscription-android-9-validation-server.md).
+3.  **Validator Setup:** Ensure your `store.validator` is configured and your validation server is connected to the **Google Play Developer API** using a Service Account key. This is mandatory for getting correct subscription status. See [Setup Guide - Step 9](../setup/setup-googleplay.md).
 4.  **Add Testers:** Add your tester Google accounts to the License Testing list and the specific testing track in the Play Console.
 5.  **Prepare Test Device:** Use a physical device logged in **only** with a tester Google account. Install the app **from the Google Play Store** via the test link/invitation.
 6.  **Run & Monitor:** Launch the app, monitor logs with `adb logcat CordovaPurchase:V CordovaLog:V chromium:D *:S`.

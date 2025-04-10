@@ -1,6 +1,6 @@
 ### Purchase Flow (Android/Google Play Non-Renewing Subscription)
 
-This section implements the purchase logic for **non-renewing subscriptions** on **Android using Google Play**, assuming you have completed the [generic non-renewing initialization](non-renewing-generic-initialization.md). Your application manages the entitlement period, and you **must acknowledge** the purchase with Google Play using `transaction.finish()`.
+This section implements the purchase logic for **non-renewing subscriptions** on **Android using Google Play**. Your application manages the entitlement period, and you **must acknowledge** the purchase with Google Play using `transaction.finish()`.
 
 **Step 1: Implement the Purchase Action (`purchaseNonRenewing`)**
 

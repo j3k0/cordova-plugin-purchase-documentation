@@ -4,7 +4,7 @@ This section describes the minimal code required to implement a non-renewing sub
 
 ### Base framework
 
-First, let's set up the basic HTML structure and the initial JavaScript to load the plugin. Make sure you have performed the basic [Code Framework Setup](/setup/code-framework).
+First, let's set up the basic HTML structure and the initial JavaScript to load the plugin. Make sure you have performed the basic [Code Framework Setup](../setup/code-framework.md).
 
 ### Initialization & Presentation
 
@@ -17,8 +17,6 @@ Now, we'll initialize the plugin, register our non-renewing subscription product
 
 !INCLUDE "./subscription-generic-initialization.src.md"
 
-
-*Note: Adapt the UI logic in `subscription-generic-initialization.md`. The concept of `product.owned` is less relevant here; you need to track ownership and expiry based on purchase history (likely stored locally or synced via your backend). Show "Access until [Your Calculated Expiry Date]".*
 
 ### Purchase Flow
 

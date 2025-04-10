@@ -215,7 +215,7 @@ Implement the logic to handle the purchase process when the user taps the "Buy" 
 
 ### Purchase Flow (iOS/App Store Consumable)
 
-This section details how to handle the purchase of a consumable item (like virtual currency or extra lives) on iOS/App Store, assuming you have completed the [generic consumable initialization](consumable-generic-initialization.md). The process is very similar to Android, with `transaction.finish()` also serving to consume the item.
+This section details how to handle the purchase of a consumable item (like virtual currency or extra lives) on iOS/App Store. The process is very similar to Android, with `transaction.finish()` also serving to consume the item.
 
 **Step 1: Implement the Purchase Action (`buyConsumable`)**
 
