@@ -2,3 +2,5 @@ node_modules
 package-lock.json
 include_graph.mmd
 links_graph.mmd
+docs/
+ROADMAP.md

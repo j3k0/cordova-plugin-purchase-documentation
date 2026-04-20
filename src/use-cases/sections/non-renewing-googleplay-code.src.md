@@ -15,7 +15,7 @@ Now, we'll initialize the plugin, register our non-renewing subscription product
 *   Showing a "Subscribe" or "Extend" button. Google Play treats these similarly to consumables, so they can typically be purchased again once expired (or potentially even before to extend).
 
 
-!INCLUDE "./subscription-generic-initialization.sr
+!INCLUDE "./subscription-generic-initialization.src.md"
 
 
 ### Purchase Flow

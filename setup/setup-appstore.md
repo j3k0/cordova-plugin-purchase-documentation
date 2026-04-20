@@ -127,6 +127,7 @@ Install the purchase plugin and enable the necessary capability in Xcode.
     *   Search for and add **"In-App Purchase"**. Verify it appears in the list.
 
 
+![Enabling In-App Purchase Capability in Xcode](../.gitbook/assets/xcode-iap-capability.png)
 
 
 ### 5. Create In-App Products

@@ -219,10 +219,10 @@ done
 
 # Sanitize target paths/URLs/placeholders collected in Pass 1
 for path_raw in "${!target_paths_set[@]}"; do
-    local path="$(printf '%s' "$path_raw")" # Clean path from set key
-    local kind=""
-    local lookup_key=""
-    local display_label_source=""
+    path="$(printf '%s' "$path_raw")" # Clean path from set key
+    kind=""
+    lookup_key=""
+    display_label_source=""
 
     if [[ "$path" =~ ^BROKEN\( ]]; then
         kind="broken_placeholder"
@@ -232,7 +232,7 @@ for path_raw in "${!target_paths_set[@]}"; do
     elif [[ "$path" =~ :// ]]; then
         # This block will only run if OMIT_EXTERNAL is 0
         kind="external"
-        local domain_name=$(echo "$path" | sed -E 's#^https?://([^/]+)/?.*#\1#')
+        domain_name=$(echo "$path" | sed -E 's#^https?://([^/]+)/?.*#\1#')
         lookup_key="$domain_name" # Key is the domain
         display_label_source="$domain_name" # Label is the domain
         # Call sanitize only ONCE per unique domain name
@@ -281,7 +281,7 @@ for source_file_norm in "${!source_files_set[@]}"; do
                     continue
                 fi
                 # Lookup key is the domain name
-                local domain_name=$(echo "$target_raw" | sed -E 's#^https?://([^/]+)/?.*#\1#')
+                domain_name=$(echo "$target_raw" | sed -E 's#^https?://([^/]+)/?.*#\1#')
                 target_lookup_key="$domain_name"
                 current_link_is_external=1
             else

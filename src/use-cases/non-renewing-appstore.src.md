@@ -3,7 +3,7 @@
 This use case explains how to implement a **non-renewing subscription** product (granting access for a fixed period) on iOS and macOS using the App Store platform and `cordova-plugin-purchase` v13+. Your application is responsible for managing the expiry date.
 
 
-!INCLUDE "./sections/non-renewing-ios-intro.src.src.md"
+!INCLUDE "./sections/non-renewing-ios-intro.src.md"
 
 
 ## 1. Platform Setup

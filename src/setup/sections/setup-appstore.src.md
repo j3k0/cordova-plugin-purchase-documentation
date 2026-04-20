@@ -75,7 +75,7 @@ Install the purchase plugin and enable the necessary capability in Xcode.
     *   Search for and add **"In-App Purchase"**. Verify it appears in the list.
 
 
-!INCLUDE "../images/xcode-capability-in-app-purchase.src.md"
+![Enabling In-App Purchase Capability in Xcode](../.gitbook/assets/xcode-iap-capability.png)
 
 
 !INCLUDE "setup-ios-5-create-in-app-products.src.md"

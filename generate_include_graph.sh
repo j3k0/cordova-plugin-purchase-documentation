@@ -243,11 +243,6 @@ while IFS= read -r line; do
 
     # Check if target exists
     if [[ "$is_unresolved" -eq 0 ]] && [[ ! -v existing_files["$resolved_target"] ]]; then
-        # --- Restore simpler DEBUG ---
-        if [[ "$source_file_raw" == *"payment-braintree-code.src.md"* ]]; then
-             echo "DEBUG [Check Failed]: Resolved target path: '$resolved_target'"
-        fi
-        # --- END DEBUG ---
         echo "Warning: Included file NOT FOUND: '$resolved_target' (normalized from '$target_raw' in '$source_file_raw')" >&2
         is_broken_link["$link_key"]=1
         ((broken_count++))
@@ -355,8 +350,12 @@ if [ "${#FOCUS_TARGETS[@]}" -gt 0 ]; then
 else
     # No focus: include all nodes and links
     echo "No focus specified, generating full graph."
-    included_node_ids=("${!node_id_to_path_map[@]}") # Include all nodes with generated IDs
-    final_links=("${all_links_set[@]}") # Include all links
+    for _id in "${!node_id_to_path_map[@]}"; do
+        included_node_ids["$_id"]=1
+    done
+    for _key in "${!all_links_set[@]}"; do
+        final_links["$_key"]=1
+    done
 
     # Just use the global broken_count calculated earlier
     echo "Including all ${#final_links[@]} links ($broken_count broken)."
@@ -457,7 +456,7 @@ echo "Writing Mermaid file: $MERMAID_OUTPUT_FILE"
 # Use the count of links actually written to the file
 final_link_count_written="${#final_links[@]}"
 # Use the corrected broken count
-final_broken_count_written="$final_broken_count_corrected"
+final_broken_count_written="$broken_count"
 
 echo "Done. Mermaid definition saved to '$MERMAID_OUTPUT_FILE'."
 echo "Generated graph contains $final_link_count_written links ($final_broken_count_written broken)."
