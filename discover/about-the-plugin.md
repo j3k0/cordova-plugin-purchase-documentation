@@ -47,6 +47,19 @@ The plugin manages interactions with the underlying payment platforms through a 
 
 *   **JavaScript Core (`CdvPurchase.store`):** Provides the unified API and manages platform adapters.
 *   **Platform Adapters:** Internal components responsible for implementing the unified API for each specific platform (App Store, Google Play, Braintree, Test).
-*   **Native Bridges:** Cordova plugins (Objective-C/Swift for iOS/macOS, Java/Kotlin for Android) that communicate directly with the native platform SDKs (StoreKit, Google Play Billing Library, Braintree SDK).
+*   **Native Bridges:** Framework-specific native code that communicates directly with platform SDKs:
+    *   **Cordova:** Native plugins (Objective-C/Swift for iOS/macOS, Java/Kotlin for Android).
+    *   **Capacitor:** Dedicated native bridges via `capacitor-plugin-cdv-purchase` — StoreKit 2 on iOS, Google Play Billing on Android — with no Cordova dependency.
 
 This layered approach allows the JavaScript API (`CdvPurchase.store`) to remain consistent while the adapters and native bridges handle the platform-specific implementation details.
+
+## Framework Support
+
+The plugin ships as two packages that share the same JavaScript API:
+
+| Framework | Package | Install |
+|-----------|---------|---------|
+| Cordova / Ionic (Cordova) | `cordova-plugin-purchase` | `cordova plugin add cordova-plugin-purchase` |
+| Capacitor / Ionic (Capacitor) | `capacitor-plugin-cdv-purchase` | `npm install capacitor-plugin-cdv-purchase && npx cap sync` |
+
+See [Capacitor Setup](../setup/setup-capacitor.md) for full installation and configuration instructions when using Capacitor.

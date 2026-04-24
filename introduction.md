@@ -11,6 +11,16 @@ Welcome to the documentation for the `cordova-plugin-purchase` plugin (version 1
 *   **Facilitates Receipt Validation:** Provides receipt data necessary for server-side validation, which is **crucial** for security and managing entitlements, especially subscriptions. Integrates easily with services like [Iaptic](https://www.iaptic.com/).
 *   **Test Platform:** Includes a built-in `Platform.TEST` adapter for local development and testing without real store interaction.
 
+## Supported Frameworks
+
+The plugin supports the following frameworks:
+
+*   **Cordova** — via `cordova-plugin-purchase` (the original integration).
+*   **Capacitor** — via `capacitor-plugin-cdv-purchase`, a dedicated native package with its own StoreKit 2 and Google Play Billing bridges (no Cordova dependency). See [Capacitor Setup](setup/setup-capacitor.md).
+*   **Ionic** — works with either of the above depending on your underlying runtime (Cordova or Capacitor).
+
+The JavaScript API (`CdvPurchase.store`) is identical across all three — only installation and initialization differ.
+
 ## Who Is This For?
 
 This documentation is for developers building hybrid mobile applications using frameworks like Cordova, Capacitor, or Ionic who need to implement In-App Purchases for digital goods or services.

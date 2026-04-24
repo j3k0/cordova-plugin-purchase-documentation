@@ -92,6 +92,86 @@ This page lists common issues encountered when implementing In-App Purchases wit
     *   **(iOS):** Ensure products are in the same **Subscription Group** in App Store Connect.
     *   **(Android):** Ensure products are registered with the same `group` in `store.register()`. Pass the correct `oldPurchaseToken` and `replacementMode` in `additionalData` when calling `offer.order()`. Check device logs for specific Billing Library errors.
 
+## StoreKit 2 Issues (v13.14+)
+
+*   **Purchases work but validation returns unexpected format:**
+    *   **Cause:** With `cordova-plugin-purchase-storekit2` installed on iOS 15+, the adapter sends per-transaction JWS tokens (type `apple-sk2`) instead of the monolithic `appStoreReceipt`.
+    *   **Solution:** Ensure your validator supports the `apple-sk2` transaction type. If using Iaptic, this is handled automatically. If using a custom validator, update it to accept `jwsRepresentation` fields.
+
+*   **Duplicate transactions or double validation calls after installing StoreKit 2 extension:**
+    *   **Cause:** On older plugin versions (< 13.15.2), both SK1 and SK2 observers could fire for the same purchase.
+    *   **Solution:** Update to v13.15.2+. The plugin now automatically disables the SK1 payment queue observer when the SK2 extension is detected on iOS 15+.
+
+*   **StoreKit 2 extension not activating (still using SK1):**
+    *   **Cause:** The `cordova-plugin-purchase-storekit2` plugin is not installed, or the device runs iOS < 15.
+    *   **Solution:** Verify installation (`cordova plugin ls` or check `package.json`). The SK2 extension requires cordova-ios 7+ (tested with cordova-ios 8). On iOS < 15, SK1 is used automatically -- this is expected behavior.
+
+*   **`store.getStorefront()` returns error on Mac Catalyst:**
+    *   **Cause:** SK1's `SKPaymentQueue.storefront` returns nil on Mac Catalyst / "Designed for iPad" mode.
+    *   **Solution:** Update to v13.15.1+ and install `cordova-plugin-purchase-storekit2` v1.0.3+. The plugin falls back to SK2's `Storefront.current` automatically.
+
+*   **Sandbox sign-in dialog loops endlessly (iOS):**
+    *   **Cause:** The app receipt fails to load, and the native transaction never finishes, causing repeated sign-in prompts.
+    *   **Solution:** Update to v13.15.3+. The plugin now falls back to a synthetic receipt so the transaction resolves instead of looping.
+
+*   **Existing subscriptions not visible after app relaunch (Capacitor + SK2):**
+    *   **Cause:** On earlier versions, current entitlements were not emitted on init.
+    *   **Solution:** Update to v13.15.2+. The Capacitor SK2 plugin now emits current entitlements as restored transactions on `init()`.
+
+## Capacitor Installation Issues (v13.15+)
+
+*   **`npx cap sync ios` fails with missing `Package.swift` or podspec:**
+    *   **Cause:** Earlier versions of `capacitor-plugin-cdv-purchase` omitted the SPM manifest and root podspec from the npm tarball.
+    *   **Solution:** Update to `capacitor-plugin-cdv-purchase` v13.15.2+. Both `Package.swift` (for Capacitor 8/SPM) and `CapacitorPluginCdvPurchase.podspec` (for Capacitor 6-7/CocoaPods) are now included.
+
+*   **Peer dependency conflict with Capacitor 7 or 8:**
+    *   **Cause:** The `@capacitor/core` peer dependency was pinned to `^6.0.0`.
+    *   **Solution:** Update to `capacitor-plugin-cdv-purchase` v13.15.2+ which supports `^6.0.0 || ^7.0.0 || ^8.0.0`.
+
+*   **`CdvPurchase` undefined in Capacitor app:**
+    *   **Cause:** The plugin was not synced or the Capacitor bridge has not loaded yet.
+    *   **Solution:** Run `npx cap sync` after installing. Access `CdvPurchase.store` only after `Capacitor.Plugins` is ready. In Ionic, use `this.platform.ready()`.
+
+*   **Using both Cordova plugin and Capacitor plugin simultaneously:**
+    *   **Cause:** Installing both `cordova-plugin-purchase` (via Cordova compatibility) and `capacitor-plugin-cdv-purchase` causes conflicts.
+    *   **Solution:** Use only one. For Capacitor apps, prefer `capacitor-plugin-cdv-purchase`. Remove the Cordova plugin: `npm uninstall cordova-plugin-purchase` then `npx cap sync`.
+
+## Multi-Quantity Purchase Issues (v13.15+)
+
+*   **`quantity` parameter ignored on iOS:**
+    *   **Cause:** Multi-quantity requires `cordova-plugin-purchase` v13.15.0+ on iOS.
+    *   **Solution:** Update to v13.15.0+. Verify the platform supports it:
+        ```javascript
+        if (!store.checkSupport(CdvPurchase.Platform.APPLE_APPSTORE, 'orderQuantity')) {
+          console.warn('Multi-quantity not supported on this platform version');
+        }
+        ```
+
+*   **`quantity` not appearing in `VerifiedPurchase`:**
+    *   **Cause:** Your validator does not return the `quantity` field, or you are on an older plugin version.
+    *   **Solution:** Update to v13.15.0+. Ensure your validator extracts and returns the quantity from the transaction data. If using Iaptic, this is handled automatically.
+
+*   **Apple rejects quantity > 10:**
+    *   **Cause:** Apple limits consumable purchases to 10 units per transaction.
+    *   **Solution:** Cap the quantity picker at 10. For larger quantities, perform multiple sequential purchases or adjust your product's unit value.
+
+## Google Play Billing 8.x Issues (v13.13+)
+
+*   **Build fails with `minSdkVersion` error:**
+    *   **Cause:** Google Play Billing Library 8.1+ requires `minSdkVersion` 23.
+    *   **Solution:** In `config.xml` or `build.gradle`, set `minSdkVersion` to 23 or higher:
+        ```xml
+        <preference name="android-minSdkVersion" value="23" />
+        ```
+
+*   **Suspended subscriptions now appear as "owned" locally but validation says expired:**
+    *   **Cause:** Google Play now returns suspended (paused / payment-on-hold) subscriptions in the purchases list (aligning with Apple). The local transaction exists but the subscription is not active.
+    *   **Solution:** This is expected behavior. Always rely on `store.owned()` (which checks validated expiry) rather than the presence of a local transaction. The `expirationDate` on suspended subscriptions is in the past, so `store.owned()` correctly returns `false`.
+
+*   **"Product Owned" event never fires (Android):**
+    *   **Cause:** On v13.15.3 and earlier, a null `AccountIdentifiers` from the Play Billing Library could crash the purchase-to-JS serialization silently.
+    *   **Solution:** Update to v13.15.3+ which includes a null-guard for `Purchase.getAccountIdentifiers()`.
+
 ---
 
 *This is not an exhaustive list. If you encounter issues not listed here, please re-check device logs, consult platform-specific documentation (StoreKit, Google Play Billing), and consider opening an issue on the plugin's GitHub repository with detailed information (logs, code snippets, platform versions).*

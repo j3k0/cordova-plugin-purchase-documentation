@@ -215,3 +215,138 @@ Version 13 introduces official Braintree support via the `cordova-plugin-purchas
 ---
 
 Review these changes carefully and update your application code accordingly. Test thoroughly after migration, especially the purchase and validation flows. Consult the [API documentation](https://www.iaptic.com/documentation/cordova-plugin-api/) for detailed information on the new methods and classes.
+
+---
+
+## What Changed in v13.12 -- v13.15
+
+If you are already on v13.x and upgrading to v13.12 or later, this section covers the significant additions, new features, and behavioral changes introduced across these releases.
+
+### Capacitor Native Plugin (v13.15+)
+
+The plugin now ships a dedicated native Capacitor adapter as a separate package. Capacitor apps no longer need the Cordova compatibility layer.
+
+**Installation:**
+
+```sh
+npm install capacitor-plugin-cdv-purchase
+npx cap sync
+```
+
+The JavaScript API (`CdvPurchase.store`) remains identical -- only the native bridge changes. Capacitor 6, 7, and 8 are supported.
+
+**Migration from Cordova-Capacitor compatibility mode:** If you previously used `cordova-plugin-purchase` inside a Capacitor app via `@awesome-cordova-plugins` or similar wrappers, switch to the native package for better performance and simpler builds. Remove the Cordova plugin and install `capacitor-plugin-cdv-purchase` instead.
+
+### StoreKit 2 Extension (v13.14+)
+
+StoreKit 2 is supported as an optional extension. When `cordova-plugin-purchase-storekit2` is installed, the Apple AppStore adapter automatically upgrades from StoreKit 1 to StoreKit 2 on iOS 15+ devices -- no code changes are needed.
+
+**Installation:**
+
+```sh
+cordova plugin add cordova-plugin-purchase-storekit2
+# or for Capacitor:
+npm install cordova-plugin-purchase-storekit2
+npx cap sync
+```
+
+**What changes with StoreKit 2:**
+
+*   Per-transaction JWS (JSON Web Signature) tokens replace the monolithic `appStoreReceipt`
+*   Receipt validation uses transaction type `apple-sk2` with a `jwsRepresentation` field
+*   Native async/await APIs for product loading, purchases, and transaction observation
+*   Built-in support for manage-subscriptions and offer-code redemption sheets
+
+**Fallback behavior:** If the extension is not installed, or the device runs iOS < 15, the adapter continues using StoreKit 1 transparently. No conditional logic is required in your app code.
+
+**Important:** When both plugins are installed on iOS 15+, the StoreKit 1 observer is automatically disabled to prevent duplicate transaction delivery.
+
+### Multi-Quantity Consumable Purchases (v13.15+)
+
+Multi-quantity purchases are now supported on iOS (in addition to the existing Android support). Pass a `quantity` value (1--10, Apple's limit) when ordering:
+
+```javascript
+const error = await store.order(offer, { quantity: 3 });
+```
+
+Platforms advertise support via a capability check:
+
+```javascript
+if (store.checkSupport(CdvPurchase.Platform.APPLE_APPSTORE, 'orderQuantity')) {
+  // show the quantity picker
+}
+```
+
+The `VerifiedPurchase` object now includes an optional `quantity` field reflecting the number of units purchased.
+
+### Storefront / Country Code API (v13.15+)
+
+A new `store.getStorefront()` method returns the user's billing country:
+
+```javascript
+const storefront = store.getStorefront();
+// { countryCode: 'US' }
+
+store.when().storefrontUpdated(sf => {
+  console.log('Storefront changed to:', sf.countryCode);
+});
+```
+
+Use this for regional pricing display, product filtering, or legal prompts. The value refreshes automatically after order, restore, and update flows.
+
+Available on Apple AppStore (SK1 + SK2), Google Play, and through the native Capacitor plugin.
+
+### IapticJS Adapter
+
+A new `Platform.IAPTIC_JS` adapter allows web-based apps (using Stripe via the [iaptic-js](https://github.com/nicklockwood/iaptic-js) SDK) to participate in the same purchase flow as native platforms. Initialize it alongside other platforms:
+
+```javascript
+store.initialize([
+  Platform.APPLE_APPSTORE,
+  Platform.GOOGLE_PLAY,
+  { platform: Platform.IAPTIC_JS, options: { /* iaptic-js config */ } }
+]);
+```
+
+This is primarily useful for apps that offer web-based Stripe payments in addition to native store purchases, managed through a single Iaptic backend.
+
+### Privacy Policy for Validator Requests
+
+Control what device information is sent with receipt validation requests via `store.validator_privacy_policy`:
+
+```javascript
+CdvPurchase.store.validator_privacy_policy = ['fraud', 'support', 'analytics'];
+```
+
+Allowed values:
+*   `fraud` -- hashed device fingerprint for fraud detection
+*   `support` -- OS, OS version, device manufacturer, Cordova version
+*   `analytics` -- same data as `support`, intended for analytics use
+*   `tracking` -- device identifiers and/or UUID (if available)
+
+Default: `['fraud', 'support', 'analytics']`. Requires `cordova-plugin-device` to be installed.
+
+### Google Play Billing Library 8.3 (v13.13+)
+
+The plugin upgraded from Billing Library 7.x to 8.3.0. Key behavioral changes:
+
+*   **`minSdkVersion` 23 required.** If your app targets API < 23, you must update.
+*   **Suspended subscriptions now returned in purchases list.** Previously, Google Play omitted paused or payment-on-hold subscriptions. Now they appear with an `expirationDate` in the past, so `store.owned()` correctly returns `false`. No code changes needed -- the existing expiry check handles this.
+*   **One-time product offers.** In-app products can now have multiple offers (v12.0 format), similar to subscriptions. The plugin resolves the first available offer with pricing data.
+*   **Pending purchases enabled for one-time products** and prepaid plans.
+*   **Auto service reconnection** for more reliable BillingClient connections when Google Play Services disconnects.
+
+### Other Notable Changes
+
+*   **Validation payload optimization (v13.15.2):** The full product catalog is sent with validation requests at most once per 24 hours instead of on every call, reducing payload size significantly.
+*   **`store.restorePurchases()` deduplication (v13.15.3):** Repeated restore calls on Android no longer accumulate stale duplicates in the internal purchase list.
+*   **iOS sandbox dialog loop fix (v13.15.3):** A synthetic receipt fallback prevents the sandbox sign-in dialog from looping when the app receipt fails to load.
+*   **Stale ownership at startup fix (v13.15.3):** `loadReceipts()` now properly awaits pending transactions instead of relying on a fixed timeout.
+
+### Breaking Changes Summary
+
+| Change | Version | Action Required |
+|--------|---------|-----------------|
+| `minSdkVersion` 23 (Android) | 13.13 | Update `build.gradle` if targeting API < 23 |
+| Suspended subscriptions in purchases list (Android) | 13.13 | None -- handled automatically by expiry check |
+| SK1 observer disabled when SK2 extension installed (iOS) | 13.15.2 | None -- automatic; be aware if you relied on SK1-specific behavior |
