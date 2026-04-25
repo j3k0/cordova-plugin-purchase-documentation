@@ -2,6 +2,10 @@
 
 This use case explains how to implement an **auto-renewing subscription** on iOS and macOS using the App Store platform and `cordova-plugin-purchase` v13+. Reliable subscription management **requires server-side receipt validation**.
 
+> **Capacitor:** This guide applies to both Cordova and Capacitor projects. The purchase API is identical — only the [installation](../setup/setup-capacitor.md) differs. In Capacitor, import the plugin directly instead of waiting for `deviceready`.
+
+> **Tip:** For enhanced transaction handling on iOS 15+, see [StoreKit 2 Extension](../setup/storekit2.md).
+
 ## 1. Platform Setup
 
 First, ensure your Apple Developer account, App Store Connect (including creating subscription products and groups), and Xcode project are correctly configured.

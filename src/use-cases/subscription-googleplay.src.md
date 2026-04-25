@@ -2,6 +2,10 @@
 
 This use case explains how to implement an **auto-renewing subscription** on Android using the Google Play platform and `cordova-plugin-purchase` v13+. Reliable subscription management **requires server-side receipt validation** connected to the Google Play Developer API.
 
+> **Capacitor:** This guide applies to both Cordova and Capacitor projects. The purchase API is identical — only the [installation](../setup/setup-capacitor.md) differs. In Capacitor, import the plugin directly instead of waiting for `deviceready`.
+
+> **Tip:** For suspended subscriptions and pending purchases on newer Play Billing versions, see [Google Play Billing 8.3](google-play-billing.md).
+
 ## 1. Platform Setup
 
 First, ensure your Google Play Console (including creating subscription products), application build, test environment, and **Google Play Developer API access** (for validation) are correctly configured.

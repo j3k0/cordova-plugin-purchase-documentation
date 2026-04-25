@@ -2,6 +2,10 @@
 
 This use case explains how to implement a **consumable** product (like virtual currency or extra lives) on Android using the Google Play platform and `cordova-plugin-purchase` v13+.
 
+> **Capacitor:** This guide applies to both Cordova and Capacitor projects. The purchase API is identical — only the [installation](../setup/setup-capacitor.md) differs. In Capacitor, import the plugin directly instead of waiting for `deviceready`.
+
+> **Tip:** For purchasing multiple units at once, see [Multi-Quantity Consumables](multi-quantity.md) (v13.15+).
+
 ## 1. Platform Setup
 
 First, ensure your Google Play Console, application build, and test environment are correctly configured for Google Play Billing.

@@ -19,7 +19,7 @@ It simplifies handling in-app purchases across multiple platforms by abstracting
 | Feature                      | App Store (iOS/macOS) | Google Play (Android) | Braintree (iOS/Android)¹ | Test Platform |
 | :--------------------------- | :-------------------: | :-------------------: | :----------------------: | :-----------: |
 | Consumables                  |           ✅          |           ✅          |            ✅            |       ✅      |
-| Multi-Quantity Consumables   |                       |           ✅          |                          |               |
+| Multi-Quantity Consumables   |           ✅          |           ✅          |                          |               |
 | Non-Consumables              |           ✅          |           ✅          |                          |       ✅      |
 | Auto-Renewing Subscriptions  |           ✅          |           ✅          |                          |       ✅      |
 | Non-Renewing Subscriptions   |           ✅          |           ✅          |                          |               |

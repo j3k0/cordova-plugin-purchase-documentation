@@ -46,3 +46,6 @@ Follow the specific testing procedures using your Braintree Sandbox account and 
 
 !INCLUDE "./sections/payment-braintree-test.src.md"
 
+{% hint style="info" %}
+For web-based payments via Stripe as an alternative to Braintree, see [IapticJS Adapter](iaptic-js.md).
+{% endhint %}

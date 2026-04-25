@@ -44,4 +44,6 @@ The `cordova-plugin-purchase` plugin uses these distinct `ProductType` enums to 
 *   **Dedicated Accounts:** You **must** create specific test accounts (Sandbox Apple ID, Google License Tester Account) for this purpose. Using real accounts for testing can lead to unexpected charges or issues.
 *   **Environment Differences:** Be aware that test environments might have slightly different behaviors (e.g., accelerated subscription renewals, specific test card responses, different UI prompts). Always test thoroughly in the production environment before launch (e.g., using promo codes or with trusted users if possible).
 
+The `cordova-plugin-purchase` plugin works across Cordova, Capacitor, and Ionic projects with the same JavaScript API. For web-based payment scenarios outside of native app stores, see also the [IapticJS Adapter](../use-cases/iaptic-js.md).
+
 Understanding these general principles is key to successfully implementing IAPs using the `cordova-plugin-purchase` plugin.

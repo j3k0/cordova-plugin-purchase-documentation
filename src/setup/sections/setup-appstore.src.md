@@ -99,4 +99,11 @@ Install the purchase plugin and enable the necessary capability in Xcode.
 
 ---
 
+### See also
+
+* **StoreKit 2** — The optional `cordova-plugin-purchase-storekit2` extension enables Apple's StoreKit 2 API on iOS 15+, providing improved transaction handling and subscription management. See [StoreKit 2 Setup](storekit2.md) for installation instructions.
+* **Capacitor** — If you are using Capacitor instead of Cordova, StoreKit 2 support is built in. See [Capacitor Setup](setup-capacitor.md) for platform-specific guidance.
+
+---
+
 After completing these steps, your Apple Developer account, App Store Connect record, and Xcode project should be configured to support In-App Purchases using `cordova-plugin-purchase`. You can now proceed to implement the purchase logic in your application code as shown [here](/../setup/code-framework.md).

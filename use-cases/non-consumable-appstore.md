@@ -2,6 +2,8 @@
 
 This use case explains how to implement a **non-consumable** product (like unlocking a premium feature or removing ads permanently) on iOS and macOS using the App Store platform and `cordova-plugin-purchase` v13+.
 
+> **Capacitor:** This guide applies to both Cordova and Capacitor projects. The purchase API is identical — only the [installation](../setup/setup-capacitor.md) differs. In Capacitor, import the plugin directly instead of waiting for `deviceready`.
+
 ## 1. Platform Setup
 
 First, ensure your Apple Developer account, App Store Connect, and Xcode project are correctly configured for In-App Purchases.

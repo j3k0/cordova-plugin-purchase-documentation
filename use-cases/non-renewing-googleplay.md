@@ -2,6 +2,8 @@
 
 This use case explains how to implement a **non-renewing subscription** product (granting access for a fixed period) on Android using the Google Play platform and `cordova-plugin-purchase` v13+. Your application is responsible for managing the expiry date, and the purchase must be acknowledged.
 
+> **Capacitor:** This guide applies to both Cordova and Capacitor projects. The purchase API is identical — only the [installation](../setup/setup-capacitor.md) differs. In Capacitor, import the plugin directly instead of waiting for `deviceready`.
+
 
 # Non-Renewing Subscription on Android
 

@@ -497,3 +497,6 @@ After implementing the code from the previous sections, you can test the Braintr
 
 This process allows you to verify the client-side flow and the crucial interaction with your backend for processing the payment nonce.
 
+{% hint style="info" %}
+For web-based payments via Stripe as an alternative to Braintree, see [IapticJS Adapter](iaptic-js.md).
+{% endhint %}

@@ -128,4 +128,11 @@ Server-side validation is essential for security and reliable subscription manag
 
 ---
 
+### See also
+
+* **Google Play Billing 8.3** — Starting with plugin v13.13, the plugin uses Google Play Billing Library 8.3 which requires `minSdkVersion` 23+. See [Google Play Billing 8.3](../use-cases/google-play-billing.md) for behavioral details and migration notes.
+* **Capacitor** — For Capacitor projects, see [Capacitor Setup](setup-capacitor.md) instead of the Cordova-specific steps above.
+
+---
+
 After completing these steps, your Google Play Console, application build, and test device should be configured to support In-App Purchases using `cordova-plugin-purchase`. You can now proceed to implement the purchase logic in your application code as shown [here](/../setup/code-framework.md).

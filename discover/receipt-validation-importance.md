@@ -47,3 +47,5 @@ While the `cordova-plugin-purchase` allows you to interact with platform SDKs to
 *   Use a dedicated service like [Iaptic](https://www.iaptic.com/) (recommended, handles platform complexities, API changes, and provides a unified response format).
 
 While the plugin provides access to local transaction data via `store.localReceipts`, treat it as provisional and **never** grant permanent or high-value entitlements based solely on it. Use the `store.verifiedReceipts` and `store.verifiedPurchases` collections (populated after successful validation) or, even better, query your own backend (which should be updated by your validator) as the source of truth for entitlements on the client-side.
+
+You can control what data is sent during validation -- see [Validator Privacy Policy](../use-cases/privacy-policy.md).

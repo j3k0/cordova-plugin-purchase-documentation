@@ -1,4 +1,7 @@
 
+{% hint style="info" %}
+This guide applies to both Cordova and Capacitor projects.
+{% endhint %}
 
 # Using the Test Platform
 
@@ -355,4 +358,8 @@ if (typeof refreshUI !== 'function') { refreshUI = () => console.log('Placeholde
 *   **Promise Handling (Lines 15-28):** The promise returned by `order()` resolves/rejects quickly after the prompt is dismissed, mainly indicating if the *request* was initiated or immediately failed/cancelled. The final purchase *outcome* is handled by the event listeners.
 
 This setup allows you to test the full client-side purchase lifecycle locally using simple prompts for interaction. Remember to replace the Test platform logic with real platform adapters and server-side validation for production.
+
+{% hint style="tip" %}
+For registering custom products beyond the built-in defaults, see [Custom Test Products](test-custom-products.md).
+{% endhint %}
 

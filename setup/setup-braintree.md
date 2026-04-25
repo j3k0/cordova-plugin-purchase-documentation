@@ -221,4 +221,10 @@ To add an extra layer of security for card payments:
 
 ---
 
+### See also
+
+* **IapticJS alternative** — For web-based payments via Stripe (rather than native Braintree Drop-in), consider the [IapticJS Adapter](../use-cases/iaptic-js.md) as a lighter-weight alternative.
+
+---
+
 After completing these steps, your Braintree account and application should be configured to process payments using the `cordova-plugin-purchase-braintree` extension and the `store.requestPayment()` method. Remember that the crucial step of processing the payment nonce **must happen on your server**.
