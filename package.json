@@ -1,5 +1,21 @@
 {
+  "name": "cordova-plugin-purchase-documentation",
+  "version": "13.15.0",
+  "private": true,
+  "scripts": {
+    "docusaurus": "docusaurus",
+    "start": "docusaurus start",
+    "build": "docusaurus build",
+    "serve": "docusaurus serve"
+  },
   "dependencies": {
-    "cordova-plugin-purchase": "github:j3k0/cordova-plugin-purchase#v13.1.0"
+    "@docusaurus/core": "3.6.3",
+    "@docusaurus/preset-classic": "3.6.3",
+    "prism-react-renderer": "^2.4",
+    "react": "^18.3",
+    "react-dom": "^18.3"
+  },
+  "overrides": {
+    "webpack": "5.88.2"
   }
 }

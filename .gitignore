@@ -1,6 +1,8 @@
-node_modules
-package-lock.json
+node_modules/
+# package-lock.json tracked for reproducible Docusaurus builds
 include_graph.mmd
 links_graph.mmd
-docs/
+docs/epics/
 ROADMAP.md
+build/
+.docusaurus/
