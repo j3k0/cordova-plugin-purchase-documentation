@@ -11,6 +11,9 @@ const config = {
   onBrokenLinks: 'warn',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.ico',
+  markdown: {
+    format: 'md',
+  },
   presets: [
     [
       'classic',
