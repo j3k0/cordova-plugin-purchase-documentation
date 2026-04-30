@@ -1,1 +1,0 @@
-!INCLUDE "sections/setup-braintree.src.md"

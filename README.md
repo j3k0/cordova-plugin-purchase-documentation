@@ -1,6 +1,6 @@
 # Cordova Purchase Plugin
 
-![](.gitbook/assets/banner.jpg)
+![](static/img/banner.jpg)
 
 > **In-App Purchases for Cordova, Capacitor, and Ionic**
 
@@ -196,9 +196,20 @@ function displayTestProduct() {
 ```
 *   **Note:** This example uses the `CdvPurchase` global namespace.
 
-## Contributing
+## Development
 
-Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to edit the documentation and submit changes.
+```bash
+npm install
+npm start          # local preview at localhost:3000 (requires Node 22)
+npm run build      # production build
+```
+
+## Deployment
+
+```bash
+docker build -t purchase-docs .
+docker run -p 80:80 purchase-docs
+```
 
 ## Sponsors & License
 
@@ -207,4 +218,4 @@ This plugin is maintained thanks to its sponsors. See the full [README on GitHub
 Licensed under the MIT License.
 
 ---
-[Documentation](introduction.md) | [GitHub](https://github.com/j3k0/cordova-plugin-purchase) | [Iaptic Validation](https://www.iaptic.com/)
+[Documentation](https://purchase.cordova.fovea.cc) | [GitHub](https://github.com/j3k0/cordova-plugin-purchase) | [Iaptic Validation](https://www.iaptic.com/)

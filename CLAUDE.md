@@ -4,42 +4,54 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-GitBook-hosted documentation for the `cordova-plugin-purchase` plugin (v13+) — a unified JavaScript In-App Purchase API for Cordova, Capacitor, and Ionic apps (Apple App Store, Google Play, Braintree, and a built-in Test platform). `SUMMARY.md` is the GitBook table of contents.
+Docusaurus documentation site for the `cordova-plugin-purchase` plugin (v13+) — a unified JavaScript In-App Purchase API for Cordova, Capacitor, and Ionic apps (Apple App Store, Google Play, Braintree, and a built-in Test platform). Self-hosted at `purchase.cordova.fovea.cc`.
 
 ## Build
 
 ```bash
-npm install -g markdown-pp   # one-time: required build tool
-./build.sh                   # preprocesses src/**/*.src.md -> final .md files
+npm install        # install dependencies (Node 22+ required)
+npm start          # local dev server with hot reload at localhost:3000
+npm run build      # production build (output in build/)
+docker build .     # production Docker image (node:22 + nginx)
 ```
 
-`build.sh` runs `markdown-pp` from each source file's directory (so `!INCLUDE` paths resolve relatively), then `rsync`s `src/use-cases/code/` → `use-cases/code/`.
+Note: Local Node v25 is incompatible with Docusaurus. Use Node 22 (see `.nvmrc`) or build via Docker.
 
-## Source vs generated — DO NOT edit generated files
+## Content
 
-Authoritative content lives under `src/`. Files in `use-cases/`, `setup/`, `discover/`, and `doc/` are *generated* from matching `src/**/*.src.md` files by `build.sh` and will be overwritten.
+All documentation lives in `docs/`. Edit `.md` files directly — no preprocessor, no source/generated split.
 
-| Edit here | Generated output |
-|-----------|------------------|
-| `src/<area>/foo.src.md` (depth ≤ 2) | `<area>/foo.md` |
-| `src/use-cases/code/*.js` | rsynced to `use-cases/code/` |
+| Directory | Content |
+|-----------|---------|
+| `docs/discover/` | Conceptual guides (IAP technology, plugin overview, receipt validation) |
+| `docs/setup/` | Platform and framework setup (AppStore, Google Play, Capacitor, Braintree, StoreKit 2) |
+| `docs/use-cases/` | Implementation guides by product type + advanced features |
+| `docs/doc/` | Migration guide, troubleshooting, quick reference |
+| `docs/code/` | Shared JS code snippets (imported into pages) |
+| `static/img/` | Images |
 
-Shared snippets live in `src/use-cases/sections/` and `src/setup/sections/` and are pulled into page sources via `!INCLUDE "./sections/name.src.md"`. They don't produce standalone output (build.sh uses `-maxdepth 2`).
+## Configuration
 
-Root-level files (`README.md`, `introduction.md`, `SUMMARY.md`, `CONTRIBUTING.md`) are edited directly — they have no `.src.md` counterparts.
+| File | Purpose |
+|------|---------|
+| `docusaurus.config.js` | Site config (URL, navbar, footer, plugins, versioning) |
+| `sidebars.js` | Navigation sidebar (replaces old SUMMARY.md) |
+| `src/css/custom.css` | Theme color overrides |
+| `Dockerfile` | Multi-stage build: node:22 → nginx |
+| `nginx.conf` | SPA fallback, gzip, cache, legacy `.gitbook/assets/` redirect |
 
 ## Commit workflow
 
-When changing documentation: edit the `.src.md` source, run `./build.sh`, then commit **both** the source and the regenerated `.md` output in the same commit.
+Edit content in `docs/`, verify the Docker build passes, commit.
 
-## Graph utilities
+## Versioning
 
-`generate_include_graph.sh` and `generate_links_graph.sh` emit Mermaid diagrams (`include_graph.mmd`, `links_graph.mmd`, both gitignored) that highlight broken `!INCLUDE` targets or dead internal links in red. Both accept `-f <path>` to focus on a subtree — useful when diagnosing cross-file issues.
+Configured for v13. When v14 ships: `npx docusaurus docs:version 13` to snapshot, then edit `docs/` for v14 content.
 
 ## Roadmap
 
-`ROADMAP.md` tracks the documentation review initiative — 6 epics to bring docs to parity with plugin v13.15. Epic details live in `docs/epics/`. Both are gitignored (not part of the published site).
+`ROADMAP.md` tracks the documentation review initiative. Epic details live in `docs/epics/`. Both are gitignored.
 
 ## Lessons
 
-Project-specific lessons learned are stored as short notes in `./lessons/` (create on first use). Add one when something non-obvious bites (build quirks, GitBook rendering surprises, markdown-pp edge cases) so future sessions don't repeat the discovery.
+Project-specific lessons learned are stored as short notes in `./lessons/` (create on first use).
