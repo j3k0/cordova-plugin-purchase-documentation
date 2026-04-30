@@ -123,14 +123,6 @@ No extra Gradle or manifest changes are required. The plugin automatically inclu
 
 Ensure your `android/app/build.gradle` has `minSdkVersion` of 23 or higher (the Capacitor default satisfies this).
 
-## Recommended Companion Packages
-
-- **`@capacitor/network`** — Allows the purchase plugin to detect connectivity changes for faster retry of failed validation requests:
-  ```bash
-  npm install @capacitor/network
-  npx cap sync
-  ```
-
 ## Next Steps
 
 Once installed, the API usage is identical across Cordova and Capacitor. Continue with:
