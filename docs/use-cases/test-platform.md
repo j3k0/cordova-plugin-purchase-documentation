@@ -41,8 +41,7 @@ Ensure you have the basic HTML structure and initial JavaScript setup (waiting f
 
 Implement the `initializeStoreAndSetupListeners` function to configure and initialize the Test platform. This involves registering test products and setting up event listeners.
 
-{% code title="www/js/index.js (initializeStoreAndSetupListeners)" lineNumbers="true" %}
-```javascript
+```javascript title="www/js/index.js (initializeStoreAndSetupListeners)"
 // This function should be called by onDeviceReady after basic setup
 function initializeStoreAndSetupListeners() {
   console.log('Setting up store for Test Platform...');
@@ -256,7 +255,6 @@ if (!CdvPurchase.Utils) CdvPurchase.Utils = {};
 if (!CdvPurchase.Utils.formatDurationEN) { CdvPurchase.Utils.formatDurationEN = (iso) => iso || ''; }
 
 ```
-{% endcode %}
 
 **Explanation:**
 
@@ -277,8 +275,7 @@ if (!CdvPurchase.Utils.formatDurationEN) { CdvPurchase.Utils.formatDurationEN = 
 
 Implement the function called by your "Buy" buttons to initiate a test purchase using `offer.order()`.
 
-{% code title="www/js/index.js (buyTestProduct)" lineNumbers="true" %}
-```javascript
+```javascript title="www/js/index.js (buyTestProduct)"
 // This function is called by the "Buy" buttons in the UI
 window.buyTestProduct = function(productId) {
   console.log(`Buy button clicked for test product: ${productId}`);
@@ -342,7 +339,6 @@ if (typeof setStatus !== 'function') { setStatus = (message) => console.log('[St
 if (typeof refreshUI !== 'function') { refreshUI = () => console.log('Placeholder: refreshUI()'); }
 
 ```
-{% endcode %}
 
 **Explanation:**
 

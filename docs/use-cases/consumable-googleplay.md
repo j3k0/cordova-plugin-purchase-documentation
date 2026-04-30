@@ -33,8 +33,7 @@ This section covers the initial setup and UI display for a **consumable** produc
 
 Replace the placeholder `initializeStoreAndSetupListeners` function (from the initial JavaScript setup) with the following code. This function registers your consumable product, optionally sets up a validator, adds a listener to update the UI when product data loads, and initializes the store.
 
-{% code title="www/js/index.js (initializeStoreAndSetupListeners)" lineNumbers="true" %}
-```javascript
+```javascript title="www/js/index.js (initializeStoreAndSetupListeners)"
 // This function should be called by onDeviceReady after basic setup
 function initializeStoreAndSetupListeners() {
   console.log('Setting up store for Consumables...');
@@ -194,7 +193,6 @@ if (typeof setStatus !== 'function') {
 }
 
 ```
-{% endcode %}
 
 **Explanation:**
 

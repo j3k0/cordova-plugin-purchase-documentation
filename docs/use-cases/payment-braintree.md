@@ -33,8 +33,7 @@ Next, implement the `initializeStoreAndSetupListeners` function. This involves:
 *   Setting up `store.when()` listeners to handle the `approved` (nonce received), `verified` (server processed nonce successfully), and `finished` (acknowledged) states.
 *   Calling `store.initialize()` with the Braintree platform and options.
 
-{% code title="www/js/index.js (initializeStoreAndSetupListeners)" lineNumbers="true" %}
-```javascript
+```javascript title="www/js/index.js (initializeStoreAndSetupListeners)"
 // This function should be called by onDeviceReady after basic setup
 function initializeStoreAndSetupListeners() {
   console.log('Setting up store for Braintree...');
@@ -173,7 +172,6 @@ if (typeof setAppState !== 'function') { setAppState = (state, message) => { con
 {message}`); refreshUI(); }; } // Link to refreshUI
 
 ```
-{% endcode %}
 
 **Explanation:**
 *   **Lines 11-15:** Define configuration constants (replace placeholders!).
@@ -192,8 +190,7 @@ if (typeof setAppState !== 'function') { setAppState = (state, message) => { con
 
 Implement the `refreshUI` function to display the payment details and update the UI based on the payment state (`LOADING`, `BASKET`, `IN_PROGRESS`, `PAYMENT_INITIATED`, `PAYMENT_APPROVED`, `PAYMENT_FINISHED`).
 
-{% code title="www/js/index.js (refreshUI and state helpers)" lineNumbers="true" %}
-```javascript
+```javascript title="www/js/index.js (refreshUI and state helpers)"
 // Global state variables (consider a more robust state management approach for larger apps)
 let appState = 'LOADING'; // Initial state: LOADING, BASKET, IN_PROGRESS, PAYMENT_INITIATED, PAYMENT_APPROVED, PAYMENT_FINISHED
 let appMessage = 'Initializing Payment...';
@@ -285,7 +282,6 @@ document.addEventListener('deviceready', () => {
 // Ensure refreshUI is called initially if needed elsewhere
 // refreshUI(); // Call if needed outside of setAppState
 ```
-{% endcode %}
 
 **Explanation:**
 *   This function manages showing/hiding elements and enabling/disabling the "Pay Now" button based on the `appState` variable.
@@ -295,8 +291,7 @@ document.addEventListener('deviceready', () => {
 
 Implement the function triggered by your "Pay Now" button. This function uses `store.requestPayment()` to initiate the Braintree flow.
 
-{% code title="www/js/index.js (requestBraintreePayment)" lineNumbers="true" %}
-```javascript
+```javascript title="www/js/index.js (requestBraintreePayment)"
 // Make this function globally accessible if called from HTML onclick
 window.requestBraintreePayment = function() {
   // Ensure CdvPurchase and its members are available
@@ -387,7 +382,6 @@ if (typeof setAppState !== 'function') { setAppState = (state, message) => { con
 </html> "{state}: ")
 {message}`); refreshUI(); }; }
 ```
-{% endcode %}
 
 **Explanation:**
 *   **Lines 10-29:** Define payment details (items, total amount, currency) and optional billing/user info.

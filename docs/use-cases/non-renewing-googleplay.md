@@ -49,8 +49,7 @@ This section covers the initial setup and UI display for a **non-renewing subscr
 
 Replace the placeholder `initializeStoreAndSetupListeners` function with the following code. This registers your non-renewing subscription product, optionally sets up a validator (useful for getting an accurate purchase date), adds listeners for UI updates, and initializes the store.
 
-{% code title="www/js/index.js (initializeStoreAndSetupListeners)" lineNumbers="true" %}
-```javascript
+```javascript title="www/js/index.js (initializeStoreAndSetupListeners)"
 // This function should be called by onDeviceReady after basic setup
 function initializeStoreAndSetupListeners() {
   console.log('Setting up store for Non-Renewing Subscriptions...');
@@ -218,7 +217,6 @@ if (!CdvPurchase.Utils.formatDurationEN) {
 }
 
 ```
-{% endcode %}
 
 **Explanation:**
 
@@ -254,8 +252,7 @@ This section implements the purchase logic for **non-renewing subscriptions** on
 *   **What:** Replace the placeholder `window.purchaseNonRenewing` function to call `offer.order()` for the Google Play platform.
 *   **Why:** Starts the Google Play purchase dialog for the non-renewing product.
 
-{% code title="www/js/index.js (purchaseNonRenewing)" %}
-```javascript
+```javascript title="www/js/index.js (purchaseNonRenewing)"
 // Replace the placeholder purchaseNonRenewing function
 window.purchaseNonRenewing = function() {
     const productId = 'non_renewing_1_month'; // Use the SAME product ID you registered
@@ -291,7 +288,6 @@ window.purchaseNonRenewing = function() {
     }
 }
 ```
-{% endcode %}
 
 **Step 2: Handle Purchase Events (`.approved`, `.verified`, `.finished`)**
 
@@ -300,8 +296,7 @@ window.purchaseNonRenewing = function() {
 
 Add these handlers inside the existing `store.when()` call:
 
-{% code title="www/js/index.js (listeners within store.when)" %}
-```javascript
+```javascript title="www/js/index.js (listeners within store.when)"
   .approved(transaction => {
     console.log(`Transaction ${transaction.transactionId} approved for ${transaction.products[0]?.id}.`);
     setStatus('Purchase approved. Verifying...');
@@ -335,7 +330,6 @@ Add these handlers inside the existing `store.when()` call:
     refreshUI();
   });
 ```
-{% endcode %}
 
 **Step 3: Implement Access Granting, Expiry Calculation, and Acknowledgment (`grantAccessAndAcknowledge`)**
 
@@ -344,8 +338,7 @@ Add these handlers inside the existing `store.when()` call:
 
 Replace the placeholder `grantAccessAndFinish` function in `www/js/index.js`:
 
-{% code title="www/js/index.js (grantAccessAndAcknowledge)" %}
-```javascript
+```javascript title="www/js/index.js (grantAccessAndAcknowledge)"
 // Replace the placeholder grantAccessAndFinish function
 function grantAccessAndAcknowledge(transaction) {
     const productId = transaction.products[0]?.id;
@@ -401,7 +394,6 @@ function grantAccessAndAcknowledge(transaction) {
     }
 }
 ```
-{% endcode %}
 
 ---
 

@@ -69,8 +69,7 @@ You might want to comment out or remove the default CSS (`www/css/index.css`) fr
 
 This section provides the minimal JavaScript foundation needed to start using the `cordova-plugin-purchase` plugin in your `www/js/index.js` file (or equivalent).
 
-{% code title="www/js/index.js" lineNumbers="true" %}
-```javascript
+```javascript title="www/js/index.js"
 // Wait for Cordova's deviceready event
 document.addEventListener('deviceready', onDeviceReady, false);
 
@@ -155,7 +154,6 @@ function refreshUI() {
 // window.myPurchaseFunction = function() { ... }
 
 ```
-{% endcode %}
 
 **Explanation:**
 
@@ -186,8 +184,7 @@ npx cap sync
 
 **Initialization (`src/purchase.ts` or equivalent):**
 
-{% code title="src/purchase.ts" lineNumbers="true" %}
-```typescript
+```typescript title="src/purchase.ts"
 import { store, ProductType, Platform, LogLevel } from 'capacitor-plugin-cdv-purchase';
 
 /**
@@ -246,7 +243,6 @@ function refreshUI() {
   // Update your UI with product data, ownership status, etc.
 }
 ```
-{% endcode %}
 
 **Explanation:**
 

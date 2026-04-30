@@ -30,8 +30,7 @@ This section covers the initial setup and UI display for a **non-consumable** pr
 
 Replace the placeholder `initializeStoreAndSetupListeners` function with the following code. This registers your non-consumable product, sets up essential event listeners for UI updates, configures the (highly recommended) validator, and initializes the store.
 
-{% code title="www/js/index.js (initializeStoreAndSetupListeners)" lineNumbers="true" %}
-```javascript
+```javascript title="www/js/index.js (initializeStoreAndSetupListeners)"
 // This function should be called by onDeviceReady after basic setup
 function initializeStoreAndSetupListeners() {
   console.log('Setting up store for Non-Consumables...');
@@ -198,7 +197,6 @@ if (typeof setStatus !== 'function') {
 }
 
 ```
-{% endcode %}
 
 **Explanation:**
 
