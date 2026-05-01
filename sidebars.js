@@ -1,6 +1,7 @@
 /** @type {import('@docusaurus/plugin-content-docs').SidebarsConfig} */
 const sidebars = {
   docs: [
+    { type: 'doc', id: 'index', label: 'Home' },
     { type: 'doc', id: 'introduction', label: 'Introduction' },
     { type: 'doc', id: 'doc/migration-to-v13', label: 'Migrating to v13' },
     {
