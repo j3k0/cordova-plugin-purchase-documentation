@@ -22,23 +22,24 @@ It simplifies handling in-app purchases across multiple platforms by abstracting
 
 **Supported Platforms & Features:**
 
-| Feature                      | App Store (iOS/macOS) | Google Play (Android) | Braintree (iOS/Android)¹ | Test Platform |
-| :--------------------------- | :-------------------: | :-------------------: | :----------------------: | :-----------: |
-| Consumables                  |           ✅          |           ✅          |            ✅            |       ✅      |
-| Multi-Quantity Consumables   |           ✅          |           ✅          |                          |               |
-| Non-Consumables              |           ✅          |           ✅          |                          |       ✅      |
-| Auto-Renewing Subscriptions  |           ✅          |           ✅          |                          |       ✅      |
-| Non-Renewing Subscriptions   |           ✅          |           ✅          |                          |               |
-| Restore Purchases            |           ✅          |           ✅          |            ✅            |       ✅      |
-| Payment Requests             |                       |                       |            ✅            |       ✅      |
-| Receipt Validation           |           ✅          |           ✅          |            ✅            |       ✅      |
-| Introductory Offers          |           ✅          |           ✅          |                          |       ✅      |
-| Promotional Offers (iOS)     |           ✅          |                       |                          |               |
-| Subscription Offers (GP)     |                       |           ✅          |                          |       ✅      |
-| Manage Subscriptions UI      |           ✅          |           ✅          |                          |       ✅      |
-| Manage Billing UI            |           ✅          |           ✅          |                          |       ✅      |
+| Feature                      | App Store (iOS/macOS) | Google Play (Android) | Braintree (iOS/Android)¹ | Stripe (IapticJS)² | Test Platform |
+| :--------------------------- | :-------------------: | :-------------------: | :----------------------: | :-----------------: | :-----------: |
+| Consumables                  |           ✅          |           ✅          |            ✅            |         ✅          |       ✅      |
+| Multi-Quantity Consumables   |           ✅          |           ✅          |                          |                     |               |
+| Non-Consumables              |           ✅          |           ✅          |                          |                     |       ✅      |
+| Auto-Renewing Subscriptions  |           ✅          |           ✅          |                          |         ✅          |       ✅      |
+| Non-Renewing Subscriptions   |           ✅          |           ✅          |                          |                     |               |
+| Restore Purchases            |           ✅          |           ✅          |            ✅            |         ✅          |       ✅      |
+| Payment Requests             |                       |                       |            ✅            |                     |       ✅      |
+| Receipt Validation           |           ✅          |           ✅          |            ✅            |         ✅          |       ✅      |
+| Introductory Offers          |           ✅          |           ✅          |                          |                     |       ✅      |
+| Promotional Offers (iOS)     |           ✅          |                       |                          |                     |               |
+| Subscription Offers (GP)     |                       |           ✅          |                          |                     |       ✅      |
+| Manage Subscriptions UI      |           ✅          |           ✅          |                          |         ✅          |       ✅      |
+| Manage Billing UI            |           ✅          |           ✅          |                          |         ✅          |       ✅      |
 
 ¹ *Requires the [cordova-plugin-purchase-braintree](https://github.com/j3k0/cordova-plugin-purchase-braintree) extension.*
+² *Web-based payments via Stripe through the [IapticJS adapter](use-cases/iaptic-js). Products defined in your [Iaptic](https://www.iaptic.com) dashboard.*
 
 ## Documentation
 
