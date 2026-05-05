@@ -4,3 +4,5 @@ build/
 *.mmd
 docs/epics/
 ROADMAP.md
+deploy/
+deploy.sh

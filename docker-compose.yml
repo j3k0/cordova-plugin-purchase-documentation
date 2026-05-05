@@ -1,0 +1,16 @@
+# Cordova Purchase Plugin Documentation — Docker Compose
+#
+# Usage:
+#   docker compose up --build
+#
+# For production:
+#   - Deploy via deploy.sh (Ansible playbook)
+#   - The deploy playbook copies deploy/prod.docker-compose.yml
+#     as docker-compose.override.yml on the server
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
