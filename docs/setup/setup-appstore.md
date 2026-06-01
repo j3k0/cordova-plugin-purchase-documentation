@@ -191,6 +191,9 @@ For subscriptions (and non-consumables), **server-side receipt validation is ess
           options: {
             discountEligibilityDeterminer: iaptic.appStoreDiscountEligibilityDeterminer,
             // needAppReceipt: true // Required if using eligibility determiner
+            // Note: On iOS 15+ with StoreKit 2, introductory price eligibility
+            // is determined automatically via the native introPriceEligible property.
+            // The determiner is still needed for promotional offers on all iOS versions.
           }
         }]);
         ```

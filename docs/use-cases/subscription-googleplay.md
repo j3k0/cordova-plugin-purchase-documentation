@@ -380,8 +380,11 @@ window.subscribe = function(productId, platform, offerId) {
         const additionalData = {
             googlePlay: {
                 // Optional: Provide obfuscated user identifiers for fraud prevention
-                // accountId: store.getApplicationUsername() ? Utils.md5(store.getApplicationUsername()) : undefined,
-                // profileId: '...' // If using multiple profiles per account
+                // Set store.obfuscator = 'uuid' before initialize() to automatically transform
+                // the applicationUsername into a deterministic UUID for Google Play's obfuscatedAccountId
+                // store.applicationUsername = 'user-42';
+                // store.obfuscator = 'uuid';
+                // accountId: undefined, // auto-populated from store.obfuscator
 
                 // --- Subscription Update Parameters ---
                 // The plugin attempts to find the 'oldPurchaseToken' automatically

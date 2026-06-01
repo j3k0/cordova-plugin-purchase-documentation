@@ -32,6 +32,7 @@ const { store, ProductType, Platform, LogLevel } = CdvPurchase;
 | `store.validator` | URL string or function for receipt validation |
 | `store.validator_privacy_policy` | Array of privacy categories sent to validator |
 | `store.applicationUsername` | App-specific user identifier sent with purchases |
+| `store.obfuscator` | `Obfuscator` | How `applicationUsername` is transformed before being sent to the native store (`'uuid'` recommended, `'legacy'` default) |
 
 ## Events (via `store.when()`)
 
@@ -80,7 +81,7 @@ A specific pricing option for a product.
 |---|---|---|
 | `id` | `string` | Offer identifier |
 | `pricingPhases` | `PricingPhase[]` | Phases (trial, intro, regular) |
-| `canPurchase` | `boolean` | Whether this offer can currently be purchased |
+| `canPurchase` | `boolean` | Whether this offer can currently be purchased (`false` while a transaction is pending or unfinished) |
 | `order(additionalData?)` | method | Initiate purchase of this offer |
 
 ### PricingPhase
@@ -131,6 +132,36 @@ Authoritative purchase data from your validator.
 | `isExpired` | `boolean` | Whether the subscription has expired |
 | `renewalIntent` | `string` | Whether the user intends to renew |
 | `quantity` | `number` | Number of units (consumables, v13.15+) |
+| `introPriceEligible` | `boolean?` | Whether the user is eligible for an introductory price (Apple SK2 only, v13.15.4+) |
+
+### Obfuscator
+
+Controls how `applicationUsername` is transformed before being sent to the native store.
+
+| Value | Behavior |
+|---|---|
+| `'uuid'` | **Recommended.** Deterministic UUIDv3 on all platforms. Valid as Apple's `appAccountToken` and Google Play's `obfuscatedAccountId`. |
+| `'legacy'` | Default (backward compat). MD5 hash on Google Play; UUIDv3 on Apple SK2; raw value on Apple SK1. |
+| `'disabled'` | No transformation — raw `applicationUsername` is passed through. For Apple SK2 the value must be a valid UUID. |
+| Custom function | `(username: string, platform: Platform) => string` — full control. Must return a valid UUID for Apple platforms. |
+
+```javascript
+store.applicationUsername = 'user-42';
+store.obfuscator = 'uuid'; // deterministic UUID — valid for Apple appAccountToken and Google obfuscatedAccountId
+```
+
+### Error Codes
+
+Common error codes (full list in `CdvPurchase.ErrorCode`):
+
+| Code | Meaning |
+|---|---|
+| `ErrorCode.SETUP` | Store not set up |
+| `ErrorCode.PURCHASE` | Generic purchase error |
+| `ErrorCode.STORE_BLOCKED` | Store is blocked by OEM restrictions (e.g. Google Play unavailable on device, v13.16.1+) |
+| `ErrorCode.COMMUNICATION` | Network/communication error |
+| `ErrorCode.VERIFICATION_FAILED` | Receipt verification failed |
+| `ErrorCode.BAD_RESPONSE` | Invalid validator response |
 
 ## Platforms
 
@@ -150,6 +181,8 @@ const { store, ProductType, Platform } = CdvPurchase;
 // 1. Configure
 store.verbosity = CdvPurchase.LogLevel.DEBUG;
 store.validator = "https://validator.iaptic.com/v1/validate?appName=...";
+store.applicationUsername = 'user-42';
+store.obfuscator = 'uuid'; // deterministic UUID — valid for Apple appAccountToken
 
 // 2. Register products
 store.register([{

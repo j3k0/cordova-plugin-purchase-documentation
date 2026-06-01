@@ -347,6 +347,45 @@ The plugin upgraded from Billing Library 7.x to 8.3.0. Key behavioral changes:
 *   **iOS sandbox dialog loop fix (v13.15.3):** A synthetic receipt fallback prevents the sandbox sign-in dialog from looping when the app receipt fails to load.
 *   **Stale ownership at startup fix (v13.15.3):** `loadReceipts()` now properly awaits pending transactions instead of relying on a fixed timeout.
 
+### Username Obfuscation (v13.16+)
+
+`additionalData.applicationUsername` is deprecated. Set the obfuscator once at init time instead:
+
+```js
+store.applicationUsername = 'user-42';
+store.obfuscator = 'uuid'; // deterministic UUIDv3 — valid for Apple appAccountToken and Google obfuscatedAccountId
+```
+
+| Mode | Google Play | Apple SK2 | Apple SK1 |
+|------|------------|-----------|-----------|
+| `'uuid'` (recommended) | UUIDv3 | UUIDv3 | UUIDv3 |
+| `'legacy'` (default) | MD5 hash | UUIDv3 | raw value |
+| `'disabled'` | raw value | raw value | raw value |
+
+For custom transformations, pass a function: `store.obfuscator = (username, platform) => myHash(username);`
+
+**Migration:** If you were passing `additionalData.applicationUsername` to `offer.order()`, move the username to `store.applicationUsername` and set `store.obfuscator` before calling `store.initialize()`. The `additionalData.applicationUsername` field still works but will be removed in a future version.
+
+### `canPurchase` Behavioral Change (v13.15.4+)
+
+`offer.canPurchase` now returns `false` when there is a pending or unfinished transaction for the same product. Previously, it returned `true` whenever any matching transaction existed, which could allow duplicate purchases.
+
+This change prevents users from initiating a new purchase while a previous one is still being processed (e.g., waiting for receipt validation or acknowledgment). If you were relying on `canPurchase` to check product availability rather than purchase eligibility, use `store.get(id, platform)?.offers[0]?.pricingPhases` to verify the product has loaded pricing data instead.
+
+### `ERR_STORE_BLOCKED` Error Code (v13.16.1)
+
+A new error code `ErrorCode.STORE_BLOCKED` (numeric `6777033`) has been added for Google Play Billing Library v9. It fires when `BILLING_UNAVAILABLE` indicates that the Google Play Store is blocked by OEM restrictions (e.g., on some Huawei or Amazon devices that don't include Google Play).
+
+Handle this gracefully in your app:
+
+```js
+store.when().error(error => {
+    if (error.code === CdvPurchase.ErrorCode.STORE_BLOCKED) {
+        // Show a user-friendly message: "In-app purchases are not available on this device"
+    }
+});
+```
+
 ### Breaking Changes Summary
 
 | Change | Version | Action Required |

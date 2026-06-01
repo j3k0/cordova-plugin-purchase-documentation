@@ -176,6 +176,20 @@ This page lists common issues encountered when implementing In-App Purchases wit
     *   **Cause:** On v13.15.3 and earlier, a null `AccountIdentifiers` from the Play Billing Library could crash the purchase-to-JS serialization silently.
     *   **Solution:** Update to v13.15.3+ which includes a null-guard for `Purchase.getAccountIdentifiers()`.
 
+## Store Blocked by OEM (v13.16.1+)
+
+*   **`ERR_STORE_BLOCKED` (`ErrorCode.STORE_BLOCKED`) on Android:**
+    *   **Cause:** On devices where the Google Play Store is blocked by the device manufacturer (e.g., some Huawei or Amazon devices that lack Google Play Services), `store.order()` fails with `ERR_STORE_BLOCKED`. This error was added in v13.16.1 alongside Google Play Billing Library v9.
+    *   **Solution:** Handle this gracefully in your app:
+        ```javascript
+        store.when().error(error => {
+            if (error.code === CdvPurchase.ErrorCode.STORE_BLOCKED) {
+                // Show a user-friendly message: "In-app purchases are not available on this device"
+            }
+        });
+        ```
+    *   **Note:** This is different from `ERR_SETUP` (the store is configured but not ready) and `ERR_UNAVAILABLE` (the store is not available on the device). `ERR_STORE_BLOCKED` specifically means the store app is present but blocked from making purchases by OEM restrictions.
+
 ---
 
 *This is not an exhaustive list. If you encounter issues not listed here, please re-check device logs, consult platform-specific documentation (StoreKit, Google Play Billing), and consider opening an issue on the plugin's GitHub repository with detailed information (logs, code snippets, platform versions).*

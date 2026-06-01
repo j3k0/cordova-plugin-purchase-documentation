@@ -376,8 +376,11 @@ window.subscribe = function(productId, platform, offerId) {
         setStatus('Initiating subscription...');
 
         // Optional: Pass applicationUsername for tracking/linking on your server
-        // const additionalData = { applicationUsername: 'hashed_user_id_or_uuid' };
-        // offer.order(additionalData)
+        // Set store.obfuscator = 'uuid' before initialize() to transform the username
+        // into a deterministic UUID (recommended for Apple appAccountToken)
+        // store.applicationUsername = 'user-42';
+        // store.obfuscator = 'uuid';
+        // offer.order()
 
         // Optional: Pass discount details if ordering a promotional offer
         // const discountData = { appStore: { discount: { id: 'promoId', key: '...', nonce: '...', signature: '...', timestamp: '...' } } };
