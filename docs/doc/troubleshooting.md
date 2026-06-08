@@ -159,10 +159,10 @@ This page lists common issues encountered when implementing In-App Purchases wit
     *   **Cause:** Apple limits consumable purchases to 10 units per transaction.
     *   **Solution:** Cap the quantity picker at 10. For larger quantities, perform multiple sequential purchases or adjust your product's unit value.
 
-## Google Play Billing 8.x Issues (v13.13+)
+## Google Play Billing Library Issues (v13.13+)
 
 *   **Build fails with `minSdkVersion` error:**
-    *   **Cause:** Google Play Billing Library 8.1+ requires `minSdkVersion` 23.
+    *   **Cause:** Google Play Billing Library v9.0.0+ requires `minSdkVersion` 23.
     *   **Solution:** In `config.xml` or `build.gradle`, set `minSdkVersion` to 23 or higher:
         ```xml
         <preference name="android-minSdkVersion" value="23" />
@@ -179,7 +179,8 @@ This page lists common issues encountered when implementing In-App Purchases wit
 ## Store Blocked by OEM (v13.16.1+)
 
 *   **`ERR_STORE_BLOCKED` (`ErrorCode.STORE_BLOCKED`) on Android:**
-    *   **Cause:** On devices where the Google Play Store is blocked by the device manufacturer (e.g., some Huawei or Amazon devices that lack Google Play Services), `store.order()` fails with `ERR_STORE_BLOCKED`. This error was added in v13.16.1 alongside Google Play Billing Library v9.
+    *   **Cause:** On devices where the Google Play Store is blocked by the device manufacturer (e.g., some Huawei or Amazon devices that lack Google Play Services), the store reports `BILLING_UNAVAILABLE` and the plugin surfaces `ERR_STORE_BLOCKED`. This error was added in v13.16.1 alongside Google Play Billing Library v9.
+    *   **When it fires:** `ERR_STORE_BLOCKED` is reported both when calling `store.order()` and at **initialization time**. At init, a blocked store is treated as a terminal condition: the Google Play adapter resolves immediately and **short-circuits the connection retry loop** instead of retrying with back-off (as it would for a transient `ERR_SETUP`/disconnection). This means a blocked device fails fast rather than spinning on retries — listen for the error on `store.when().error()` to detect it during startup, not just during a purchase.
     *   **Solution:** Handle this gracefully in your app:
         ```javascript
         store.when().error(error => {
@@ -188,7 +189,7 @@ This page lists common issues encountered when implementing In-App Purchases wit
             }
         });
         ```
-    *   **Note:** This is different from `ERR_SETUP` (the store is configured but not ready) and `ERR_UNAVAILABLE` (the store is not available on the device). `ERR_STORE_BLOCKED` specifically means the store app is present but blocked from making purchases by OEM restrictions.
+    *   **Note:** This is different from `ERR_SETUP` (the store is configured but not ready). `ERR_STORE_BLOCKED` specifically means the store app is present but blocked from making purchases by OEM restrictions.
 
 ---
 

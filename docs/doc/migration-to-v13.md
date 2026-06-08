@@ -386,6 +386,29 @@ store.when().error(error => {
 });
 ```
 
+`ERR_STORE_BLOCKED` is reported both at purchase time (`store.order()`) and at initialization. On a blocked device the Google Play adapter resolves immediately and does **not** retry the connection, so the error surfaces quickly during startup rather than after a series of back-off retries.
+
+### `BILLING_UNAVAILABLE` Error Message Change (v13.16.1)
+
+The user-facing message for the Android `BILLING_UNAVAILABLE` response code changed from:
+
+> "Billing API version is not supported for the type requested"
+
+to:
+
+> "Billing is not available on this device"
+
+This affects both the Cordova and Capacitor native plugins. The error **code** is unchanged — only the human-readable message is different. If your app matches on the exact message string (rather than the error code), update your comparison. Matching on `error.code` is recommended.
+
+### Google Play Billing v9 Dependency Change (v13.16.1)
+
+Upgrading to Google Play Billing Library 9.0.0 adds a new transitive dependency, **`androidx.core:core:1.9.0`**, which the plugin declares explicitly (it is needed for the blocked-store detection introduced in v9):
+
+*   **Cordova** — declared in `plugin.xml` as `<framework src="androidx.core:core:1.9.0" />`
+*   **Capacitor** — declared in `android/build.gradle` as `implementation 'androidx.core:core:1.9.0'`
+
+Most projects need no action — Gradle resolves it automatically. If you pin AndroidX versions or use a custom build configuration that excludes/overrides `androidx.core`, ensure your resolved version is **1.9.0 or higher** to avoid build or runtime conflicts.
+
 ### Breaking Changes Summary
 
 | Change | Version | Action Required |
@@ -393,3 +416,6 @@ store.when().error(error => {
 | `minSdkVersion` 23 (Android) | 13.13 | Update `build.gradle` if targeting API < 23 |
 | Suspended subscriptions in purchases list (Android) | 13.13 | None -- handled automatically by expiry check |
 | SK1 observer disabled when SK2 extension installed (iOS) | 13.15.2 | None -- automatic; be aware if you relied on SK1-specific behavior |
+| Google Play Billing Library 9.0.0 (Android) | 13.16.1 | None for most apps; `androidx.core:core:1.9.0` is added as a dependency |
+| `ERR_STORE_BLOCKED` error code added (Android) | 13.16.1 | Handle `ErrorCode.STORE_BLOCKED` in `store.when().error()` for OEM-blocked devices |
+| `BILLING_UNAVAILABLE` message reworded (Android) | 13.16.1 | None unless you match on the exact message string -- match on `error.code` instead |
