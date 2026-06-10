@@ -6,3 +6,4 @@ docs/epics/
 ROADMAP.md
 deploy/
 deploy.sh
+.claude/

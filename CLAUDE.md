@@ -44,6 +44,13 @@ All documentation lives in `docs/`. Edit `.md` files directly — no preprocesso
 
 Edit content in `docs/`, verify the Docker build passes, commit.
 
+## Deployment
+
+`./deploy.sh` runs an Ansible playbook to deploy to the production server.
+Both `deploy.sh` and `deploy/` are **gitignored** — `deploy/` is its own
+separate private repo, so deploy changes commit there, not in this repo.
+Infra notes (server, quirks) live in that repo's `DEPLOY-NOTES.md`.
+
 ## Versioning
 
 Configured for v13. When v14 ships: `npx docusaurus docs:version 13` to snapshot, then edit `docs/` for v14 content.
