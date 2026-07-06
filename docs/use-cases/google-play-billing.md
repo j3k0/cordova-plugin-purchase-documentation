@@ -4,7 +4,7 @@ sidebar_position: 14
 ---
 
 
-As of plugin v13.16.1, the plugin uses Google Play Billing Library 9.0.0. The behaviors and capabilities below were first introduced when v13.13.0 upgraded to Billing Library 8.3.0 and remain in effect on 9.0.0.
+As of plugin v13.17.0, the plugin uses Google Play Billing Library 9.0.0. The behaviors and capabilities below were first introduced when v13.13.0 upgraded to Billing Library 8.3.0 and remain in effect on 9.0.0.
 
 **Requirement:** `minSdkVersion` 23 or higher (Android 6.0+).
 

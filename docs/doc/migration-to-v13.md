@@ -372,7 +372,7 @@ For custom transformations, pass a function: `store.obfuscator = (username, plat
 
 This change prevents users from initiating a new purchase while a previous one is still being processed (e.g., waiting for receipt validation or acknowledgment). If you were relying on `canPurchase` to check product availability rather than purchase eligibility, use `store.get(id, platform)?.offers[0]?.pricingPhases` to verify the product has loaded pricing data instead.
 
-### `ERR_STORE_BLOCKED` Error Code (v13.16.1)
+### `ERR_STORE_BLOCKED` Error Code (v13.17.0)
 
 A new error code `ErrorCode.STORE_BLOCKED` (numeric `6777033`) has been added for Google Play Billing Library v9. It fires when `BILLING_UNAVAILABLE` indicates that the Google Play Store is blocked by OEM restrictions (e.g., on some Huawei or Amazon devices that don't include Google Play).
 
@@ -388,7 +388,7 @@ store.when().error(error => {
 
 `ERR_STORE_BLOCKED` is reported both at purchase time (`store.order()`) and at initialization. On a blocked device the Google Play adapter resolves immediately and does **not** retry the connection, so the error surfaces quickly during startup rather than after a series of back-off retries.
 
-### `BILLING_UNAVAILABLE` Error Message Change (v13.16.1)
+### `BILLING_UNAVAILABLE` Error Message Change (v13.17.0)
 
 The user-facing message for the Android `BILLING_UNAVAILABLE` response code changed from:
 
@@ -400,7 +400,7 @@ to:
 
 This affects both the Cordova and Capacitor native plugins. The error **code** is unchanged — only the human-readable message is different. If your app matches on the exact message string (rather than the error code), update your comparison. Matching on `error.code` is recommended.
 
-### Google Play Billing v9 Dependency Change (v13.16.1)
+### Google Play Billing v9 Dependency Change (v13.17.0)
 
 Upgrading to Google Play Billing Library 9.0.0 adds a new transitive dependency, **`androidx.core:core:1.9.0`**, which the plugin declares explicitly (it is needed for the blocked-store detection introduced in v9):
 
@@ -416,6 +416,6 @@ Most projects need no action — Gradle resolves it automatically. If you pin An
 | `minSdkVersion` 23 (Android) | 13.13 | Update `build.gradle` if targeting API < 23 |
 | Suspended subscriptions in purchases list (Android) | 13.13 | None -- handled automatically by expiry check |
 | SK1 observer disabled when SK2 extension installed (iOS) | 13.15.2 | None -- automatic; be aware if you relied on SK1-specific behavior |
-| Google Play Billing Library 9.0.0 (Android) | 13.16.1 | None for most apps; `androidx.core:core:1.9.0` is added as a dependency |
-| `ERR_STORE_BLOCKED` error code added (Android) | 13.16.1 | Handle `ErrorCode.STORE_BLOCKED` in `store.when().error()` for OEM-blocked devices |
-| `BILLING_UNAVAILABLE` message reworded (Android) | 13.16.1 | None unless you match on the exact message string -- match on `error.code` instead |
+| Google Play Billing Library 9.0.0 (Android) | 13.17.0 | None for most apps; `androidx.core:core:1.9.0` is added as a dependency |
+| `ERR_STORE_BLOCKED` error code added (Android) | 13.17.0 | Handle `ErrorCode.STORE_BLOCKED` in `store.when().error()` for OEM-blocked devices |
+| `BILLING_UNAVAILABLE` message reworded (Android) | 13.17.0 | None unless you match on the exact message string -- match on `error.code` instead |

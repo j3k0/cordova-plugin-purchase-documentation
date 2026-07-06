@@ -176,10 +176,10 @@ This page lists common issues encountered when implementing In-App Purchases wit
     *   **Cause:** On v13.15.3 and earlier, a null `AccountIdentifiers` from the Play Billing Library could crash the purchase-to-JS serialization silently.
     *   **Solution:** Update to v13.15.3+ which includes a null-guard for `Purchase.getAccountIdentifiers()`.
 
-## Store Blocked by OEM (v13.16.1+)
+## Store Blocked by OEM (v13.17.0+)
 
 *   **`ERR_STORE_BLOCKED` (`ErrorCode.STORE_BLOCKED`) on Android:**
-    *   **Cause:** On devices where the Google Play Store is blocked by the device manufacturer (e.g., some Huawei or Amazon devices that lack Google Play Services), the store reports `BILLING_UNAVAILABLE` and the plugin surfaces `ERR_STORE_BLOCKED`. This error was added in v13.16.1 alongside Google Play Billing Library v9.
+    *   **Cause:** On devices where the Google Play Store is blocked by the device manufacturer (e.g., some Huawei or Amazon devices that lack Google Play Services), the store reports `BILLING_UNAVAILABLE` and the plugin surfaces `ERR_STORE_BLOCKED`. This error was added in v13.17.0 alongside Google Play Billing Library v9.
     *   **When it fires:** `ERR_STORE_BLOCKED` is reported both when calling `store.order()` and at **initialization time**. At init, a blocked store is treated as a terminal condition: the Google Play adapter resolves immediately and **short-circuits the connection retry loop** instead of retrying with back-off (as it would for a transient `ERR_SETUP`/disconnection). This means a blocked device fails fast rather than spinning on retries — listen for the error on `store.when().error()` to detect it during startup, not just during a purchase.
     *   **Solution:** Handle this gracefully in your app:
         ```javascript

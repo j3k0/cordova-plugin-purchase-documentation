@@ -373,7 +373,7 @@ With the validator configured and connected to the Google Play Developer API, th
 
 ### See also
 
-* **Google Play Billing 9** — As of plugin v13.16.1, the plugin uses Google Play Billing Library 9.0.0 (the GPBL 8.x behaviors arrived in v13.13), which requires `minSdkVersion` 23+. See [Google Play Billing 9 Features](../use-cases/google-play-billing.md) for behavioral details and migration notes.
+* **Google Play Billing 9** — As of plugin v13.17.0, the plugin uses Google Play Billing Library 9.0.0 (the GPBL 8.x behaviors arrived in v13.13), which requires `minSdkVersion` 23+. See [Google Play Billing 9 Features](../use-cases/google-play-billing.md) for behavioral details and migration notes.
 * **Capacitor** — For Capacitor projects, see [Capacitor Setup](setup-capacitor.md) instead of the Cordova-specific steps above.
 
 ---

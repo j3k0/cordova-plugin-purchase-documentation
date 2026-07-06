@@ -158,7 +158,7 @@ Common error codes (full list in `CdvPurchase.ErrorCode`):
 |---|---|
 | `ErrorCode.SETUP` | Store not set up |
 | `ErrorCode.PURCHASE` | Generic purchase error |
-| `ErrorCode.STORE_BLOCKED` | Store is blocked by OEM restrictions (e.g. Google Play unavailable on device, v13.16.1+) |
+| `ErrorCode.STORE_BLOCKED` | Store is blocked by OEM restrictions (e.g. Google Play unavailable on device, v13.17.0+) |
 | `ErrorCode.COMMUNICATION` | Network/communication error |
 | `ErrorCode.VERIFICATION_FAILED` | Receipt verification failed |
 | `ErrorCode.BAD_RESPONSE` | Invalid validator response |
