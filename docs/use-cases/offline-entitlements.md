@@ -44,11 +44,11 @@ if (entitlement?.expiryDate) {
 | `storage` | Pluggable `OfflineStorageAdapter` (defaults to a `localStorage` wrapper). For long-offline deployments (weeks without connectivity), pass a file-based or secure-storage adapter — `localStorage` can be evicted by the WebView under storage pressure. |
 | `gracePeriodMs` | Grace window after a subscription's `expiryDate` during which it is still considered owned (default 30 days). |
 | `onExpiredOffline` | Behavior when the grace period has elapsed and the device is still offline: `'readonly'` keeps granting access (default), `'deny'` revokes it. |
-| `detectClockRollback` | If `true`, deny access when the persisted `lastSeenTimestamp` is in the future relative to `now` (clock tampering). |
+| `detectClockRollback` | If `true`, deny access when the persisted `lastSeenTimestamp` is in the future relative to `now` — clock tampering (default `false`). |
 
 ## Events
 
-Subscribe with `offline.on(event => ...)` to be notified of state transitions:
+Subscribe with `offline.onEvent(event => ...)` to be notified of state transitions:
 
 | Event | When It Fires |
 |---|---|
