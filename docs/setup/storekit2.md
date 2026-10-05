@@ -93,7 +93,7 @@ StoreKit 1 only re-delivered *unfinished* transactions at launch. StoreKit 2 sur
 
 `store.restorePurchases()` fires `approved` for that same set.
 
-Consumables are **not** re-delivered this way: they never appear in StoreKit 2's current entitlements. An unfinished consumable is still re-delivered once per launch, exactly as under StoreKit 1.
+Consumables are **not** re-delivered this way: they never appear in StoreKit 2's current entitlements. Only an *unfinished* consumable is re-delivered, once per launch, exactly as under StoreKit 1.
 
 **What this means for your app.** With the usual pattern:
 
