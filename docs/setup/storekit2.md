@@ -110,7 +110,7 @@ Register your `approved` handler before calling `store.initialize()` -- the laun
 
 This behavior is shared by the Cordova StoreKit 2 extension and the Capacitor plugin's built-in StoreKit 2 bridge.
 
-**Version note:** current entitlements have been surfaced at launch since StoreKit 2 extension v1.0.1 and `capacitor-plugin-cdv-purchase` v13.15.2. The `Transaction.unfinished` pass that re-emits unfinished consumables, and the deferral of the `Transaction.updates` observer to the end of `init()` ([#1714](https://github.com/j3k0/cordova-plugin-purchase/issues/1714), commit `fa38a27`), landed on `master` after v13.18.0 and are not in a published release yet.
+**Version note:** current entitlements are surfaced at launch by the StoreKit 2 extension since v1.0.1 and by `capacitor-plugin-cdv-purchase` since v13.15.2. The `Transaction.unfinished` pass that re-emits unfinished consumables, and the deferral of the `Transaction.updates` observer to the end of `init()` ([#1714](https://github.com/j3k0/cordova-plugin-purchase/issues/1714), commit `fa38a27`), are on `master` but not in a published release yet.
 
 ### SK1 standdown
 
