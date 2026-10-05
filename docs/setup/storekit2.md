@@ -81,7 +81,36 @@ If you use [iaptic](https://www.iaptic.com) as your validation service, both for
 
 ### Existing subscriptions at launch
 
-The extension loads `Transaction.currentEntitlements` at startup, so existing subscriptions are visible immediately without requiring a manual restore.
+The extension loads `Transaction.currentEntitlements` at startup, so existing subscriptions are visible immediately without requiring a manual restore. See the behavior change below for the full set of events this produces.
+
+### Behavior change: purchase events at app launch (Capacitor iOS)
+
+StoreKit 1 only re-delivered *unfinished* transactions at launch. StoreKit 2 surfaces the user's full set of **current entitlements**, so `store.initialize()` fires `approved` for:
+
+*   every non-consumable purchase,
+*   the latest transaction of each auto-renewable subscription,
+*   each non-renewing subscription -- including transactions you already finished.
+
+`store.restorePurchases()` fires `approved` for that same set.
+
+Consumables are **not** re-delivered this way: they never appear in StoreKit 2's current entitlements. An unfinished consumable is still re-delivered once per launch, exactly as under StoreKit 1.
+
+**What this means for your app.** With the usual pattern:
+
+```javascript
+store.when().approved(transaction => {
+    deliverToServer(transaction); // your fulfillment endpoint
+    transaction.finish();
+});
+```
+
+`approved` fires for already-fulfilled non-consumables and non-renewing subscriptions on every app launch. Make fulfillment **idempotent on the transaction id**: your server (or app) must treat a re-delivered, already-fulfilled transaction id as a no-op, otherwise the user is granted the same purchase again on each launch. The same applies to an unfinished consumable re-delivered at launch.
+
+Register your `approved` handler before calling `store.initialize()` -- the launch-time events are emitted during and shortly after initialization, and are lost if nothing is listening yet.
+
+This behavior is shared by the Cordova StoreKit 2 extension and the Capacitor plugin's built-in StoreKit 2 bridge.
+
+**Version note:** current entitlements have been surfaced at launch since StoreKit 2 extension v1.0.1 and `capacitor-plugin-cdv-purchase` v13.15.2. The `Transaction.unfinished` pass that re-emits unfinished consumables, and the deferral of the `Transaction.updates` observer to the end of `init()` ([#1714](https://github.com/j3k0/cordova-plugin-purchase/issues/1714), commit `fa38a27`), landed on `master` after v13.18.0 and are not in a published release yet.
 
 ### SK1 standdown
 

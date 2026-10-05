@@ -122,6 +122,10 @@ This page lists common issues encountered when implementing In-App Purchases wit
     *   **Cause:** On earlier versions, current entitlements were not emitted on init.
     *   **Solution:** Update to v13.15.2+. The Capacitor SK2 plugin now emits current entitlements as restored transactions on `init()`.
 
+*   **Fulfillment runs again on every app launch (iOS + SK2):**
+    *   **Cause:** This is the documented launch behavior, not a bug. On iOS 15+ with StoreKit 2, `store.initialize()` fires `approved` for every current entitlement -- non-consumables and non-renewing subscriptions you already finished included. See [Behavior change: purchase events at app launch (Capacitor iOS)](../setup/storekit2.md#behavior-change-purchase-events-at-app-launch-capacitor-ios).
+    *   **Solution:** Make fulfillment idempotent on the transaction id: treat a re-delivered transaction id as a no-op. Consumables are not re-delivered this way, except an unfinished one, which is re-emitted once per launch.
+
 ## Capacitor Installation Issues (v13.15+)
 
 *   **`npx cap sync ios` fails with missing `Package.swift` or podspec:**
