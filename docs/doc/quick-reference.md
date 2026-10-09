@@ -56,7 +56,7 @@ store.when()
 | `productUpdated` | `Product` | Product metadata (price, title) changed |
 | `receiptUpdated` | `Receipt` | Local receipt/transaction state changed |
 | `storefrontUpdated` | `Storefront` | User's billing country changed |
-| `unverified` | `UnverifiedReceipt` | Receipt validation failed |
+| `unverified` | `UnverifiedReceipt` | Receipt validation failed (`transient: true` when the validator couldn't be reached, v13.19+) |
 
 ## Key Types
 

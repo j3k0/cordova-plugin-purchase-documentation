@@ -84,6 +84,22 @@ This page lists common issues encountered when implementing In-App Purchases wit
     *   **Invalid Receipt Data:** Was the receipt data corrupted before sending? Is the plugin sending the correct fields? (Check `receiptValidationBody` in adapter source if necessary).
     *   **Incorrect Validator Logic:** Is your server correctly parsing the platform response and determining entitlement?
 
+*   **Paying Users Locked Out During an Outage (v13.19+):**
+    *   **Cause:** The app revokes access whenever `.unverified()` fires. Validation also fails when the validator, or Apple/Google behind it, can't be reached, even though the receipt is fine.
+    *   **Solution:** Check the `transient` flag on the `UnverifiedReceipt`. When it's `true`, keep the access you already granted and validate again later. Only act on definitive answers. Your server's database stays the source of truth for subscription state.
+
+        ```ts
+        store.when().unverified(({ payload, transient }) => {
+            if (transient) return; // temporary failure: keep current access, retry later
+            // definitive answer: update access
+        });
+        ```
+
+        | `transient` | Validator answer |
+        |---|---|
+        | `true` | HTTP 5xx (transport, or `payload.status` in the response body), `CONNECTION_FAILED` (6778002), timeout, no network, unreadable response |
+        | `false` | Everything else: HTTP 400 `INVALID_PAYLOAD`, 401/403, 410, 419 expired, `BAD_RESPONSE` |
+
 ## Subscription Issues
 
 *   **Subscription Status Incorrect (`product.owned`, Expiry Date):**
