@@ -100,6 +100,8 @@ This page lists common issues encountered when implementing In-App Purchases wit
         | `true` | HTTP 5xx (transport, or `payload.status` in the response body), `CONNECTION_FAILED` (6778002), timeout, no network, unreadable response |
         | `false` | Everything else: HTTP 400 `INVALID_PAYLOAD`, 401/403, 410, 419 expired, `BAD_RESPONSE` |
 
+        **Custom validators:** in the app's WebView, an HTTP error response without CORS headers reaches the plugin as status 0, the same as no network. So a bare 4xx from a custom validator that doesn't send CORS headers is reported as `transient: true`. To get a definitive answer, send CORS headers (including on the preflight), or answer HTTP 200 with `{ ok: false, status, code }` in the body. Iaptic already does the latter.
+
 ## Subscription Issues
 
 *   **Subscription Status Incorrect (`product.owned`, Expiry Date):**
