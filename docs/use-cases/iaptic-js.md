@@ -51,9 +51,7 @@ await store.initialize([{
     options: {
         type: 'stripe',
         appName: 'your-app-name',
-        apiKey: 'your-iaptic-public-key',
-        // Only for self-hosted iaptic deployments:
-        customIapticUrl: 'https://iaptic.example.com'
+        apiKey: 'your-iaptic-public-key'
     }
 }]);
 ```
