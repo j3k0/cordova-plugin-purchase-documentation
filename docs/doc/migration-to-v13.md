@@ -302,7 +302,7 @@ Available on Apple AppStore (SK1 + SK2), Google Play, and through the native Cap
 
 ### IapticJS Adapter
 
-A new `Platform.IAPTIC_JS` adapter allows web-based apps (using Stripe via the [iaptic-js](https://github.com/nicklockwood/iaptic-js) SDK) to participate in the same purchase flow as native platforms. Initialize it alongside other platforms:
+A new `Platform.IAPTIC_JS` adapter allows web-based apps (using Stripe via the [iaptic-js](https://github.com/iaptic/iaptic-js) SDK) to participate in the same purchase flow as native platforms. Initialize it alongside other platforms:
 
 ```javascript
 store.initialize([

@@ -22,7 +22,7 @@ The IapticJS adapter is suited for:
 2. The `iaptic-js` SDK loaded in your HTML (before the plugin initializes)
 
 ```html
-<script src="https://cdn.iaptic.com/iaptic-js/v1/iaptic.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/iaptic-js@1.0.4/dist/iaptic-js.js"></script>
 ```
 
 ## Setup
@@ -51,7 +51,9 @@ await store.initialize([{
     options: {
         type: 'stripe',
         appName: 'your-app-name',
-        apiKey: 'your-iaptic-public-key'
+        apiKey: 'your-iaptic-public-key',
+        // Only for self-hosted iaptic deployments:
+        customIapticUrl: 'https://iaptic.example.com'
     }
 }]);
 ```
