@@ -81,21 +81,21 @@ If you use [iaptic](https://www.iaptic.com) as your validation service, both for
 
 ### Existing subscriptions at launch
 
-The extension loads `Transaction.currentEntitlements` at startup, so existing subscriptions are visible immediately without requiring a manual restore. See the behavior change below for the full set of events this produces.
+The extension loads `Transaction.currentEntitlements` at startup, so existing subscriptions are visible immediately without requiring a manual restore. See the section below for the full set of events this produces.
 
-### Behavior change: purchase events at app launch (Capacitor iOS)
+### Purchase events at app launch (iOS, StoreKit 2)
 
 StoreKit 1 only re-delivered *unfinished* transactions at launch. StoreKit 2 surfaces the user's full set of **current entitlements**, so `store.initialize()` fires `approved` for:
 
-*   every non-consumable purchase,
-*   the latest transaction of each auto-renewable subscription,
-*   each non-renewing subscription -- including transactions you already finished.
+- every non-consumable purchase,
+- the latest transaction of each auto-renewable subscription,
+- each non-renewing subscription — including transactions you already finished.
 
-`store.restorePurchases()` fires `approved` for that same set.
+`store.restorePurchases()` fires `approved` for that same set, except for a purchase reported less than 60 seconds earlier: a repeated `approved` for the same purchase is suppressed for 60s.
 
-Consumables are **not** re-delivered this way: they never appear in StoreKit 2's current entitlements. Only an *unfinished* consumable is re-delivered, once per launch, exactly as under StoreKit 1.
+Consumables are **not** re-delivered this way: they never appear in StoreKit 2's current entitlements. Only an *unfinished* consumable is re-delivered, once per launch, as under StoreKit 1 — on Capacitor from v13.19.0, see the version note below.
 
-**What this means for your app.** With the usual pattern:
+**What this means for your app:** with the usual pattern:
 
 ```javascript
 store.when().approved(transaction => {
@@ -106,11 +106,11 @@ store.when().approved(transaction => {
 
 `approved` fires for already-fulfilled non-consumables and non-renewing subscriptions on every app launch. Make fulfillment **idempotent on the transaction id**: your server (or app) must treat a re-delivered, already-fulfilled transaction id as a no-op, otherwise the user is granted the same purchase again on each launch. The same applies to an unfinished consumable re-delivered at launch.
 
-Register your `approved` handler before calling `store.initialize()` -- the launch-time events are emitted during and shortly after initialization, and are lost if nothing is listening yet.
+Register your `approved` handler before calling `store.initialize()` — the launch-time events are emitted during and shortly after initialization, and are lost if nothing is listening yet.
 
 This behavior is shared by the Cordova StoreKit 2 extension and the Capacitor plugin's built-in StoreKit 2 bridge.
 
-**Version note:** current entitlements are surfaced at launch by the StoreKit 2 extension since v1.0.1 and by `capacitor-plugin-cdv-purchase` since v13.15.2. The `Transaction.unfinished` pass that re-emits unfinished consumables, and the deferral of the `Transaction.updates` observer to the end of `init()` ([#1714](https://github.com/j3k0/cordova-plugin-purchase/issues/1714), commit `fa38a27`), landed in `v13.19.0`.
+**Version note:** current entitlements are surfaced at launch by the StoreKit 2 extension since v1.0.1 and by `capacitor-plugin-cdv-purchase` since v13.15.2. The `Transaction.unfinished` pass that re-emits unfinished consumables, and the deferral of the `Transaction.updates` observer to the end of `init()` ([#1714](https://github.com/j3k0/cordova-plugin-purchase/issues/1714), commit `fa38a27`), landed in `v13.19.0`. On earlier Capacitor versions the observer started before `initialize()`, so an unfinished consumable's launch event had no listener yet and was dropped for the session — registering your handler earlier could not recover it.
 
 ### SK1 standdown
 
