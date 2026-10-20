@@ -23,7 +23,7 @@ function isUserPremium() {
 
 ## Surviving a Validator or Store Outage
 
-With a validator configured, `store.verifiedReceipts` is kept in memory only. A validation error mid-session leaves it alone (see the `transient` flag on `unverified`), but an app **restarted** while validation fails starts with nothing owned. The plugin doesn't persist anything by default, so use `OfflineEntitlements` for this case if you accept the trade-off below. Ownership still ends at the purchase's `expiryDate` (plus your `gracePeriodMs`).
+With a validator configured, `store.verifiedReceipts` is kept in memory only. A validation error mid-session leaves it alone (see the `transient` flag on `unverified`), but an app **restarted** while validation fails starts with nothing owned. The plugin doesn't persist anything by default, so use `OfflineEntitlements` for this case if you accept the trade-off below. `store.owned()` never grants a purchase past its `expiryDate`. `offline.isOwned()` is looser: it adds `gracePeriodMs`, and with the default `onExpiredOffline: 'readonly'` it keeps granting access after the grace period while the device stays offline. Set `onExpiredOffline: 'deny'` if access must end with the grace period.
 
 ## Security Boundary: Phase 1 Is an Unsigned Cache
 
