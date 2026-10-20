@@ -342,6 +342,10 @@ function grantAccessAndFinish(transaction) {
     const productId = transaction.products[0]?.id;
     if (productId !== MY_NON_RENEWING_ID) return; // Ensure correct product
 
+    // StoreKit 2 re-reports finished non-renewing subscriptions at every launch.
+    // On Capacitor iOS (v13.19.1+), skip them so access isn't extended again.
+    if (transaction.isAcknowledged) return;
+
     console.log(`Granting access for non-renewing subscription ${productId}, transaction ${transaction.transactionId}...`);
 
     // 1. Determine duration based on productId (e.g., from product metadata or a config map)
@@ -352,7 +356,7 @@ function grantAccessAndFinish(transaction) {
 
     if (durationMonths === 0) {
         console.error(`Unknown duration for product ${productId}. Cannot grant access.`);
-        if (transaction.state !== TransactionState.FINISHED) transaction.finish(); // Finish anyway
+        if (transaction.state !== CdvPurchase.TransactionState.FINISHED) transaction.finish(); // Finish anyway
         return;
     }
 
@@ -383,7 +387,7 @@ function grantAccessAndFinish(transaction) {
 
     // 6. Finish the transaction with the App Store
     // This acknowledges the purchase and removes it from the payment queue.
-    if (transaction.state !== TransactionState.FINISHED) {
+    if (transaction.state !== CdvPurchase.TransactionState.FINISHED) {
         console.log(`Finishing transaction ${transaction.transactionId}...`);
         transaction.finish();
     } else {
