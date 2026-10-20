@@ -100,6 +100,20 @@ This page lists common issues encountered when implementing In-App Purchases wit
         | `true` | HTTP 5xx (transport, or `payload.status` in the response body), `CONNECTION_FAILED` (6778002), timeout, no network, unreadable response |
         | `false` | Everything else: HTTP 400 `INVALID_PAYLOAD`, 401/403, 410, 419 expired, `BAD_RESPONSE` |
 
+*   **Premium Locked After an App Restart During an Outage (cold start):**
+    *   **Cause:** `store.verifiedReceipts` lives in memory only. With a validator configured, `store.owned()` reads only that list, so after a restart nothing is owned until a validation succeeds. Mid-session this doesn't happen: a validation error fires `unverified()` but leaves `store.verifiedReceipts` alone, and `store.owned()` stays true until the purchase's `expiryDate`.
+    *   **Solution:** The plugin stores nothing on the device by default. If your app accepts caching entitlements locally, use [`OfflineEntitlements`](../use-cases/offline-entitlements.md) and check both: `store.owned('premium') || offline.isOwned('premium')`. Otherwise, rely on your own server's record of the user's subscription. Never grant access past a purchase's `expiryDate` without a validation.
+
+*   **What the Iaptic Validator Does When the Store Is Unreachable (Apple/Google outage):**
+    *   **Subscriptions-only receipt, verified in the last 7 days, not expired:** the validator answers with the last successful validation of that receipt. It's a normal success (`verified` fires), and `receipt.cache` is set (`{ source: 'last-verified', reason: 'store_unreachable', lastConfirmedAt }`, from the next plugin release) so you can tell it from a store-confirmed answer. A later successful validation replaces the whole content of the verified receipt (no merge).
+    *   **Never-verified, mixed (e.g. subscription + consumable) or older receipts, or a request that times out:** you get an error, `CONNECTION_FAILED` (6778002), with `transient: true`. Keep the access you already granted and validate again later.
+
+        ```ts
+        store.when().verified((receipt) => {
+            if (receipt.cache) console.log('Answered from cache, last confirmed at', receipt.cache.lastConfirmedAt);
+        });
+        ```
+
 ## Subscription Issues
 
 *   **Subscription Status Incorrect (`product.owned`, Expiry Date):**
