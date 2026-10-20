@@ -86,11 +86,12 @@ This page lists common issues encountered when implementing In-App Purchases wit
 
 *   **Paying Users Locked Out During an Outage (v13.19+):**
     *   **Cause:** The app revokes access whenever `.unverified()` fires. Validation also fails when the validator, or Apple/Google behind it, can't be reached, even though the receipt is fine.
-    *   **Solution:** Check the `transient` flag on the `UnverifiedReceipt`. When it's `true`, keep the access you already granted and validate again later. Only act on definitive answers. Your server's database stays the source of truth for subscription state. From v13.19.1, the plugin retries temporary failures itself (4 attempts in total, with growing waits starting at 5s, 10s, 20s, and right away when the device comes back online), so `transient: true` means validation failed several times in a row. No need to retry immediately yourself. A malformed answer from the validator (`BAD_RESPONSE`) is retried the same way, but still reports `transient: false`.
+    *   **Solution:** Check the `transient` flag on the `UnverifiedReceipt`. When it's `true`, keep the access you already granted and validate again later. Only act on definitive answers, and note that `transient: false` isn't always one (see the table). Your server's database stays the source of truth for subscription state. From v13.19.1, the plugin retries temporary failures itself (4 attempts in total, with growing waits starting at 5s, 10s, 20s, and right away when the device comes back online), so `transient: true` means validation failed several times in a row. No need to retry immediately yourself. A malformed answer from the validator (`BAD_RESPONSE`) is retried the same way, but still reports `transient: false`: it's a server fault, not a verdict on the receipt.
 
         ```ts
         store.when().unverified(({ payload, transient }) => {
             if (transient) return; // temporary failure: keep current access, retry later
+            if (payload.code === CdvPurchase.ErrorCode.BAD_RESPONSE) return; // malformed validator answer: not a verdict
             // definitive answer: update access
         });
         ```
@@ -98,7 +99,8 @@ This page lists common issues encountered when implementing In-App Purchases wit
         | `transient` | Validator answer |
         |---|---|
         | `true` | HTTP 5xx (transport, or `payload.status` in the response body), `CONNECTION_FAILED` (6778002), timeout, no network, unreadable response |
-        | `false` | Everything else: HTTP 400 `INVALID_PAYLOAD`, 401/403, 410, 419 expired, `BAD_RESPONSE` |
+        | `false`, definitive | Everything else: HTTP 400 `INVALID_PAYLOAD`, 401/403, 410, 419 expired |
+        | `false`, **not** a verdict | `BAD_RESPONSE`: the validator's answer was malformed. Retried like a temporary failure (4 attempts in total, v13.19.1+); don't revoke access on it |
 
 ## Subscription Issues
 
