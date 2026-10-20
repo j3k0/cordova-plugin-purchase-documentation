@@ -74,6 +74,10 @@ function grantAccessAndFinish(transaction) {
   const productId = transaction.products[0]?.id;
   if (productId !== MY_NON_RENEWING_ID) return; // Ensure correct product
 
+  // StoreKit 2 re-reports finished non-renewing subscriptions at every launch.
+  // On Capacitor iOS (v13.19.1+), skip them so access isn't extended again.
+  if (transaction.isAcknowledged) return;
+
   console.log(`Granting access for non-renewing subscription ${productId}, transaction ${transaction.transactionId}...`);
 
   // 1. Determine duration based on productId (e.g., from product metadata or a config map)

@@ -86,7 +86,7 @@ This page lists common issues encountered when implementing In-App Purchases wit
 
 *   **Paying Users Locked Out During an Outage (v13.19+):**
     *   **Cause:** The app revokes access whenever `.unverified()` fires. Validation also fails when the validator, or Apple/Google behind it, can't be reached, even though the receipt is fine.
-    *   **Solution:** Check the `transient` flag on the `UnverifiedReceipt`. When it's `true`, keep the access you already granted and validate again later. Only act on definitive answers. Your server's database stays the source of truth for subscription state.
+    *   **Solution:** Check the `transient` flag on the `UnverifiedReceipt`. When it's `true`, keep the access you already granted and validate again later. Only act on definitive answers. Your server's database stays the source of truth for subscription state. From v13.19.1, the plugin retries temporary failures itself (4 attempts in total, waiting 5s, 10s, 20s, and right away when the device comes back online), so `transient: true` means validation failed several times in a row. No need to retry immediately yourself.
 
         ```ts
         store.when().unverified(({ payload, transient }) => {

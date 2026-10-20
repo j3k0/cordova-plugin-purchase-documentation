@@ -112,6 +112,19 @@ This behavior is shared by the Cordova StoreKit 2 extension and the Capacitor pl
 
 **Version note:** current entitlements are surfaced at launch by the StoreKit 2 extension since v1.0.1 and by `capacitor-plugin-cdv-purchase` since v13.15.2. The `Transaction.unfinished` pass that re-emits unfinished consumables, and the deferral of the `Transaction.updates` observer to the end of `init()` ([#1714](https://github.com/j3k0/cordova-plugin-purchase/issues/1714), commit `fa38a27`), landed in `v13.19.0`. On earlier Capacitor versions the observer started before `initialize()`, so an unfinished consumable's launch event had no listener yet and was dropped for the session — registering your handler earlier could not recover it.
 
+#### Skip already-delivered purchases (Capacitor iOS, v13.19.1+)
+
+On Capacitor iOS, `transaction.isAcknowledged` tells a re-reported purchase you already finished from a new one: it's `true` for transactions you finished, `false` for those you haven't, and `finish()` sets it to `true`. It's the same flag Google Play uses.
+
+```javascript
+store.when().approved(transaction => {
+    if (transaction.isAcknowledged) return transaction.finish(); // already delivered
+    deliverToServer(transaction).then(() => transaction.finish());
+});
+```
+
+Only the Capacitor build sets this flag on iOS. With the Cordova StoreKit 2 extension, launch-time transactions don't carry it, so the check above simply falls through to delivery. Keep fulfillment idempotent on the transaction id anyway: an app killed between delivery and `finish()` gets the transaction again, unfinished. See [#1714](https://github.com/j3k0/cordova-plugin-purchase/issues/1714).
+
 ### SK1 standdown
 
 When both plugins are installed on iOS 15+, the StoreKit 1 `SKPaymentQueue` observer is not registered. This eliminates duplicate transaction delivery and conflicting auto-finish behavior.
