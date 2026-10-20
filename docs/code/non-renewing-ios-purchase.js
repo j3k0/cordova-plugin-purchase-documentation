@@ -88,7 +88,7 @@ function grantAccessAndFinish(transaction) {
 
   if (durationMonths === 0) {
       console.error(`Unknown duration for product ${productId}. Cannot grant access.`);
-      if (transaction.state !== TransactionState.FINISHED) transaction.finish(); // Finish anyway
+      if (transaction.state !== CdvPurchase.TransactionState.FINISHED) transaction.finish(); // Finish anyway
       return;
   }
 
@@ -119,7 +119,7 @@ function grantAccessAndFinish(transaction) {
 
   // 6. Finish the transaction with the App Store
   // This acknowledges the purchase and removes it from the payment queue.
-  if (transaction.state !== TransactionState.FINISHED) {
+  if (transaction.state !== CdvPurchase.TransactionState.FINISHED) {
       console.log(`Finishing transaction ${transaction.transactionId}...`);
       transaction.finish();
   } else {
