@@ -103,6 +103,8 @@ This page lists common issues encountered when implementing In-App Purchases wit
         | `false`, definitive | Every other answer, e.g. HTTP 400 `INVALID_PAYLOAD`, 401/403, 410, 419 expired |
         | `false`, **not** a verdict | `BAD_RESPONSE`: the validator's answer was malformed. Retried like a temporary failure (4 attempts in total, v13.19.1+). `VERIFICATION_FAILED`: the plugin couldn't process the answer; not retried. Don't revoke access on either |
 
+        **Custom validators:** in the app's WebView, an HTTP error response without CORS headers reaches the plugin as status 0, the same as no network. So a bare 4xx from a custom validator that doesn't send CORS headers is reported as `transient: true`. To get a definitive answer, send CORS headers (including on the preflight), or answer HTTP 200 with `{ ok: false, status, code }` in the body. Iaptic already does the latter.
+
 ## Subscription Issues
 
 *   **Subscription Status Incorrect (`product.owned`, Expiry Date):**
