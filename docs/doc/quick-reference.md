@@ -56,7 +56,7 @@ store.when()
 | `productUpdated` | `Product` | Product metadata (price, title) changed |
 | `receiptUpdated` | `Receipt` | Local receipt/transaction state changed |
 | `storefrontUpdated` | `Storefront` | User's billing country changed |
-| `unverified` | `UnverifiedReceipt` | Receipt validation failed (`transient: true` when the validator couldn't be reached, v13.19+; fires after 4 failed attempts on temporary failures and malformed validator answers, v13.19.1+; `transient: false` with `BAD_RESPONSE` or `VERIFICATION_FAILED` is a server fault, not a verdict) |
+| `unverified` | `UnverifiedReceipt` | Receipt validation failed (`transient: true` when the validator couldn't be reached, v13.19+; fires after 4 failed attempts on temporary failures and malformed validator answers, v13.19.1+; `BAD_RESPONSE` and `VERIFICATION_FAILED` are server faults, not verdicts: `transient: true` from v13.20.0, `transient: false` before) |
 
 ## Key Types
 

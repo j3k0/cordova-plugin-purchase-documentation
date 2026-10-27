@@ -77,7 +77,7 @@ This page lists common issues encountered when implementing In-App Purchases wit
     *   **CSP:** Ensure `Content-Security-Policy` in `index.html` allows connections to your validator domain (`connect-src https://your-validator.com;`).
     *   **Server Issues:** Check validator server logs. Firewall issues? Service downtime? Incorrect API keys/secrets used by the validator? Invalid request format received?
     *   **Timeout:** Request might be timing out. If using `Validator.Target`, increase the `timeout` value. Check server processing time.
-*   **Validation Fails (Error Code `VERIFICATION_FAILED` or platform-specific codes):**
+*   **Validation Fails (Validator Rejects the Receipt, Platform-Specific Codes):**
     *   **Check Validator Logs:** Essential for diagnosis. Why did the server reject the validation?
     *   **Incorrect Environment:** Is your validator calling the correct Apple/Google endpoint (Sandbox vs. Production)? Receipts generated in Sandbox must be validated against the Sandbox endpoint, and vice-versa.
     *   **Invalid Credentials:** Is the App-Specific Shared Secret (iOS) or Service Account Key (Android) used by the validator correct and valid?
@@ -86,22 +86,23 @@ This page lists common issues encountered when implementing In-App Purchases wit
 
 *   **Paying Users Locked Out During an Outage (v13.19+):**
     *   **Cause:** The app revokes access whenever `.unverified()` fires. Validation also fails when the validator, or Apple/Google behind it, can't be reached, even though the receipt is fine.
-    *   **Solution:** Check the `transient` flag on the `UnverifiedReceipt`. When it's `true`, keep the access you already granted and validate again later. Only act on definitive answers, and note that `transient: false` isn't always one (see the table). Your server's database stays the source of truth for subscription state. From v13.19.1, the plugin retries temporary failures itself (4 attempts in total, with growing waits starting at 5s, 10s, 20s, and right away when the device comes back online), so `transient: true` means validation failed several times in a row. No need to retry immediately yourself. A malformed answer from the validator (`BAD_RESPONSE`) is retried the same way, but still reports `transient: false`: it's a server fault, not a verdict on the receipt. The same goes for an answer the plugin can't process (`VERIFICATION_FAILED`), which isn't retried.
+    *   **Solution:** Check the `transient` flag on the `UnverifiedReceipt`. When it's `true`, keep the access you already granted and validate again later. Only act on definitive answers (`transient: false`; on plugin versions before v13.20.0, see the exceptions in the table). Your server's database stays the source of truth for subscription state. From v13.19.1, the plugin retries temporary failures itself (4 attempts in total, with growing waits starting at 5s, 10s, 20s, and right away when the device comes back online), so `transient: true` means validation failed several times in a row. No need to retry immediately yourself. A malformed answer from the validator (`BAD_RESPONSE`) is retried the same way. It and an answer the plugin can't process (`VERIFICATION_FAILED`, not retried) are server faults, not verdicts on the receipt: from v13.20.0 both report `transient: true`. Before v13.20.0 they reported `transient: false`, so check the code yourself (see the sample).
 
         ```ts
         store.when().unverified(({ payload, transient }) => {
             if (transient) return; // temporary failure: keep current access, retry later
+            // Only needed before v13.20.0, where these server faults reported transient: false
             if (payload.code === CdvPurchase.ErrorCode.BAD_RESPONSE
-                || payload.code === CdvPurchase.ErrorCode.VERIFICATION_FAILED) return; // server fault: not a verdict
+                || payload.code === CdvPurchase.ErrorCode.VERIFICATION_FAILED) return;
             // definitive answer: update access
         });
         ```
 
         | `transient` | Validator answer |
         |---|---|
-        | `true` | HTTP 5xx (transport, or `payload.status` in the response body), `CONNECTION_FAILED` (6778002), timeout, no network, unreadable response |
+        | `true` | HTTP 5xx (transport, or `payload.status` in the response body), `CONNECTION_FAILED` (6778002), timeout, no network, unreadable response. From v13.20.0, also `BAD_RESPONSE` (malformed validator answer, retried like a temporary failure) and `VERIFICATION_FAILED` (the plugin couldn't process the answer; not retried) |
         | `false`, definitive | Every other answer, e.g. HTTP 400 `INVALID_PAYLOAD`, 401/403, 410, 419 expired |
-        | `false`, **not** a verdict | `BAD_RESPONSE`: the validator's answer was malformed. Retried like a temporary failure (4 attempts in total, v13.19.1+). `VERIFICATION_FAILED`: the plugin couldn't process the answer; not retried. Don't revoke access on either |
+        | `false`, **not** a verdict (before v13.20.0 only) | `BAD_RESPONSE` and `VERIFICATION_FAILED`, as above. Don't revoke access on either |
 
         **Custom validators:** in the app's WebView, an HTTP error response without CORS headers reaches the plugin as status 0, the same as no network. So a bare 4xx from a custom validator that doesn't send CORS headers is reported as `transient: true`. To get a definitive answer, send CORS headers (including on the preflight), or answer HTTP 200 with `{ ok: false, status, code }` in the body. Iaptic already does the latter.
 
@@ -110,7 +111,7 @@ This page lists common issues encountered when implementing In-App Purchases wit
     *   **Solution:** The plugin stores nothing on the device by default. If your app accepts caching entitlements locally, use [`OfflineEntitlements`](../use-cases/offline-entitlements.md) and check both: `store.owned('premium') || offline.isOwned('premium')`. Otherwise, rely on your own server's record of the user's subscription. Never grant access past a purchase's `expiryDate` without a validation.
 
 *   **What the Iaptic Validator Does When the Store Is Unreachable (Apple/Google outage):**
-    *   **Subscriptions-only receipt, verified in the last 7 days, not expired:** the validator answers with the last successful validation of that receipt. For this receipt only, it's a normal success (`verified` fires), and `receipt.cache` is set (`{ source: 'last-verified', reason: 'store_unreachable', lastConfirmedAt }`, from the next plugin release) so you can tell it from a store-confirmed answer. A later successful validation replaces the whole content of the verified receipt (no merge).
+    *   **Subscriptions-only receipt, verified in the last 7 days, not expired:** the validator answers with the last successful validation of that receipt. For this receipt only, it's a normal success (`verified` fires), and `receipt.cache` is set (`{ source: 'last-verified', reason: 'store_unreachable', lastConfirmedAt }`, from plugin v13.20.0) so you can tell it from a store-confirmed answer. A later successful validation replaces the whole content of the verified receipt (no merge).
     *   **Never-verified, mixed (e.g. subscription + consumable) or older receipts, or a request that times out:** you get an error, `CONNECTION_FAILED` (6778002), with `transient: true`. Keep the access you already granted and validate again later.
 
         ```ts
