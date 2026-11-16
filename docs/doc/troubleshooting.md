@@ -70,6 +70,7 @@ This page lists common issues encountered when implementing In-App Purchases wit
 
 ## Receipt Validation Issues
 
+*   **Running your own validation server:** the JSON answer your server must return is documented in [Writing Your Own Validation Server](../discover/own-validation-server.md). A `BAD_RESPONSE` whose message says `"data.id" must be a string` means the answer is missing the receipt id.
 *   **Validation Request Fails (Error Code `COMMUNICATION` or `BAD_RESPONSE`):**
     *   **URL/Endpoint:** Verify `store.validator` URL is correct, reachable, and doesn't have typos.
     *   **Network:** Check device network connectivity. Check server network connectivity (can it reach Apple/Google?).

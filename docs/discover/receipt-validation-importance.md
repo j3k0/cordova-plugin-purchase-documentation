@@ -23,7 +23,7 @@ While the `cordova-plugin-purchase` allows you to interact with platform SDKs to
 2.  **Platform:** Handles the payment UI (login, confirmation, Face ID, etc.) and authorizes the payment.
 3.  **Client (App):** Plugin receives the `approved` event with initial `Transaction` data (including platform-specific receipt fragments/tokens). **Do NOT grant entitlement yet.**
 4.  **Client (App):** Call `transaction.verify()`.
-5.  **Plugin:** Sends necessary receipt data to the configured `store.validator` endpoint (your server or a service like Iaptic).
+5.  **Plugin:** Sends necessary receipt data to the configured `store.validator` endpoint (your server or a service like Iaptic). The answer it expects is documented in [Writing Your Own Validation Server](own-validation-server.md).
 6.  **Validation Server:** Receives receipt data from the plugin.
 7.  **Validation Server:** Sends the receipt data to Apple/Google's validation endpoint using appropriate credentials (App-Specific Shared Secret for Apple, Service Account Key/API access for Google).
 8.  **Apple/Google:** Validates the receipt and returns the authoritative purchase status (including latest transactions, subscription expiry dates, renewal intents, etc.).
