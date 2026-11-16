@@ -46,7 +46,7 @@ const sidebars = {
           items: [
             'use-cases/storefront-api', 'use-cases/multi-quantity',
             'use-cases/privacy-policy', 'use-cases/google-play-billing',
-            'use-cases/offline-entitlements',
+            'use-cases/offline-entitlements', 'use-cases/offer-code-redemption',
           ],
         },
         {

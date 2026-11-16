@@ -36,7 +36,7 @@ Once the extension is installed, the following behaviors change automatically on
 | Native API | Objective-C callback-based | Swift async/await |
 | Transaction observation | `SKPaymentQueue` observer | `Transaction.updates` stream |
 | Subscription management | Custom implementation | Built-in system sheets |
-| Offer code redemption | Not available | Native redemption sheet |
+| Offer code redemption | Not available | Native redemption sheet, result-based on iOS 27+ ([details](../use-cases/offer-code-redemption.md)) |
 
 ## Architecture
 
