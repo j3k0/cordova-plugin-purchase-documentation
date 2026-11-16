@@ -15,7 +15,7 @@ cordova plugin add cordova-plugin-purchase-storekit2
 ```
 
 **Requirements:**
-- cordova-ios 7+ (tested with cordova-ios 8)
+- cordova-ios 7+ (tested with cordova-ios 8). Extension v1.1.0 makes this a hard requirement: it uses the `CDVCommandStatus.ok` / `.error` Swift enum cases to send plugin results, and declares `cordova-ios >= 7.0.0` in its engine list. If your project pins `cordova-ios` with a caret range, installing or updating the extension can bump you to cordova-ios 7+ silently — check your installed version (`cordova platform ls`) and that your app still builds with cordova-ios 7 after installing. On cordova-ios 6, stay on extension 1.0.x.
 - iOS 15+ at runtime (falls back to StoreKit 1 on older versions)
 
 For Capacitor projects:
@@ -111,6 +111,8 @@ Register your `approved` handler before calling `store.initialize()` — the lau
 This behavior is shared by the Cordova StoreKit 2 extension and the Capacitor plugin's built-in StoreKit 2 bridge.
 
 **Version note:** current entitlements are surfaced at launch by the StoreKit 2 extension since v1.0.1 and by `capacitor-plugin-cdv-purchase` since v13.15.2. The `Transaction.unfinished` pass that re-emits unfinished consumables, and the deferral of the `Transaction.updates` observer to the end of `init()` ([#1714](https://github.com/j3k0/cordova-plugin-purchase/issues/1714), commit `fa38a27`), landed in `v13.19.0`. On earlier Capacitor versions the observer started before `initialize()`, so an unfinished consumable's launch event had no listener yet and was dropped for the session — registering your handler earlier could not recover it.
+
+Extension v1.1.0 is a precautionary release with no API or behaviour change: it switches the plugin results to the `CDVCommandStatus.ok` / `.error` Swift enum cases, which is what makes cordova-ios ≥ 7.0.0 a requirement (see Requirements, above).
 
 #### Skip already-delivered purchases (Capacitor iOS, v13.19.1+)
 
