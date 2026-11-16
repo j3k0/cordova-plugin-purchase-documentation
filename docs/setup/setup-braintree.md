@@ -169,6 +169,20 @@ store.initialize([{
 .then(/* ... */);
 ```
 
+#### Reusing saved payment methods (customer ID)
+
+The Drop-in can show a user's saved payment methods when the client token is generated for their Braintree **customer**. Your server does that with the Braintree Server SDK (`gateway.clientToken.generate({ customerId })`); on the app side, make sure the token request carries the right customer ID:
+
+```javascript
+// In your clientTokenProvider, ask the plugin which customer ID to send
+const customerId = CdvPurchase.Braintree.getCustomerId(store.applicationUsername);
+// fetch(...) — send customerId to your server, which generates the client token
+```
+
+Customer IDs captured from validation responses (returned by your validator after a successful Braintree payment) are kept **per `applicationUsername`**: an ID is only sent for the user it belongs to, and a newer ID for the same user replaces an older one. With Iaptic, use `clientTokenProvider: iaptic.braintreeClientTokenProvider`, which sends the ID captured for the current user automatically.
+
+If your app sets `CdvPurchase.Braintree.customerId` itself, that value is sent as-is for every user: **reset it when the user changes** (for example `CdvPurchase.Braintree.customerId = undefined;` on logout), or the next user's Drop-in opens on the previous user's saved payment methods.
+
 ### 8. (Optional) Configure Apple Pay (iOS Only)
 
 To enable Apple Pay via Braintree:

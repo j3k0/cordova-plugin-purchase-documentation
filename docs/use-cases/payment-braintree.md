@@ -186,6 +186,26 @@ if (typeof setAppState !== 'function') { setAppState = (state, message) => { con
     *   `.cancelled()`: Handles cancellations from the Drop-in UI (though the `requestPayment` promise `.cancelled()` is often more direct).
 *   **Lines 94-110:** Call `store.initialize()` to activate the Braintree adapter. Update UI state based on success or failure.
 
+#### Braintree customer ID and saved payment methods
+
+To show a returning user's saved payment methods, the Drop-in must be opened with a client token generated for their Braintree **customer** (server-side, with your Braintree private key). What matters on the app side is *which* customer ID the client token request carries.
+
+When your validator (Iaptic, or your own endpoint) returns a Braintree customer ID with a successful validation, the plugin captures it and can send it with later client token requests. Captured IDs are tracked **per `applicationUsername`** — this is what prevents a user from seeing another user's saved payment methods:
+
+* An ID is only sent for the user it belongs to. After a logout and a login, the new user's Drop-in is not opened for the previous user's Braintree customer.
+* A newer ID captured for the same user replaces the older one.
+* `CdvPurchase.Braintree.getCustomerId(applicationUsername)` returns the customer ID that will be sent for a given user (`undefined` if there is none). In your own `clientTokenProvider`, use it to pass the right ID to your server. With Iaptic, `clientTokenProvider: iaptic.braintreeClientTokenProvider` sends it for you.
+
+For the per-user tracking to work, set `store.applicationUsername` to your user identifier (see [Setup Braintree][/setup/setup-braintree] and the `applicationUsername` documentation).
+
+If your app sets `CdvPurchase.Braintree.customerId` itself, that value is sent as-is, whatever the current `applicationUsername`. **Reset it when the user changes** — for example on logout:
+
+```javascript
+CdvPurchase.Braintree.customerId = undefined;
+```
+
+Otherwise the next user's Drop-in opens on the previous user's saved payment methods.
+
 ### 3. User Interface (`refreshUI`)
 
 Implement the `refreshUI` function to display the payment details and update the UI based on the payment state (`LOADING`, `BASKET`, `IN_PROGRESS`, `PAYMENT_INITIATED`, `PAYMENT_APPROVED`, `PAYMENT_FINISHED`).
