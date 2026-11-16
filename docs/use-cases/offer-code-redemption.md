@@ -46,7 +46,11 @@ if (error) {
 }
 ```
 
-`store.redeemCode()` resolves to `undefined` once the sheet has been handled, or to an `IError` when no transaction came out of it.
+```typescript
+store.redeemCode(options?: string[]): Promise<IError | undefined>
+```
+
+`store.redeemCode()` resolves to `undefined` once the sheet has been handled, or to an `IError` when no transaction came out of it. A returned error is also dispatched to the store's error handler, exactly as for `order()`.
 
 ### The `options` argument
 
@@ -87,9 +91,7 @@ Redemption reuses the plugin's existing error codes — no new codes were introd
 | Account not entitled, code not available in the storefront, feature unsupported | `ErrorCode.PAYMENT_NOT_ALLOWED` (6777008) | |
 | System error, unknown error, unverified transaction | `ErrorCode.UNKNOWN` (6777010) | Also Apple's `invalidPresentationContext`, which means the sheet could not be presented at all (bad window / view controller) — a bug in your app, not a user outcome |
 
-`IError.message` carries Apple's own case name (for example `notAvailableInStorefront`), which is useful for logs and support requests.
-
-<!-- TODO(FOV-2765): confirm with CDVGD that invalidPresentationContext is surfaced and lands on UNKNOWN (the default case must exist for this to hold). -->
+`IError.message` carries Apple's own case name (for example `notAvailableInStorefront`), which is useful for logs and support requests. Apple errors the plugin does not recognise, and the case where there is no view controller to present the sheet from, also land on `UNKNOWN`.
 
 ## Before iOS 27
 
