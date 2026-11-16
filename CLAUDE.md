@@ -30,6 +30,18 @@ All documentation lives in `docs/`. Edit `.md` files directly — no preprocesso
 | `docs/code/` | Shared JS code snippets (imported into pages) |
 | `static/img/` | Images |
 
+`static/llms.txt` (served at `/llms.txt`) is the hand-maintained index of this site for LLM
+agents ([llmstxt.org](https://llmstxt.org) format). When you add, rename or move a page under
+`docs/`, update its line there in the same commit: the page URL and a one-sentence description.
+To list the pages it doesn't cover:
+
+```bash
+git ls-files 'docs/**.md' | sed 's#^docs##; s#\.md$##; s#/index$#/#' \
+  | while read -r u; do grep -q "purchase.cordova.fovea.cc${u})" static/llms.txt || echo "not in llms.txt: $u"; done
+```
+
+A URL ending in a slash is an index page (`/setup/` → `docs/setup/index.md`).
+
 ## Configuration
 
 | File | Purpose |
@@ -50,6 +62,11 @@ Edit content in `docs/`, verify the Docker build passes, commit.
 Both `deploy.sh` and `deploy/` are **gitignored** — `deploy/` is its own
 separate private repo, so deploy changes commit there, not in this repo.
 Infra notes (server, quirks) live in that repo's `DEPLOY-NOTES.md`.
+
+`static/llms.txt` links a few iaptic.com pages with their `.md` (Markdown export) URLs. Those
+routes only exist once the `j3k0/billing` release that ships them is live (FOV-2421, plus the
+Capacitor agent-snippet page). Until then they answer with the site's soft-404 page and HTTP 200,
+so **deploy this site after that billing release**, or drop the `.md` suffixes first.
 
 ## Versioning
 

@@ -4,7 +4,7 @@
 
 Notes for coding agents:
 
-- Every page below is the published HTML page. Its Markdown source is at `https://github.com/j3k0/cordova-plugin-purchase-documentation/blob/v13-new/docs/<path>.md`, where `<path>` is the part of the URL without the leading slash (`/doc/quick-reference` → `docs/doc/quick-reference.md`).
+- Every page below is the published HTML page. Its Markdown source is at `https://github.com/j3k0/cordova-plugin-purchase-documentation/blob/v13-new/docs/<path>.md`, where `<path>` is the part of the URL without the leading slash (`/doc/quick-reference` → `docs/doc/quick-reference.md`). A URL ending in a slash is an index page: `docs/<path>index.md` (`/` → `docs/index.md`, `/setup/` → `docs/setup/index.md`).
 - The current major version is v13 (`capacitor-plugin-cdv-purchase` on npm for Capacitor, `cordova-plugin-purchase` for Cordova). The API is identical on both.
 - On Capacitor use `npm install capacitor-plugin-cdv-purchase`; on Cordova `cordova plugin add cordova-plugin-purchase`.
 - Receipt validation needs a server. Iaptic is the hosted option; the plugin works with any validator that answers the documented contract.
