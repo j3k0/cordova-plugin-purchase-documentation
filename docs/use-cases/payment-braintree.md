@@ -196,7 +196,7 @@ When your validator (Iaptic, or your own endpoint) returns a Braintree customer 
 * A newer ID captured for the same user replaces the older one.
 * `CdvPurchase.Braintree.getCustomerId(applicationUsername)` returns the customer ID that will be sent for a given user (`undefined` if there is none). In your own `clientTokenProvider`, use it to pass the right ID to your server. With Iaptic, `clientTokenProvider: iaptic.braintreeClientTokenProvider` sends it for you.
 
-For the per-user tracking to work, set `store.applicationUsername` to your user identifier (see [Setup Braintree][/setup/setup-braintree] and the `applicationUsername` documentation).
+For the per-user tracking to work, set `store.applicationUsername` to your user identifier (see [Setup Braintree](/setup/setup-braintree) and the `applicationUsername` documentation).
 
 If your app sets `CdvPurchase.Braintree.customerId` itself, that value is sent as-is, whatever the current `applicationUsername`. **Reset it when the user changes** — for example on logout:
 
