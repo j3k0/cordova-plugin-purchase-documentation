@@ -25,6 +25,7 @@ const { store, ProductType, Platform, LogLevel } = CdvPurchase;
 | `new CdvPurchase.OfflineEntitlements(store, options)` | Persist entitlements and answer "is this product owned?" while offline — see [Offline Entitlements](../use-cases/offline-entitlements.md) |
 | `store.order(offer, additionalData?)` | Initiate a purchase for an offer |
 | `store.getStorefront()` | Get the user's billing country (`{ countryCode }`) |
+| `store.redeemCode(options?)` | Show the App Store offer-code redemption sheet — see [Offer Code Redemption](../use-cases/offer-code-redemption.md) |
 | `store.checkSupport(platform, feature)` | Check if a platform supports a feature |
 | `store.products` | Array of all loaded `Product` objects |
 | `store.localReceipts` | Array of local `Receipt` objects |

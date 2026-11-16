@@ -47,6 +47,7 @@ Notes for coding agents:
 - [Offline Entitlements](https://purchase.cordova.fovea.cc/use-cases/offline-entitlements): Answering "is this owned?" when the device cannot reach the validator.
 - [Validator Privacy Policy](https://purchase.cordova.fovea.cc/use-cases/privacy-policy): What the plugin sends to a validation server and how to declare it.
 - [macOS Specifics](https://purchase.cordova.fovea.cc/use-cases/macos-specifics): Building and testing on macOS.
+- [Offer Code Redemption](https://purchase.cordova.fovea.cc/use-cases/offer-code-redemption): `store.redeemCode()`, the Apple redemption sheet, its error codes and the iOS 27+ limit on cancel/error reporting.
 
 ## Testing
 
