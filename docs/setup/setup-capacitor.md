@@ -123,6 +123,12 @@ No extra Gradle or manifest changes are required. The plugin automatically inclu
 
 Ensure your `android/app/build.gradle` has `minSdkVersion` of 23 or higher (the Capacitor default satisfies this).
 
+## Using an AI coding agent
+
+If you are having an agent (Claude Code, Cursor, Copilot, Codex…) write the purchase code, iaptic publishes a block you can paste into your `AGENTS.md`: install, initialization, receipt validation and a minimal subscription flow, on the same plugin version this page documents. See [Capacitor: instructions for AI coding agents](https://www.iaptic.com/documentation/capacitor/agent-snippet).
+
+Agents that need the rest of this site can read [`/llms.txt`](https://purchase.cordova.fovea.cc/llms.txt), an index of every page with a one-line description.
+
 ## Next Steps
 
 Once installed, the API usage is identical across Cordova and Capacitor. Continue with:

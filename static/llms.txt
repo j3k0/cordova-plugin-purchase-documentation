@@ -1,0 +1,70 @@
+# Cordova Purchase Plugin
+
+> `cordova-plugin-purchase` is an open-source in-app purchase plugin for Cordova, Capacitor and Ionic apps, from Iaptic. One JavaScript API (`CdvPurchase.store`) covers Apple App Store (StoreKit), Google Play Billing, Braintree, iaptic-js (Stripe) and a built-in test platform: register products, listen to events, order offers, verify receipts and finish transactions.
+
+Notes for coding agents:
+
+- Every page below is the published HTML page. Its Markdown source is at `https://github.com/j3k0/cordova-plugin-purchase-documentation/blob/v13-new/docs/<path>.md`, where `<path>` is the part of the URL without the leading slash (`/doc/quick-reference` → `docs/doc/quick-reference.md`).
+- The current major version is v13 (`capacitor-plugin-cdv-purchase` on npm for Capacitor, `cordova-plugin-purchase` for Cordova). The API is identical on both.
+- On Capacitor use `npm install capacitor-plugin-cdv-purchase`; on Cordova `cordova plugin add cordova-plugin-purchase`.
+- Receipt validation needs a server. Iaptic is the hosted option; the plugin works with any validator that answers the documented contract.
+- The full class and method reference for v13 is the `api/` directory of the plugin repo: `https://github.com/j3k0/cordova-plugin-purchase/tree/v13/api`.
+
+## Start here
+
+- [Cordova Purchase Plugin](https://purchase.cordova.fovea.cc/): What the plugin does, the feature matrix per store, install commands and where to go next.
+- [Introduction](https://purchase.cordova.fovea.cc/introduction): What the plugin does, the supported frameworks and the core concepts.
+- [Migrate to v13](https://purchase.cordova.fovea.cc/doc/migration-to-v13): Upgrading from v11/v12, including the `CdvPurchase` API changes.
+
+## Discover
+
+- [About the Plugin](https://purchase.cordova.fovea.cc/discover/about-the-plugin): How the plugin wraps each store and why it exists.
+- [About IAP Technology](https://purchase.cordova.fovea.cc/discover/generalities-about-iap-technology): Consumables, non-consumables and subscriptions, and what the stores require of each.
+- [Micro Example](https://purchase.cordova.fovea.cc/discover/micro-example): The smallest working integration.
+- [The Importance of Receipt Validation](https://purchase.cordova.fovea.cc/discover/receipt-validation-importance): Why client-side purchase data alone is not safe to grant access from.
+
+## Setup
+
+- [Setup Phase](https://purchase.cordova.fovea.cc/setup/): Index of the framework and store setup guides.
+- [Capacitor Setup](https://purchase.cordova.fovea.cc/setup/setup-capacitor): Install and configure the plugin in a Capacitor 6+ app, and migrate a Capacitor app off cordova-plugin-purchase.
+- [Setup for iOS AppStore](https://purchase.cordova.fovea.cc/setup/setup-appstore): App Store Connect products and in-app purchase configuration.
+- [Setup for Google Play](https://purchase.cordova.fovea.cc/setup/setup-googleplay): Play Console products, license testers and service account.
+- [Setup for Braintree Payments](https://purchase.cordova.fovea.cc/setup/setup-braintree): Braintree account and tokenization keys.
+- [StoreKit 2 Extension](https://purchase.cordova.fovea.cc/setup/storekit2): The cordova-plugin-purchase-storekit2 extension for Cordova apps on StoreKit 2.
+- [Code Framework](https://purchase.cordova.fovea.cc/setup/code-framework): Minimal app skeleton (HTML, JS, store initialization) for Cordova and Ionic.
+
+## Use cases
+
+- [Consumable on AppStore (iOS & macOS)](https://purchase.cordova.fovea.cc/use-cases/consumable-appstore) and [Consumable on Google Play](https://purchase.cordova.fovea.cc/use-cases/consumable-googleplay): Buy, deliver and finish a product the user consumes.
+- [Non-Consumable on AppStore (iOS & macOS)](https://purchase.cordova.fovea.cc/use-cases/non-consumable-appstore) and [Non-Consumable on Google Play](https://purchase.cordova.fovea.cc/use-cases/non-consumable-googleplay): One-time unlocks and restore.
+- [Subscription on AppStore (iOS & macOS)](https://purchase.cordova.fovea.cc/use-cases/subscription-appstore) and [Subscription on Google Play](https://purchase.cordova.fovea.cc/use-cases/subscription-googleplay): Auto-renewing subscriptions, offers and pricing phases.
+- [Non-Renewing Subscription on AppStore (iOS & macOS)](https://purchase.cordova.fovea.cc/use-cases/non-renewing-appstore) and [Non-Renewing Subscription on Google Play](https://purchase.cordova.fovea.cc/use-cases/non-renewing-googleplay): Manually renewed access.
+- [Multi-Quantity Consumable Purchases](https://purchase.cordova.fovea.cc/use-cases/multi-quantity): Buying several units in one transaction.
+- [Payment Request with Braintree](https://purchase.cordova.fovea.cc/use-cases/payment-braintree): Custom-amount payments through Braintree.
+- [IapticJS Adapter](https://purchase.cordova.fovea.cc/use-cases/iaptic-js): Selling through Stripe on the web with the same store API.
+- [Google Play Billing 9 Features](https://purchase.cordova.fovea.cc/use-cases/google-play-billing): What the Google Play Billing 9 integration exposes.
+- [Storefront API](https://purchase.cordova.fovea.cc/use-cases/storefront-api): The user's storefront country and currency.
+- [Offline Entitlements](https://purchase.cordova.fovea.cc/use-cases/offline-entitlements): Answering "is this owned?" when the device cannot reach the validator.
+- [Validator Privacy Policy](https://purchase.cordova.fovea.cc/use-cases/privacy-policy): What the plugin sends to a validation server and how to declare it.
+- [macOS Specifics](https://purchase.cordova.fovea.cc/use-cases/macos-specifics): Building and testing on macOS.
+
+## Testing
+
+- [Using the Test Platform](https://purchase.cordova.fovea.cc/use-cases/test-platform): The built-in `Platform.TEST` store: no accounts, no money.
+- [Custom Test Products](https://purchase.cordova.fovea.cc/use-cases/test-custom-products): Defining your own test products.
+
+## Reference
+
+- [Quick Reference](https://purchase.cordova.fovea.cc/doc/quick-reference): The store API at a glance: registration, events, products, offers, transactions, error codes.
+- [Troubleshooting (v13+)](https://purchase.cordova.fovea.cc/doc/troubleshooting): Error codes and their fixes, including validator and StoreKit issues.
+- [API reference v13](https://github.com/j3k0/cordova-plugin-purchase/tree/v13/api): Every class, method and property, generated from the source.
+- [Plugin source](https://github.com/j3k0/cordova-plugin-purchase): Code, issues and release notes.
+- [Capacitor examples](https://github.com/j3k0/capacitor-purchase-examples): Standalone Capacitor example apps, with receipt validation.
+
+## Validating purchases with Iaptic
+
+- [Capacitor: instructions for AI coding agents](https://www.iaptic.com/documentation/capacitor/agent-snippet.md): A ready-to-paste `AGENTS.md` block: install, init, validation and a minimal subscription flow.
+- [Usage with Capacitor & Cordova](https://www.iaptic.com/documentation/setup/capacitor.md): Wiring the plugin to Iaptic (validator URL, App Store discount eligibility, webhooks).
+- [Capacitor & Cordova plugin page](https://www.iaptic.com/documentation/capacitor.md): The Iaptic side of this plugin.
+- [Receipt Validation API](https://www.iaptic.com/documentation/validation-api.md): The validation request and response format, if you run your own validator.
+- [Application Username](https://www.iaptic.com/documentation/application-username.md): Linking purchases to your own user IDs.
