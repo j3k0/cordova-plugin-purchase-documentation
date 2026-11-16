@@ -72,7 +72,7 @@ This page lists common issues encountered when implementing In-App Purchases wit
         *   `ErrorCode.PAYMENT_CANCELLED` — the user cancelled the App Store sign-in dialog. Not a real failure: you usually skip the error message in this case.
         *   `ErrorCode.CLOUD_SERVICE_NETWORK_CONNECTION_FAILED` — the device could not connect to the store's network service.
         *   `ErrorCode.UNKNOWN` — anything else.
-    *   The error message carries the reason StoreKit reported (for example `Restore purchases failed: <StoreKit message>`), on the Capacitor plugin and on the Cordova StoreKit 1 plugin.
+    *   The error message carries the reason StoreKit reported (for example `Restore purchases failed: <StoreKit message>`), on the Capacitor plugin and on the Cordova StoreKit 1 plugin. With the Cordova StoreKit 2 extension this doesn't happen: its restore replays the current entitlements and always reports completion, with no failure step.
     *   **Solution:** Treat `PAYMENT_CANCELLED` as a no-op, retry on network failures, and log the message for anything else — no need to reject the promise or wrap the call in try/catch, the error is resolved, not thrown.
 
 ## Receipt Validation Issues
