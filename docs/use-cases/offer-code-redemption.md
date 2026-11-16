@@ -12,6 +12,8 @@ Offer codes work with every Apple product type: auto-renewable subscriptions (iO
 
 ## Availability
 
+Introduced in plugin **v13.21.0** (`store.redeemCode()`, `Adapter.redeemCode()`, `checkSupport('redeemCode')`).
+
 Offer codes predate the result-based sheet, so two things have separate floors: the sheet itself, and whether the plugin can tell you how it ended.
 
 | What | Where |
@@ -79,6 +81,8 @@ The result-based sheet can end three ways:
 | Code accepted, transaction produced | `undefined` | fires with the transaction |
 | Sheet dismissed by the user | `IError` with `ErrorCode.PAYMENT_CANCELLED` | does not fire |
 | Redemption failed | `IError` with one of the codes below | does not fire |
+
+A cancellation also reaches the store's global error handler (`store.error()`), exactly as a cancelled `order()` does. If your app shows an alert or a toast for every store error, it will show one when the user simply closes the redemption sheet — more likely here than during checkout, since the sheet carries a Cancel button. Filter `PAYMENT_CANCELLED` out (or downgrade it to a log line) if that is not the behaviour you want.
 
 ## Error codes
 
