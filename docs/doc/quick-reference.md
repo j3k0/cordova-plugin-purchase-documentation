@@ -34,6 +34,8 @@ const { store, ProductType, Platform, LogLevel } = CdvPurchase;
 | `store.validator_privacy_policy` | Array of privacy categories sent to validator |
 | `store.applicationUsername` | App-specific user identifier sent with purchases |
 | `store.obfuscator` | `Obfuscator` | How `applicationUsername` is transformed before being sent to the native store (`'uuid'` recommended, `'legacy'` default) |
+| `CdvPurchase.Braintree.customerId` | Braintree customer ID, for saved payment methods in the Drop-in — captured by the plugin from validation responses (per user), or set by your app (then reset it on logout) |
+| `CdvPurchase.Braintree.getCustomerId(applicationUsername)` | The Braintree customer ID that will be sent for that user (`undefined` if none) |
 
 ## Events (via `store.when()`)
 
