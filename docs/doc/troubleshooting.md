@@ -231,6 +231,13 @@ This page lists common issues encountered when implementing In-App Purchases wit
         ```
     *   **Note:** This is different from `ERR_SETUP` (the store is configured but not ready). `ERR_STORE_BLOCKED` specifically means the store app is present but blocked from making purchases by OEM restrictions.
 
+## Google Play Setup Retries (v13.20.1+)
+
+*   **`ERR_SETUP` (`ErrorCode.SETUP`) fires repeatedly while Google Play is unavailable:**
+    *   **Cause:** When the billing setup fails for a reason other than a blocked Play Store (for example `SERVICE_DISCONNECTED`), the plugin retries the native setup with a growing delay — 5s, 10s, 20s, ... up to 2 minutes — and immediately when the device reconnects. Since v13.20.1 the retry actually runs the setup again (before, the scheduled retry was ineffective, so `store.initialize()` never resolved and the store stayed not ready until the app was restarted).
+    *   **What to expect:** every failed attempt emits a `SETUP` error, so while Google Play is unreachable your app logs one roughly every couple of minutes on `store.error()`. That is the retry loop working, not a new problem.
+    *   **Solution:** nothing to do — when a retry succeeds, the platform becomes ready and `store.initialize()` resolves. Treat `SETUP` as a transient condition: keep the app usable and let the user retry their purchase once the store answers. A blocked store is a different, terminal case: see `ERR_STORE_BLOCKED` above.
+
 ---
 
 *This is not an exhaustive list. If you encounter issues not listed here, please re-check device logs, consult platform-specific documentation (StoreKit, Google Play Billing), and consider opening an issue on the plugin's GitHub repository with detailed information (logs, code snippets, platform versions).*
