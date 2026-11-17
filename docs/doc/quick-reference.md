@@ -18,7 +18,7 @@ const { store, ProductType, Platform, LogLevel } = CdvPurchase;
 | `store.register([...])` | Register products before initialization |
 | `store.initialize([...platforms])` | Initialize platform adapters and load products |
 | `store.update()` | Refresh product prices and purchase status |
-| `store.restorePurchases()` | Trigger platform restore (iOS non-consumables, subscriptions) |
+| `store.restorePurchases()` | Trigger platform restore (iOS non-consumables, subscriptions) — resolves with an `IError` on failure, never rejects |
 | `store.when()` | Register event listeners (returns chainable builder) |
 | `store.get(id, platform)` | Get a registered `Product` by id and platform |
 | `store.owned(product)` | Check if a product is owned (based on validated receipts) |
@@ -158,11 +158,14 @@ Common error codes (full list in `CdvPurchase.ErrorCode`):
 | Code | Meaning |
 |---|---|
 | `ErrorCode.SETUP` | Store not set up |
+| `ErrorCode.PAYMENT_CANCELLED` | The user cancelled the flow — a purchase, a payment, or the App Store sign-in during a restore |
 | `ErrorCode.PURCHASE` | Generic purchase error |
 | `ErrorCode.STORE_BLOCKED` | Store is blocked by OEM restrictions (e.g. Google Play unavailable on device, v13.17.0+) |
 | `ErrorCode.COMMUNICATION` | Network/communication error |
+| `ErrorCode.CLOUD_SERVICE_NETWORK_CONNECTION_FAILED` | The device could not connect to the store's network service (e.g. a failed restore on iOS) |
 | `ErrorCode.VERIFICATION_FAILED` | Receipt verification failed |
 | `ErrorCode.BAD_RESPONSE` | Invalid validator response |
+| `ErrorCode.UNKNOWN` | Store error the plugin has no specific code for — the message carries the store's own reason (e.g. a failed restore on iOS) |
 
 ## Platforms
 
