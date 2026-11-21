@@ -11,6 +11,7 @@ const sidebars = {
         'discover/generalities-about-iap-technology',
         'discover/about-the-plugin',
         'discover/receipt-validation-importance',
+        'discover/own-validation-server',
       ],
     },
     {
