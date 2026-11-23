@@ -16,7 +16,7 @@ const { store, ProductType, Platform, LogLevel } = CdvPurchase;
 |---|---|
 | `store.verbosity` | Set log level (`LogLevel.DEBUG`, `INFO`, `WARNING`, `ERROR`, `QUIET`) |
 | `store.register([...])` | Register products before initialization |
-| `store.initialize([...platforms])` | Initialize platform adapters and load products |
+| `store.initialize([...platforms])` | Initialize platform adapters and load products. Only the first call does the work: later calls return the first call's result (with its errors), waiting if it's still running. A platform whose setup failed stays not ready (`store.getAdapter(platform).ready` is `false`) — see [Troubleshooting](./troubleshooting.md) |
 | `store.update()` | Refresh product prices and purchase status |
 | `store.restorePurchases()` | Trigger platform restore (iOS non-consumables, subscriptions) |
 | `store.when()` | Register event listeners (returns chainable builder) |
