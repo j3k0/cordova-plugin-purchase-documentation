@@ -106,6 +106,24 @@ The plugin now enables automatic reconnection of the Google Play Billing client.
 
 This is handled internally and requires no code changes.
 
+## Keep Registering Products You've Retired
+
+When you stop selling a subscription, you may deactivate it in Google Play Console. Google Play then no longer returns it when the plugin loads your products, but users who already subscribed keep renewing it.
+
+For those renewals, the plugin needs the product to still be registered: it takes the product type from your `store.register()` call, because Google Play doesn't provide it. So **keep the retired product in your `store.register()` list** for as long as it has active subscribers:
+
+```ts
+store.register([
+  { id: 'premium_monthly', type: CdvPurchase.ProductType.PAID_SUBSCRIPTION, platform: CdvPurchase.Platform.GOOGLE_PLAY },
+  // Retired in Play Console, still renewing: keep it registered
+  { id: 'premium_monthly_2022', type: CdvPurchase.ProductType.PAID_SUBSCRIPTION, platform: CdvPurchase.Platform.GOOGLE_PLAY },
+]);
+```
+
+Registered, the renewal is validated (`transaction.verify()`) and finished (`transaction.finish()`) like any other, so your validator receives it and the app gets the new expiry date. The product doesn't appear in `store.products` (Google Play didn't return it), so don't rely on it for your catalog UI.
+
+If a product isn't registered, the plugin can't build the validation request. It logs a warning and fires `unverified` with `VERIFICATION_FAILED` and `transient: true`, and keeps doing so until you register it. See [Troubleshooting](../doc/troubleshooting.md). The plugin only does this from the release after v13.20.1; older versions did nothing at all, so the app kept the old expiry date.
+
 ## Migration Notes
 
 If you are upgrading from a plugin version prior to v13.13.0:

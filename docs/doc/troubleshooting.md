@@ -83,6 +83,9 @@ This page lists common issues encountered when implementing In-App Purchases wit
     *   **Invalid Credentials:** Is the App-Specific Shared Secret (iOS) or Service Account Key (Android) used by the validator correct and valid?
     *   **Invalid Receipt Data:** Was the receipt data corrupted before sending? Is the plugin sending the correct fields? (Check `receiptValidationBody` in adapter source if necessary).
     *   **Incorrect Validator Logic:** Is your server correctly parsing the platform response and determining entitlement?
+*   **`unverified` with `VERIFICATION_FAILED` and Nothing Reaches the Validator (Google Play Renewal of a Retired Product):**
+    *   **Cause:** The plugin couldn't build a validation request. Typically a Google Play purchase of a product that is not registered: Google Play doesn't return inactive products, but existing subscribers keep renewing them, and the plugin needs the type from `store.register()`. The warning in the log says so. It fires `unverified` with `VERIFICATION_FAILED` and `transient: true` (the receipt isn't rejected, the plugin just couldn't ask), and does so again each time until the product is registered. Before the release after v13.20.1, nothing happened at all: no request, no `verified`, no `unverified`.
+    *   **Solution:** Keep registering retired products for as long as they have active subscribers. See [Keep Registering Products You've Retired](../use-cases/google-play-billing.md#keep-registering-products-youve-retired). Keep the access already granted while `transient` is `true`, see below.
 
 *   **Paying Users Locked Out During an Outage (v13.19+):**
     *   **Cause:** The app revokes access whenever `.unverified()` fires. Validation also fails when the validator, or Apple/Google behind it, can't be reached, even though the receipt is fine.
