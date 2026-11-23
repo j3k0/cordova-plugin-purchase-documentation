@@ -30,7 +30,7 @@ This page lists common issues encountered when implementing In-App Purchases wit
     *   **Validator Issues:** If `store.validator` is set, ensure the URL is correct, reachable, and your server is running. Temporarily remove the validator setting to isolate the issue. Check server logs.
     *   **Invalid Platform Argument:** Ensure you pass an array of `Platform` enums or `PlatformWithOptions` objects to `initialize()`, e.g., `store.initialize([Platform.APPLE_APPSTORE])`.
 *   **`store.ready()` Callback Never Fires:**
-    *   **Cause:** `store.initialize()` failed or never completed.
+    *   **Cause:** `store.initialize()` was never called, or never completed. A platform that failed to set up doesn't block it: the callbacks still fire (see the next entry).
     *   **Solution:** Check for errors during initialization (see above). Ensure `initialize()` is actually being called.
 *   **A platform failed to set up (`store.getAdapter(platform).ready` is `false`):**
     *   **Cause:** The platform's setup failed, and the plugin now says so instead of looking like it worked. Setup failures this applies to:
@@ -39,7 +39,7 @@ This page lists common issues encountered when implementing In-App Purchases wit
         *   the native plugin is missing (not installed, or `cordova prepare` / `npx cap sync` not run)
         *   iOS older than 15 with Capacitor
         *   the iaptic-js SDK isn't loaded
-    *   **What the plugin does:** `store.initialize()` resolves with the setup errors, and the plugin treats that platform like one that isn't available:
+    *   **What the plugin does:** `store.initialize()` usually resolves with the setup errors (it can be an empty list if a platform was skipped without an error), and the plugin treats that platform like one that isn't available:
 
         | Call | Result for the failed platform |
         |---|---|
@@ -49,7 +49,7 @@ This page lists common issues encountered when implementing In-App Purchases wit
         | `store.restorePurchases()` | skips the platform |
         | `store.getStorefront()` | `undefined` |
 
-    *   **Solution:** Read the errors `store.initialize()` resolves with (or listen with `store.error()`), fix the cause above, and relaunch the app. Other platforms you initialized keep working. In your UI, hide or disable purchase and manage buttons when `store.getAdapter(platform)?.ready` is `false`.
+    *   **Solution:** Read the errors `store.initialize()` resolves with (Google Play also reports them through `store.error()`; the other cases only appear in the result), check `store.getAdapter(platform)?.ready`, fix the cause above, and relaunch the app: calling `store.initialize()` again doesn't retry. Other platforms you initialized keep working. In your UI, hide or disable purchase and manage buttons when `store.getAdapter(platform)?.ready` is `false`.
     *   **Calling `store.initialize()` again doesn't retry:** the plugin initializes only once. A later call returns the result of the first call, including its errors, and waits if the first call is still running. Older versions returned an empty list `[]`, which looked like a successful setup.
     *   **Not affected:** `store.ready()` and `store.isReady` don't change: ready callbacks still fire once `store.initialize()` is done, even when a platform failed. On Google Play, setup errors that are retried (for example `SERVICE_DISCONNECTED`) are not failures: `store.initialize()` waits for the retry, and the platform becomes ready once setup succeeds.
 
