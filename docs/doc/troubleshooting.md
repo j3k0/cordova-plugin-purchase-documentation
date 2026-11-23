@@ -32,6 +32,26 @@ This page lists common issues encountered when implementing In-App Purchases wit
 *   **`store.ready()` Callback Never Fires:**
     *   **Cause:** `store.initialize()` failed or never completed.
     *   **Solution:** Check for errors during initialization (see above). Ensure `initialize()` is actually being called.
+*   **A platform failed to set up (`store.getAdapter(platform).ready` is `false`):**
+    *   **Cause:** The platform's setup failed, and the plugin now says so instead of looking like it worked. Setup failures this applies to:
+        *   Google Play blocked on the device (`ERR_STORE_BLOCKED`, see [Store Blocked by OEM](#store-blocked-by-oem-v13170))
+        *   iOS with the Cordova StoreKit 1 plugin, on a device that can't make payments (for example Screen Time restrictions)
+        *   the native plugin is missing (not installed, or `cordova prepare` / `npx cap sync` not run)
+        *   iOS older than 15 with Capacitor
+        *   the iaptic-js SDK isn't loaded
+    *   **What the plugin does:** `store.initialize()` resolves with the setup errors, and the plugin treats that platform like one that isn't available:
+
+        | Call | Result for the failed platform |
+        |---|---|
+        | `store.getAdapter(platform).ready` | `false` |
+        | `store.order(offer)` / `offer.order()` | error `PAYMENT_NOT_ALLOWED` |
+        | `store.manageSubscriptions()` / `store.manageBilling()` | error `SETUP` |
+        | `store.restorePurchases()` | skips the platform |
+        | `store.getStorefront()` | `undefined` |
+
+    *   **Solution:** Read the errors `store.initialize()` resolves with (or listen with `store.error()`), fix the cause above, and relaunch the app. Other platforms you initialized keep working. In your UI, hide or disable purchase and manage buttons when `store.getAdapter(platform)?.ready` is `false`.
+    *   **Calling `store.initialize()` again doesn't retry:** the plugin initializes only once. A later call returns the result of the first call, including its errors, and waits if the first call is still running. Older versions returned an empty list `[]`, which looked like a successful setup.
+    *   **Not affected:** `store.ready()` and `store.isReady` don't change: ready callbacks still fire once `store.initialize()` is done, even when a platform failed. On Google Play, setup errors that are retried (for example `SERVICE_DISCONNECTED`) are not failures: `store.initialize()` waits for the retry, and the platform becomes ready once setup succeeds.
 
 ## Product Loading Issues
 
